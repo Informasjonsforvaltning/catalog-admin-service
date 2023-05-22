@@ -7,7 +7,8 @@ import (
 )
 
 func SetupRouter() *gin.Engine {
-	router := gin.Default()
+	router := gin.New()
+	router.Use(gin.Recovery())
 	InitializeRoutes(router)
 	return router
 }
