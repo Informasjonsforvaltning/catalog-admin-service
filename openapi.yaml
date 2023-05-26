@@ -1,0 +1,224 @@
+openapi: 3.0.2
+info:
+  title: Catalog admin service
+  description: Administration of catalogs
+  version: '1.0'
+  termsOfService: 'https://fellesdatakatalog.digdir.no/about'
+  contact:
+    name: Digitaliseringsdirektoratet
+    url: 'https://fellesdatakatalog.digdir.no'
+    email: fellesdatakatalog@digdir.no
+  license:
+    name: License of API
+    url: 'http://data.norge.no/nlod/no/2.0'
+externalDocs:
+  description: Dokumentasjon på Informasjonsforvaltning GitHub
+  url: https://informasjonsforvaltning.github.io/
+tags:
+  - name: catalog-admin-service
+    description: Catalog admin service
+servers:
+  - url: 'https://catalog-admin-api.fellesdatakatalog.digdir.no'
+paths:
+  /catalogs/{catalogId}/concepts/code-lists:
+    post:
+      tags:
+        - catalog-admin-service
+      summary: Create concept code-list
+      description: Create concept code-list
+      operationId: createCodeList
+      parameters:
+        - name: catalogId
+          in: path
+          description: catalog id
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: No content
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CodeList'
+    get:
+      tags:
+        - catalog-admin-service
+      summary: Get concept code lists.
+      description: Returns all concept code lists
+      operationId: getCodeLists
+      parameters:
+        - name: catalogId
+          in: path
+          description: catalog id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeLists'
+  /catalogs/{catalogId}/concepts/code-lists/{codeListId}:
+    get:
+      tags:
+        - catalog-admin-service
+      description: Get concept code list
+      operationId: getCodeList
+      parameters:
+        - name: catalogId
+          in: path
+          description: catalog id
+          required: true
+          schema:
+            type: string
+        - name: codeListId
+          in: path
+          description: code list id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeList'
+    patch:
+      tags:
+        - catalog-admin-service
+      description: Update code list
+      operationId: updateCodeList
+      parameters:
+        - name: catalogId
+          in: path
+          description: catalog id
+          required: true
+          schema:
+            type: string
+        - name: codeListId
+          in: path
+          description: code list id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonPatch'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CodeList"
+    delete:
+      tags:
+        - catalog-admin-service
+      description: Delete code  list
+      operationId: deleteCodeList
+      parameters:
+        - name: catalogId
+          in: path
+          description: catalog id
+          required: true
+          schema:
+            type: string
+        - name: codeListId
+          in: path
+          description: code list id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No Content
+
+components:
+  schemas:
+    CodeLists:
+      type: object
+      description: List of code lists
+      properties:    
+        codeLists:
+          type: array
+          items:
+            $ref: '#/components/schemas/CodeList'
+          description: List of code lists
+
+    CodeList:
+      type: object
+      description: Concept code list
+      properties:
+        id:
+          type: string
+          description: code list id
+        name:
+          type: string
+          description: code list name
+        description:
+          type: string
+          description: code list description
+        codes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Code'
+          description: List of codes
+
+    Code:
+      type: object
+      description: Code in a code list
+      properties:
+        id:
+          type: string
+          description: code id
+        name:
+          $ref: "#/components/schemas/MultilanguageTexts"
+
+    MultilanguageTexts:
+      description: A generic object to hold multilanguage texts, that has language code (according to ISO 639-1) as keys
+      type: object
+      additionalProperties: {}
+
+    JsonPatch:
+      description: 'A JSON Schema describing a JSON Patch (https://tools.ietf.org/html/rfc6902)'
+      type: array
+      items:
+        $ref: '#/components/schemas/JsonPatchOperation'
+
+    JsonPatchOperation:
+      type: object
+      description: 'A JSON patch document as defined by RFC 6902'
+      required:
+        - op
+        - path
+      properties:
+        op:
+          type: string
+          nullable: false
+          description: 'The operation to be performed'
+          enum:
+            - add
+            - remove
+            - replace
+            - move
+            - copy
+            - test
+        path:
+          type: string
+          nullable: false
+          description: 'A JSON pointer to the property being affected'
+        value:
+          type: object
+          description: 'The value to add, replace or test.'
+        from:
+          description: 'A JSON Pointer path pointing to the location to move/copy from.'
+          type: string
