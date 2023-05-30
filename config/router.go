@@ -17,4 +17,5 @@ func InitializeRoutes(e *gin.Engine) {
 	e.SetTrustedProxies(nil)
 	e.GET("ping", handlers.PingHandler())
 	e.GET("ready", handlers.ReadyHandler())
+	e.GET("code-lists", handlers.GetCodeListsHandler())
 }
