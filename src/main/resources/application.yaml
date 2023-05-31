@@ -5,9 +5,15 @@ logging:
   level.org.springframework.web: WARN
 server:
   port: 8080
+spring:
+  data.mongodb.uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongodb:27017/catalogAdminService?authSource=admin&authMechanism=SCRAM-SHA-1
 ---
 spring:
   config.activate.on-profile: develop
+server:
+  port: 9090
+  data.mongodb.uri: mongodb://admin:admin@localhost:27017/catalogAdminService?authSource=admin&authMechanism=SCRAM-SHA-1
 ---
 spring:
   config.activate.on-profile: integration-test
+  data.mongodb.uri: mongodb://admin:admin@localhost:27017/catalogAdminService?authSource=admin&authMechanism=SCRAM-SHA-1
