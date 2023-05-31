@@ -1,20 +1,9 @@
-FROM golang:1.20-alpine as build-env
+FROM eclipse-temurin:19-jre-alpine
 
-ENV APP_NAME catalog-admin-service
-ENV CMD_PATH main.go
+ENV TZ=Europe/Oslo
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-COPY . $GOPATH/src/$APP_NAME
-WORKDIR $GOPATH/src/$APP_NAME
+VOLUME /tmp
+COPY /target/app.jar app.jar
 
-RUN CGO_ENABLED=0 go build -v -o /$APP_NAME $GOPATH/src/$APP_NAME/$CMD_PATH
-
-FROM alpine:3.18
-
-ENV APP_NAME catalog-admin-service
-ENV GIN_MODE release
-
-COPY --from=build-env /$APP_NAME .
-
-EXPOSE 8080
-
-CMD ./$APP_NAME
+CMD java -jar -XX:+UseZGC $JAVA_OPTS app.jar

@@ -7,34 +7,19 @@ on:
       - main
 
 jobs:
-  run-tests:
-    name: Run tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: 1.20.4
-      - name: Test
-        run: go test -v -race -coverpkg=./... -coverprofile=coverage.txt -covermode=atomic ./test
-      - uses: codecov/codecov-action@v3
-        with:
-          files: ./coverage.txt
-
   build-and-deploy-staging:
-    needs: run-tests
     name: Call reusable workflow when pull request is created
     if: github.event.pull_request.draft == false
-    uses: Informasjonsforvaltning/workflows/.github/workflows/build-deploy.yaml@main
+    uses: Informasjonsforvaltning/workflows/.github/workflows/build-deploy-maven.yaml@main
     with:
       app_name: catalog-admin-service
       caller_sha: ${{ github.sha }}
       repo: ${{ github.repository }}
       actor: ${{ github.actor }}
-      environment: 'staging'
-      cluster: 'digdir-fdk-dev'
+      java_version: '19'
+      coverage_file_path: ./target/site/jacoco/jacoco.xml
+      environment: staging
+      cluster: digdir-fdk-dev
     secrets:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GCP_SA_DIGDIR_FDK_GCR_KEY: ${{ secrets.GCP_SA_DIGDIR_FDK_GCR_KEY }}
