@@ -1,6 +1,7 @@
 package no.digdir.catalog_admin_service.integration
 
 
+import no.digdir.catalog_admin_service.utils.ApiTestContext
 import no.digdir.catalog_admin_service.utils.apiGet
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Tag
@@ -17,10 +18,7 @@ import org.springframework.http.HttpStatus
 )
 @Tag("integration")
 
-class StatusTest {
-
-    @LocalServerPort
-    var port = 0
+class StatusTest: ApiTestContext() {
 
     @Test
     fun ping() {
