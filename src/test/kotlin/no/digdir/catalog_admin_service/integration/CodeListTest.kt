@@ -2,6 +2,7 @@ package no.digdir.catalog_admin_service.integration
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.digdir.catalog_admin_service.model.CodeList
 import no.digdir.catalog_admin_service.model.CodeLists
 import no.digdir.catalog_admin_service.utils.ApiTestContext
 import no.digdir.catalog_admin_service.utils.CODE_LIST_0
@@ -31,5 +32,12 @@ class CodeListTest: ApiTestContext() {
         val result: CodeLists = mapper.readValue(response["body"] as String)
         val expected: CodeLists = CodeLists(codeLists = listOf(CODE_LIST_0))
         assertEquals(expected, result)
+    }
+    @Test
+    fun findCodeListById() {
+        val response = apiGet(port,"/code-lists/123", null)
+        assertTrue(HttpStatus.OK.value() == response["status"])
+        val result: CodeList = mapper.readValue(response["body"] as String)
+        assertEquals(CODE_LIST_0, result)
     }
 }
