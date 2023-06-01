@@ -40,4 +40,9 @@ class CodeListTest: ApiTestContext() {
         val result: CodeList = mapper.readValue(response["body"] as String)
         assertEquals(CODE_LIST_0, result)
     }
+    @Test
+    fun codeListNotFound() {
+        val response = apiGet(port,"/code-lists/xxx", null)
+        assertTrue(HttpStatus.NOT_FOUND.value() == response["status"])
+    }
 }
