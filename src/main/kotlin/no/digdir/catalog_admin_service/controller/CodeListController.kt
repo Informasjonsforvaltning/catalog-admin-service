@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping
     value = ["/code-lists"],
     produces = ["application/json"])
 open class CodeListController(private val codeListService: CodeListService) {
-    @GetMapping
+    @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun getCodeLists(): ResponseEntity<CodeLists> {
         return ResponseEntity(codeListService.getCodeLists(), HttpStatus.OK)
     }
