@@ -180,6 +180,9 @@ components:
         id:
           type: string
           description: code id
+        parent:
+          type: string
+          description: parent code id
         name:
           $ref: "#/components/schemas/MultilanguageTexts"
 

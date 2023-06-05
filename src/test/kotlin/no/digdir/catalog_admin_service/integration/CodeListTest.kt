@@ -30,7 +30,7 @@ class CodeListTest: ApiTestContext() {
         val response = apiGet(port,"/code-lists", null)
         assertTrue(HttpStatus.OK.value() == response["status"])
         val result: CodeLists = mapper.readValue(response["body"] as String)
-        val expected: CodeLists = CodeLists(codeLists = listOf(CODE_LIST_0))
+        val expected = CodeLists(codeLists = listOf(CODE_LIST_0))
         assertEquals(expected, result)
     }
     @Test
