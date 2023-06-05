@@ -6,7 +6,10 @@ import no.digdir.catalog_admin_service.model.CodeList
 import no.digdir.catalog_admin_service.model.CodeLists
 import no.digdir.catalog_admin_service.utils.ApiTestContext
 import no.digdir.catalog_admin_service.utils.CODE_LIST_0
+import no.digdir.catalog_admin_service.utils.apiAuthorizedRequest
 import no.digdir.catalog_admin_service.utils.apiGet
+import no.digdir.catalog_admin_service.utils.jwk.Access
+import no.digdir.catalog_admin_service.utils.jwk.JwtToken
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -19,7 +22,7 @@ import kotlin.test.assertEquals
 private val mapper = jacksonObjectMapper()
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(
-    properties = ["spring.profiles.active=contract-test"],
+    properties = ["spring.profiles.active=integration-test"],
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(initializers = [ApiTestContext.Initializer::class])
 @Tag("integration")
@@ -27,22 +30,42 @@ class CodeListTest: ApiTestContext() {
 
     @Test
     fun findCodeLists() {
-        val response = apiGet(port,"/code-lists", null)
-        assertTrue(HttpStatus.OK.value() == response["status"])
+        val response = apiAuthorizedRequest("/catalogs/910244132/concepts/code-lists", port, null, JwtToken(Access.ORG_WRITE).toString(), "GET")
+        assertEquals(HttpStatus.OK.value(), response["status"])
         val result: CodeLists = mapper.readValue(response["body"] as String)
         val expected = CodeLists(codeLists = listOf(CODE_LIST_0))
         assertEquals(expected, result)
     }
     @Test
     fun findCodeListById() {
-        val response = apiGet(port,"/code-lists/123", null)
-        assertTrue(HttpStatus.OK.value() == response["status"])
+        val response = apiAuthorizedRequest("/catalogs/910244132/concepts/code-lists/123", port, null, JwtToken(Access.ORG_READ).toString(), "GET")
+        assertEquals(HttpStatus.OK.value(), response["status"])
         val result: CodeList = mapper.readValue(response["body"] as String)
         assertEquals(CODE_LIST_0, result)
     }
     @Test
+    fun findCodeListsUnauthorizedWhenMissingJwt() {
+        val response = apiGet(port,"/catalogs/910244132/concepts/code-lists", null)
+        assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
+    }
+    @Test
+    fun findCodeListByIdUnauthorizedWhenMissingJwt() {
+        val response = apiGet(port,"/catalogs/910244132/concepts/code-lists/123", null)
+        assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
+    }
+    @Test
     fun codeListNotFound() {
-        val response = apiGet(port,"/code-lists/xxx", null)
-        assertTrue(HttpStatus.NOT_FOUND.value() == response["status"])
+        val response = apiAuthorizedRequest("/catalogs/910244132/concepts/code-lists/xxx", port, null, JwtToken(Access.ROOT).toString(), "GET")
+        assertEquals(HttpStatus.NOT_FOUND.value(), response["status"])
+    }
+    @Test
+    fun findCodeListsForbiddenForWrongOrg() {
+        val response = apiAuthorizedRequest("/catalogs/910244132/concepts/code-lists", port, null, JwtToken(Access.WRONG_ORG_READ).toString(), "GET")
+        assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
+    }
+    @Test
+    fun findCodeListByIdForbiddenForWrongOrg() {
+        val response = apiAuthorizedRequest("/catalogs/910244132/concepts/code-lists/123", port, null, JwtToken(Access.WRONG_ORG_READ).toString(), "GET")
+        assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
     }
 }

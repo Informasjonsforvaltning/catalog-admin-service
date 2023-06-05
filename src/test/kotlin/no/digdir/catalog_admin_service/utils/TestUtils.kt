@@ -9,6 +9,7 @@ import org.bson.codecs.configuration.CodecRegistries
 import org.bson.codecs.pojo.PojoCodecProvider
 import org.springframework.http.HttpStatus
 import java.io.BufferedReader
+import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -30,6 +31,48 @@ fun apiGet(port: Int, endpoint: String, acceptHeader: String?): Map<String,Any> 
                 "status" to connection.responseCode,
                 "header" to " ",
                 "body"   to " "
+            )
+        }
+    } catch (e: Exception) {
+        mapOf(
+            "status" to e.toString(),
+            "header" to " ",
+            "body"   to " "
+        )
+    }
+}
+
+fun apiAuthorizedRequest(path: String, port: Int, body: String?, token: String?, method: String): Map<String, Any> {
+    val connection  = URL("http://localhost:$port$path").openConnection() as HttpURLConnection
+    connection.requestMethod = method
+    connection.setRequestProperty("Content-type", "application/json")
+    connection.setRequestProperty("Accept", "application/json")
+
+    if(!token.isNullOrEmpty()) {
+        connection.setRequestProperty("Authorization", "Bearer $token")
+    }
+
+    return try {
+        connection.doOutput = true
+        connection.connect()
+
+        if(body != null) {
+            val writer = OutputStreamWriter(connection.outputStream)
+            writer.write(body)
+            writer.close()
+        }
+
+        if(isOK(connection.responseCode)){
+            mapOf(
+                "body"   to connection.inputStream.bufferedReader().use(BufferedReader :: readText),
+                "header" to connection.headerFields.toString(),
+                "status" to connection.responseCode
+            )
+        } else {
+            mapOf(
+                "status" to connection.responseCode,
+                "header" to " ",
+                "body" to " "
             )
         }
     } catch (e: Exception) {

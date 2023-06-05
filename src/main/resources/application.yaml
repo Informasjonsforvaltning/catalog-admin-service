@@ -7,6 +7,9 @@ server:
   port: 8080
 spring:
   data.mongodb.uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongodb:27017/catalogAdminService?authSource=admin&authMechanism=SCRAM-SHA-1
+  security.oauth2.resourceserver.jwt:
+    jwk-set-uri: ${SSO_HOST:https://sso.staging.fellesdatakatalog.digdir.no}/auth/realms/fdk/protocol/openid-connect/certs
+    issuer-uri: ${SSO_HOST:https://sso.staging.fellesdatakatalog.digdir.no}/auth/realms/fdk
 ---
 spring:
   config.activate.on-profile: develop
@@ -17,3 +20,6 @@ server:
 spring:
   config.activate.on-profile: integration-test
   data.mongodb.uri: mongodb://admin:admin@localhost:27017/catalogAdminService?authSource=admin&authMechanism=SCRAM-SHA-1
+  security.oauth2.resourceserver.jwt:
+    jwk-set-uri: http://localhost:5050/auth/realms/fdk/protocol/openid-connect/certs
+    issuer-uri: http://localhost:5050/auth/realms/fdk
