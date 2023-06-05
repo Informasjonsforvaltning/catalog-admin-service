@@ -7,10 +7,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.*
 
 @Controller
 @CrossOrigin
@@ -24,7 +21,7 @@ open class CodeListController(private val codeListService: CodeListService) {
     }
 
     @GetMapping(value = ["/{codeListId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getCatalogById(@PathVariable codeListId: String): ResponseEntity<CodeList> =
+    fun getCodeListById(@PathVariable codeListId: String): ResponseEntity<CodeList> =
         codeListService.getCodeListById(codeListId)
             ?.let { ResponseEntity(it, HttpStatus.OK) }
             ?: ResponseEntity(HttpStatus.NOT_FOUND)
