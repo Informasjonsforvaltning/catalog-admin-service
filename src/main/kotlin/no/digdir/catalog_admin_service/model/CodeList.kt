@@ -8,6 +8,7 @@ data class CodeList(
     @Id
     val id: String,
     val name: String,
+    val catalogId: String,
     val description: String,
     val codes: List<Code>
 

@@ -5,4 +5,7 @@ import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface CodeListRepository : MongoRepository<CodeList, String>
+interface CodeListRepository : MongoRepository<CodeList, String>{
+    fun findCodeListsByCatalogId(catalogId: String): List<CodeList>
+    fun findCodeListByIdAndCatalogId(id: String, catalogId: String): CodeList?
+}

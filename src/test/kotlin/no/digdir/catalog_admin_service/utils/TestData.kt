@@ -30,5 +30,6 @@ private fun CodeList.mapDBO(): Document =
     Document()
         .append("_id", id)
         .append("name", name)
+        .append("catalogId", catalogId)
         .append("description", description)
         .append("codes", codes)
