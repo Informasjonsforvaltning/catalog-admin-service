@@ -68,4 +68,10 @@ class CodeListTest: ApiTestContext() {
         val response = apiAuthorizedRequest("/catalogs/910244132/concepts/code-lists/123", port, null, JwtToken(Access.WRONG_ORG_READ).toString(), "GET")
         assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
     }
+
+    @Test
+    fun findCodeListByIdNotFoundForCodeListNotInCatalog() {
+        val response = apiAuthorizedRequest("/catalogs/123456789/concepts/code-lists/123", port, null, JwtToken(Access.WRONG_ORG_READ).toString(), "GET")
+        assertEquals(HttpStatus.NOT_FOUND.value(), response["status"])
+    }
 }
