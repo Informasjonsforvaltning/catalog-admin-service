@@ -12,4 +12,7 @@ class CodeListService(private val codeListRepository: CodeListRepository) {
 
     fun getCodeListById(catalogId: String, codeListId: String): CodeList? =
         codeListRepository.findCodeListByIdAndCatalogId(codeListId, catalogId)
+
+    fun deleteCodeListById(codeListId: String) =
+        codeListRepository.deleteById(codeListId)
 }

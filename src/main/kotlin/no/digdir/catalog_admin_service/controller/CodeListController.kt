@@ -11,6 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
@@ -19,8 +20,12 @@ import org.springframework.web.bind.annotation.RequestMapping
 @CrossOrigin
 @RequestMapping(
     value = ["/{catalogId}/concepts/code-lists"],
-    produces = ["application/json"])
-open class CodeListController(private val codeListService: CodeListService, private val endpointPermissions: EndpointPermissions) {
+    produces = ["application/json"]
+)
+open class CodeListController(
+    private val codeListService: CodeListService,
+    private val endpointPermissions: EndpointPermissions
+) {
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun getCodeLists(@AuthenticationPrincipal jwt: Jwt, @PathVariable catalogId: String): ResponseEntity<CodeLists> =
         if (endpointPermissions.hasOrgReadPermission(jwt, catalogId)) {
@@ -31,7 +36,11 @@ open class CodeListController(private val codeListService: CodeListService, priv
 
 
     @GetMapping(value = ["/{codeListId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getCatalogById(@AuthenticationPrincipal jwt: Jwt, @PathVariable catalogId: String, @PathVariable codeListId: String): ResponseEntity<CodeList> =
+    fun getCatalogById(
+        @AuthenticationPrincipal jwt: Jwt,
+        @PathVariable catalogId: String,
+        @PathVariable codeListId: String
+    ): ResponseEntity<CodeList> =
         if (endpointPermissions.hasOrgReadPermission(jwt, catalogId)) {
             codeListService.getCodeListById(catalogId, codeListId)
                 ?.let { ResponseEntity(it, HttpStatus.OK) }
@@ -40,4 +49,14 @@ open class CodeListController(private val codeListService: CodeListService, priv
             ResponseEntity(HttpStatus.FORBIDDEN)
         }
 
+    @DeleteMapping(value = ["/{codeListId}"])
+    fun deleteCodeList(
+        @AuthenticationPrincipal jwt: Jwt,
+        @PathVariable catalogId: String,
+        @PathVariable codeListId: String
+    ): ResponseEntity<Unit> =
+        if (endpointPermissions.hasOrgAdminPermission(jwt, catalogId)) {
+            codeListService.deleteCodeListById(codeListId)
+            ResponseEntity(HttpStatus.NO_CONTENT)
+        } else ResponseEntity(HttpStatus.FORBIDDEN)
 }

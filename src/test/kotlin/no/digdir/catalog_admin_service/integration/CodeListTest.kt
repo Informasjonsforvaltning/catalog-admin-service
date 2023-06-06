@@ -20,6 +20,7 @@ import org.springframework.test.context.ContextConfiguration
 import kotlin.test.assertEquals
 
 private val mapper = jacksonObjectMapper()
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(
     properties = ["spring.profiles.active=integration-test"],
@@ -30,39 +31,60 @@ class CodeListTest: ApiTestContext() {
 
     @Test
     fun findCodeLists() {
+        val response = apiAuthorizedRequest(
+            "/catalogs/910244132/concepts/code-lists",
+            port,
+            null,
+            JwtToken(Access.ORG_WRITE).toString(),
+            "GET"
+        )
         val response = apiAuthorizedRequest("/910244132/concepts/code-lists", port, null, JwtToken(Access.ORG_WRITE).toString(), "GET")
         assertEquals(HttpStatus.OK.value(), response["status"])
         val result: CodeLists = mapper.readValue(response["body"] as String)
         val expected = CodeLists(codeLists = listOf(CODE_LIST_0))
         assertEquals(expected, result)
     }
+
     @Test
     fun findCodeListById() {
+        val response = apiAuthorizedRequest(
+            "/910244132/concepts/code-lists/123",
+            port,
+            null,
+            JwtToken(Access.ORG_READ).toString(),
+            "GET"
+        )
         val response = apiAuthorizedRequest("/910244132/concepts/code-lists/123", port, null, JwtToken(Access.ORG_READ).toString(), "GET")
         assertEquals(HttpStatus.OK.value(), response["status"])
         val result: CodeList = mapper.readValue(response["body"] as String)
         assertEquals(CODE_LIST_0, result)
     }
+
     @Test
     fun findCodeListsUnauthorizedWhenMissingJwt() {
+        val response = apiGet(port, "/910244132/concepts/code-lists", null)
         val response = apiGet(port,"/910244132/concepts/code-lists", null)
         assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
     }
+
     @Test
     fun findCodeListByIdUnauthorizedWhenMissingJwt() {
-        val response = apiGet(port,"/910244132/concepts/code-lists/123", null)
+        val response = apiGet(port, "/910244132/concepts/code-lists/123", null)
         assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
     }
+
     @Test
     fun codeListNotFound() {
         val response = apiAuthorizedRequest("/910244132/concepts/code-lists/xxx", port, null, JwtToken(Access.ROOT).toString(), "GET")
         assertEquals(HttpStatus.NOT_FOUND.value(), response["status"])
     }
+
     @Test
     fun findCodeListsForbiddenForWrongOrg() {
         val response = apiAuthorizedRequest("/910244132/concepts/code-lists", port, null, JwtToken(Access.WRONG_ORG_READ).toString(), "GET")
         assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
     }
+
     @Test
     fun findCodeListByIdForbiddenForWrongOrg() {
         val response = apiAuthorizedRequest("/910244132/concepts/code-lists/123", port, null, JwtToken(Access.WRONG_ORG_READ).toString(), "GET")
@@ -73,5 +95,31 @@ class CodeListTest: ApiTestContext() {
     fun findCodeListByIdNotFoundForCodeListNotInCatalog() {
         val response = apiAuthorizedRequest("/123456789/concepts/code-lists/123", port, null, JwtToken(Access.WRONG_ORG_READ).toString(), "GET")
         assertEquals(HttpStatus.NOT_FOUND.value(), response["status"])
+    }
+
+    @Test
+    fun deleteCodeList() {
+        val path = "/catalogs/910244132/concepts/code-lists/123"
+
+        val preResponse = apiAuthorizedRequest(
+            path,
+            port,
+            null,
+            JwtToken(Access.ORG_ADMIN).toString(),
+            "GET"
+        )
+        assertEquals(HttpStatus.OK.value(), preResponse["status"])
+
+        val deleteResponse = apiAuthorizedRequest(path, port, null, JwtToken(Access.ORG_ADMIN).toString(), "DELETE")
+        assertEquals(HttpStatus.NO_CONTENT.value(), deleteResponse["status"])
+
+        val postResponse = apiAuthorizedRequest(
+            path,
+            port,
+            null,
+            JwtToken(Access.ORG_ADMIN).toString(),
+            "GET"
+        )
+        assertEquals(HttpStatus.NOT_FOUND.value(), postResponse["status"])
     }
 }
