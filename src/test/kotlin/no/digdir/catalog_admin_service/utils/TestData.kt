@@ -20,7 +20,7 @@ val MONGO_ENV_VALUES: Map<String, String> = ImmutableMap.of(
 val name: MultiLanguageTexts = MultiLanguageTexts(en="codeName", nb=null, nn=null)
 val code: Code = Code(id=555, name=name, parentID = null)
 val codes: List<Code> = listOf(code)
-val CODE_LIST_0 = CodeList(id="123", name = "name", description = "description", codes = codes)
+val CODE_LIST_0 = CodeList(id="123", name = "name", description = "description", codes = codes, catalogId = "910244132")
 
 fun codeListPopulation(): List<Document> =
     listOf(CODE_LIST_0)
