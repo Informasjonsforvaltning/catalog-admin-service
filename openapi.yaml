@@ -20,7 +20,7 @@ tags:
 servers:
   - url: 'https://catalog-admin-api.fellesdatakatalog.digdir.no'
 paths:
-  /catalogs/{catalogId}/concepts/code-lists:
+  /{catalogId}/concepts/code-lists:
     post:
       tags:
         - catalog-admin-service
@@ -63,7 +63,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CodeLists'
-  /catalogs/{catalogId}/concepts/code-lists/{codeListId}:
+  /{catalogId}/concepts/code-lists/{codeListId}:
     get:
       tags:
         - catalog-admin-service
@@ -141,6 +141,54 @@ paths:
       responses:
         '204':
           description: No Content
+
+  /{catalogId}/general/settings:
+    post:
+      tags:
+        - catalog-admin-service
+      summary: Update general settings for the catalog
+      description: Update general settings for the catalog
+      operationId: updateSettings
+      parameters:
+        - name: catalogId
+          in: path
+          description: catalog id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: No content
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Settings'
+  /{catalogId}/general/logo:
+    post:
+      tags:
+        - catalog-admin-service
+      summary: Update logo for the catalog
+      description: Update logo for the catalog
+      operationId: updateLogo
+      parameters:
+        - name: catalogId
+          in: path
+          description: catalog id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: No content
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
 
 components:
   schemas:
@@ -224,4 +272,13 @@ components:
           description: 'The value to add, replace or test.'
         from:
           description: 'A JSON Pointer path pointing to the location to move/copy from.'
+          type: string
+
+    Settings:
+      description: 'General configuration for the catalog'
+      type: object
+      properties:
+        color:
+          type: string
+        logoDescription:
           type: string
