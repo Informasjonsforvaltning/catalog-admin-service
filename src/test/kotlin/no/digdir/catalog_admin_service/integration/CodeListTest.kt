@@ -55,7 +55,7 @@ class CodeListTest: ApiTestContext() {
     }
     @Test
     fun codeListNotFound() {
-        val response = apiAuthorizedRequest("/catalogs/910244132/concepts/code-lists/xxx", port, null, JwtToken(Access.ROOT).toString(), "GET")
+        val response = apiAuthorizedRequest("/910244132/concepts/code-lists/xxx", port, null, JwtToken(Access.ROOT).toString(), "GET")
         assertEquals(HttpStatus.NOT_FOUND.value(), response["status"])
     }
     @Test
