@@ -142,6 +142,128 @@ paths:
         '204':
           description: No Content
 
+  /{catalogId}/concepts/fields:
+    post:
+      tags:
+        - catalog-admin-service
+      summary: Create concept field
+      description: Create concept field
+      operationId: createField
+      parameters:
+        - name: catalogId
+          in: path
+          description: catalog id
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: No content
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Field'
+    get:
+      tags:
+        - catalog-admin-service
+      summary: Get concept fields.
+      description: Returns concept fields
+      operationId: getFields
+      parameters:
+        - name: catalogId
+          in: path
+          description: catalog id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fields'
+  /{catalogId}/concepts/fields/{fieldId}:
+    get:
+      tags:
+        - catalog-admin-service
+      description: Get concept Field
+      operationId: getField
+      parameters:
+        - name: catalogId
+          in: path
+          description: catalog id
+          required: true
+          schema:
+            type: string
+        - name: fieldId
+          in: path
+          description: field id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Field'
+    patch:
+      tags:
+        - catalog-admin-service
+      description: Update field
+      operationId: updateField
+      parameters:
+        - name: catalogId
+          in: path
+          description: catalog id
+          required: true
+          schema:
+            type: string
+        - name: fieldId
+          in: path
+          description: field id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonPatch'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Field"
+    delete:
+      tags:
+        - catalog-admin-service
+      description: Delete concept field
+      operationId: deleteField
+      parameters:
+        - name: catalogId
+          in: path
+          description: catalog id
+          required: true
+          schema:
+            type: string
+        - name: fieldId
+          in: path
+          description: field id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No Content
+
   /{catalogId}/general/settings:
     post:
       tags:
@@ -233,6 +355,35 @@ components:
           description: parent code id
         name:
           $ref: "#/components/schemas/MultilanguageTexts"
+
+    Fields:
+      type: object
+      description: List of concept fields
+      properties:
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/Field'
+
+    Field:
+      type: object
+      description: Concept field
+      properties:
+        id:
+          type: string
+          description: field id
+        name:
+          type: string
+          description: field name
+        description:
+          type: string
+          description: field description / help text
+        codeList:
+          type: string
+          description: id to associated code list for fields with type CODE
+        type:
+          type: string
+          enum: [TEXT, TEXTAREA, BOOLEAN, CODE]
 
     MultilanguageTexts:
       description: A generic object to hold multilanguage texts, that has language code (according to ISO 639-1) as keys
