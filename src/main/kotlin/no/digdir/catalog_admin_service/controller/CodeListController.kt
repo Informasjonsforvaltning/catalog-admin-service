@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 @Controller
 @CrossOrigin
 @RequestMapping(
-    value = ["/catalogs/{catalogId}/concepts/code-lists"],
+    value = ["/{catalogId}/concepts/code-lists"],
     produces = ["application/json"])
 open class CodeListController(private val codeListService: CodeListService, private val endpointPermissions: EndpointPermissions) {
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
