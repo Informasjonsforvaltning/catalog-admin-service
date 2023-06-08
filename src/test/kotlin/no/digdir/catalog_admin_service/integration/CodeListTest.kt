@@ -38,7 +38,7 @@ class CodeListTest: ApiTestContext() {
     }
     @Test
     fun findCodeListById() {
-        val response = apiAuthorizedRequest("/catalogs/910244132/concepts/code-lists/123", port, null, JwtToken(Access.ORG_READ).toString(), "GET")
+        val response = apiAuthorizedRequest("/910244132/concepts/code-lists/123", port, null, JwtToken(Access.ORG_READ).toString(), "GET")
         assertEquals(HttpStatus.OK.value(), response["status"])
         val result: CodeList = mapper.readValue(response["body"] as String)
         assertEquals(CODE_LIST_0, result)
