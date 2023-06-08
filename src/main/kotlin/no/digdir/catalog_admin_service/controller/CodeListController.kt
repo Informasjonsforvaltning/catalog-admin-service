@@ -1,9 +1,11 @@
 package no.digdir.catalog_admin_service.controller
 
 import no.digdir.catalog_admin_service.model.CodeList
+import no.digdir.catalog_admin_service.model.CodeListToBeCreated
 import no.digdir.catalog_admin_service.model.CodeLists
 import no.digdir.catalog_admin_service.security.EndpointPermissions
 import no.digdir.catalog_admin_service.service.CodeListService
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 
 @Controller
@@ -59,4 +63,24 @@ open class CodeListController(
             codeListService.deleteCodeListById(codeListId)
             ResponseEntity(HttpStatus.NO_CONTENT)
         } else ResponseEntity(HttpStatus.FORBIDDEN)
+
+    @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
+    fun createCodeList(
+        @AuthenticationPrincipal jwt: Jwt,
+        @PathVariable catalogId: String,
+        @RequestBody newCodeList: CodeListToBeCreated
+    ): ResponseEntity<Unit> =
+        if (endpointPermissions.hasOrgAdminPermission(jwt, catalogId)) {
+            val created = codeListService.createCodeList(newCodeList)
+            ResponseEntity(
+                locationHeaderForCreated(newId = created.id, catalogId),
+                HttpStatus.CREATED
+            )
+        } else ResponseEntity<Unit>(HttpStatus.FORBIDDEN)
 }
+
+private fun locationHeaderForCreated(newId: String, catalogId: String): HttpHeaders =
+    HttpHeaders().apply {
+        add(HttpHeaders.LOCATION, "/$catalogId/concepts/code-lists$newId")
+        add(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.LOCATION)
+    }

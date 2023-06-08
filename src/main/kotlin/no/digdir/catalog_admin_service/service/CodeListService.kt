@@ -1,6 +1,8 @@
 package no.digdir.catalog_admin_service.service
 
+import java.util.*
 import no.digdir.catalog_admin_service.model.CodeList
+import no.digdir.catalog_admin_service.model.CodeListToBeCreated
 import no.digdir.catalog_admin_service.model.CodeLists
 import no.digdir.catalog_admin_service.repository.CodeListRepository
 import org.springframework.stereotype.Service
@@ -15,4 +17,13 @@ class CodeListService(private val codeListRepository: CodeListRepository) {
 
     fun deleteCodeListById(codeListId: String) =
         codeListRepository.deleteById(codeListId)
+
+    fun createCodeList(data: CodeListToBeCreated): CodeList =
+        CodeList(
+            id = UUID.randomUUID().toString(),
+            name = data.name,
+            catalogId = data.catalogId,
+            description = data.description,
+            codes = data.codes
+        ).let { codeListRepository.insert(it) }
 }

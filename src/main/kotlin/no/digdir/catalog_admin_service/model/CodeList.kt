@@ -11,5 +11,11 @@ data class CodeList(
     val catalogId: String,
     val description: String,
     val codes: List<Code>
+)
 
+data class CodeListToBeCreated(
+    val name: String,
+    val catalogId: String,
+    val description: String,
+    val codes: List<Code>
 )
