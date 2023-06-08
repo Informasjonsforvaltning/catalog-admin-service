@@ -60,7 +60,7 @@ class CodeListTest: ApiTestContext() {
     }
     @Test
     fun findCodeListsForbiddenForWrongOrg() {
-        val response = apiAuthorizedRequest("/catalogs/910244132/concepts/code-lists", port, null, JwtToken(Access.WRONG_ORG_READ).toString(), "GET")
+        val response = apiAuthorizedRequest("/910244132/concepts/code-lists", port, null, JwtToken(Access.WRONG_ORG_READ).toString(), "GET")
         assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
     }
     @Test
