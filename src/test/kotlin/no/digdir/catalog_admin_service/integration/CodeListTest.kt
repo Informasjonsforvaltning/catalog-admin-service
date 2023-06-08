@@ -50,7 +50,7 @@ class CodeListTest: ApiTestContext() {
     }
     @Test
     fun findCodeListByIdUnauthorizedWhenMissingJwt() {
-        val response = apiGet(port,"/catalogs/910244132/concepts/code-lists/123", null)
+        val response = apiGet(port,"/910244132/concepts/code-lists/123", null)
         assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
     }
     @Test
