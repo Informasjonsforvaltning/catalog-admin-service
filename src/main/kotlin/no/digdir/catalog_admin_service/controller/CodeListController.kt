@@ -59,7 +59,7 @@ open class CodeListController(
         @PathVariable catalogId: String,
         @PathVariable codeListId: String
     ): ResponseEntity<Unit> =
-        if (endpointPermissions.hasOrgAdminPermission(jwt, catalogId)) {
+        if (endpointPermissions.hasOrgAdminPermission(jwt, catalogId) && codeListService.getCodeListById(catalogId, codeListId) != null) {
             codeListService.deleteCodeListById(codeListId)
             ResponseEntity(HttpStatus.NO_CONTENT)
         } else ResponseEntity(HttpStatus.FORBIDDEN)
@@ -71,7 +71,7 @@ open class CodeListController(
         @RequestBody newCodeList: CodeListToBeCreated
     ): ResponseEntity<Unit> =
         if (endpointPermissions.hasOrgAdminPermission(jwt, catalogId)) {
-            val created = codeListService.createCodeList(newCodeList)
+            val created = codeListService.createCodeList(newCodeList, catalogId)
             ResponseEntity(
                 locationHeaderForCreated(newId = created.id, catalogId),
                 HttpStatus.CREATED
