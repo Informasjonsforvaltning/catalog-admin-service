@@ -3,6 +3,7 @@ package no.digdir.catalog_admin_service.controller
 import no.digdir.catalog_admin_service.model.CodeList
 import no.digdir.catalog_admin_service.model.CodeListToBeCreated
 import no.digdir.catalog_admin_service.model.CodeLists
+import no.digdir.catalog_admin_service.model.JsonPatchOperation
 import no.digdir.catalog_admin_service.security.EndpointPermissions
 import no.digdir.catalog_admin_service.service.CodeListService
 import org.springframework.http.HttpHeaders
@@ -15,9 +16,10 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 
 @Controller
@@ -47,6 +49,21 @@ open class CodeListController(
     ): ResponseEntity<CodeList> =
         if (endpointPermissions.hasOrgReadPermission(jwt, catalogId)) {
             codeListService.getCodeListById(catalogId, codeListId)
+                ?.let { ResponseEntity(it, HttpStatus.OK) }
+                ?: ResponseEntity(HttpStatus.NOT_FOUND)
+        } else {
+            ResponseEntity(HttpStatus.FORBIDDEN)
+        }
+
+    @PatchMapping(value = ["/{codeListId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun patchCodeList(
+        @AuthenticationPrincipal jwt: Jwt,
+        @PathVariable catalogId: String,
+        @PathVariable codeListId: String,
+        @RequestBody patchOperations: List<JsonPatchOperation>
+    ): ResponseEntity<CodeList> =
+        if (endpointPermissions.hasOrgAdminPermission(jwt, catalogId)) {
+            codeListService.updateCodeList(codeListId, catalogId, patchOperations)
                 ?.let { ResponseEntity(it, HttpStatus.OK) }
                 ?: ResponseEntity(HttpStatus.NOT_FOUND)
         } else {

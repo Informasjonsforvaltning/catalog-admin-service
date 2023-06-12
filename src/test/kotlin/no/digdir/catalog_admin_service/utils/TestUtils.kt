@@ -9,7 +9,6 @@ import org.bson.codecs.configuration.CodecRegistries
 import org.bson.codecs.pojo.PojoCodecProvider
 import org.springframework.http.HttpStatus
 import java.io.BufferedReader
-import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
 import org.springframework.http.HttpEntity
@@ -113,4 +112,3 @@ fun resetDB() {
 
     client.close()
 }
-
