@@ -18,11 +18,11 @@ class CodeListService(private val codeListRepository: CodeListRepository) {
     fun deleteCodeListById(codeListId: String) =
         codeListRepository.deleteById(codeListId)
 
-    fun createCodeList(data: CodeListToBeCreated): CodeList =
+    fun createCodeList(data: CodeListToBeCreated, catalogId: String): CodeList =
         CodeList(
             id = UUID.randomUUID().toString(),
             name = data.name,
-            catalogId = data.catalogId,
+            catalogId = catalogId,
             description = data.description,
             codes = data.codes
         ).let { codeListRepository.insert(it) }

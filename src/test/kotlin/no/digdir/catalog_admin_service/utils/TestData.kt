@@ -22,7 +22,7 @@ val name: MultiLanguageTexts = MultiLanguageTexts(en="codeName", nb=null, nn=nul
 val code: Code = Code(id=555, name=name, parentID = null)
 val codes: List<Code> = listOf(code)
 val CODE_LIST_0 = CodeList(id="123", name = "name", description = "description", codes = codes, catalogId = "910244132")
-val CODE_LIST_TO_BE_CREATED_0 = CodeListToBeCreated(name = "name", description = "description", codes = codes, catalogId = "910244132")
+val CODE_LIST_TO_BE_CREATED_0 = CodeListToBeCreated(name = "name", description = "description", codes = codes)
 
 fun codeListPopulation(): List<Document> =
     listOf(CODE_LIST_0)

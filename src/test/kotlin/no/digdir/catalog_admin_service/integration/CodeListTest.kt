@@ -147,6 +147,45 @@ class CodeListTest : ApiTestContext() {
     }
 
     @Test
+    fun deleteCodeListWrongOrd() {
+        val path = "/123456789/concepts/code-lists/123"
+        val preResponse = apiAuthorizedRequest(
+            path,
+            port,
+            null,
+            JwtToken(Access.ORG_ADMIN).toString(),
+            "DELETE"
+        )
+        assertEquals(HttpStatus.FORBIDDEN.value(), preResponse["status"])
+    }
+
+    @Test
+    fun deleteCodeListReadOnly() {
+        val path = "/910244132/concepts/code-lists/123"
+        val preResponse = apiAuthorizedRequest(
+            path,
+            port,
+            null,
+            JwtToken(Access.ORG_READ).toString(),
+            "DELETE"
+        )
+        assertEquals(HttpStatus.FORBIDDEN.value(), preResponse["status"])
+    }
+
+    @Test
+    fun deleteCodeListThatDoesNotExist() {
+        val path = "/910244132/concepts/code-lists/xxx"
+        val preResponse = apiAuthorizedRequest(
+            path,
+            port,
+            null,
+            JwtToken(Access.ORG_ADMIN).toString(),
+            "DELETE"
+        )
+        assertEquals(HttpStatus.FORBIDDEN.value(), preResponse["status"])
+    }
+
+    @Test
     fun createCodeList() {
         val path = "/910244132/concepts/code-lists"
 
