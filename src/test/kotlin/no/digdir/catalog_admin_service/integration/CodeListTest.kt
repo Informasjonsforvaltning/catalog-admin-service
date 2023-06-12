@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ContextConfiguration
 import kotlin.test.assertEquals
@@ -38,7 +39,7 @@ class CodeListTest : ApiTestContext() {
             port,
             null,
             JwtToken(Access.ORG_WRITE).toString(),
-            "GET"
+            HttpMethod.GET
         )
         assertEquals(HttpStatus.OK.value(), response["status"])
         val result: CodeLists = mapper.readValue(response["body"] as String)
@@ -53,7 +54,7 @@ class CodeListTest : ApiTestContext() {
             port,
             null,
             JwtToken(Access.ORG_READ).toString(),
-            "GET"
+            HttpMethod.GET
         )
         assertEquals(HttpStatus.OK.value(), response["status"])
         val result: CodeList = mapper.readValue(response["body"] as String)
@@ -79,7 +80,7 @@ class CodeListTest : ApiTestContext() {
             port,
             null,
             JwtToken(Access.ROOT).toString(),
-            "GET"
+            HttpMethod.GET
         )
         assertEquals(HttpStatus.NOT_FOUND.value(), response["status"])
     }
@@ -91,7 +92,7 @@ class CodeListTest : ApiTestContext() {
             port,
             null,
             JwtToken(Access.WRONG_ORG_READ).toString(),
-            "GET"
+            HttpMethod.GET
         )
         assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
     }
@@ -103,7 +104,7 @@ class CodeListTest : ApiTestContext() {
             port,
             null,
             JwtToken(Access.WRONG_ORG_READ).toString(),
-            "GET"
+            HttpMethod.GET
         )
         assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
     }
@@ -115,7 +116,7 @@ class CodeListTest : ApiTestContext() {
             port,
             null,
             JwtToken(Access.WRONG_ORG_READ).toString(),
-            "GET"
+            HttpMethod.GET
         )
         assertEquals(HttpStatus.NOT_FOUND.value(), response["status"])
     }
@@ -129,7 +130,7 @@ class CodeListTest : ApiTestContext() {
             port,
             null,
             JwtToken(Access.ORG_ADMIN).toString(),
-            "GET"
+            HttpMethod.GET
         )
         assertEquals(HttpStatus.OK.value(), preResponse["status"])
 
@@ -141,7 +142,7 @@ class CodeListTest : ApiTestContext() {
             port,
             null,
             JwtToken(Access.ORG_ADMIN).toString(),
-            "GET"
+            HttpMethod.DELETE
         )
         assertEquals(HttpStatus.NOT_FOUND.value(), postResponse["status"])
     }
@@ -154,7 +155,7 @@ class CodeListTest : ApiTestContext() {
             port,
             null,
             JwtToken(Access.ORG_ADMIN).toString(),
-            "DELETE"
+            HttpMethod.DELETE
         )
         assertEquals(HttpStatus.FORBIDDEN.value(), preResponse["status"])
     }
@@ -167,7 +168,7 @@ class CodeListTest : ApiTestContext() {
             port,
             null,
             JwtToken(Access.ORG_READ).toString(),
-            "DELETE"
+            HttpMethod.DELETE
         )
         assertEquals(HttpStatus.FORBIDDEN.value(), preResponse["status"])
     }
@@ -180,7 +181,7 @@ class CodeListTest : ApiTestContext() {
             port,
             null,
             JwtToken(Access.ORG_ADMIN).toString(),
-            "DELETE"
+            HttpMethod.DELETE
         )
         assertEquals(HttpStatus.NOT_FOUND.value(), preResponse["status"])
     }
@@ -194,7 +195,7 @@ class CodeListTest : ApiTestContext() {
             port,
             null,
             JwtToken(Access.ORG_ADMIN).toString(),
-            "GET"
+            HttpMethod.GET
         )
         assertEquals(HttpStatus.OK.value(), before["status"])
 
@@ -203,7 +204,7 @@ class CodeListTest : ApiTestContext() {
             port,
             mapper.writeValueAsString(CODE_LIST_TO_BE_CREATED_0),
             JwtToken(Access.ORG_ADMIN).toString(),
-            "POST"
+            HttpMethod.POST
         )
         assertEquals(HttpStatus.CREATED.value(), createResponse["status"])
 
@@ -212,7 +213,7 @@ class CodeListTest : ApiTestContext() {
             port,
             null,
             JwtToken(Access.ORG_ADMIN).toString(),
-            "GET"
+            HttpMethod.GET
         )
         assertEquals(HttpStatus.OK.value(), after["status"])
 
