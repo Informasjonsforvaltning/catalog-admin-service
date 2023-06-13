@@ -182,7 +182,7 @@ class CodeListTest : ApiTestContext() {
             JwtToken(Access.ORG_ADMIN).toString(),
             "DELETE"
         )
-        assertEquals(HttpStatus.FORBIDDEN.value(), preResponse["status"])
+        assertEquals(HttpStatus.NOT_FOUND.value(), preResponse["status"])
     }
 
     @Test
