@@ -7,22 +7,24 @@ import no.digdir.catalog_admin_service.model.CodeLists
 import no.digdir.catalog_admin_service.model.JsonPatchOperation
 import no.digdir.catalog_admin_service.model.OpEnum
 import no.digdir.catalog_admin_service.utils.ApiTestContext
+import no.digdir.catalog_admin_service.utils.CODE
 import no.digdir.catalog_admin_service.utils.CODE_LIST_0
+import no.digdir.catalog_admin_service.utils.NAME
 import no.digdir.catalog_admin_service.utils.CODE_LIST_TO_BE_CREATED_0
 import no.digdir.catalog_admin_service.utils.apiAuthorizedRequest
 import no.digdir.catalog_admin_service.utils.apiGet
 import no.digdir.catalog_admin_service.utils.jwk.Access
 import no.digdir.catalog_admin_service.utils.jwk.JwtToken
-import org.junit.jupiter.api.Assertions.assertTrue
+import no.digdir.catalog_admin_service.utils.resetDB
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.mockito.kotlin.reset
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ContextConfiguration
-import org.springframework.web.client.HttpClientErrorException.BadRequest
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
@@ -273,7 +275,17 @@ class CodeListTest : ApiTestContext() {
                 JwtToken(Access.ORG_ADMIN).toString(),
                 HttpMethod.PATCH
             )
+
             assertEquals(HttpStatus.OK.value(), response["status"])
+
+            val result: CodeList = mapper.readValue(response["body"] as String)
+            assertEquals(
+                CODE_LIST_0.copy(
+                    codes = listOf(
+                        CODE.copy(name = NAME.copy(en = "Updated name"))
+                    )
+                ), result
+            )
         }
 
         @Test
@@ -287,6 +299,16 @@ class CodeListTest : ApiTestContext() {
                 HttpMethod.PATCH
             )
             assertEquals(HttpStatus.OK.value(), response["status"])
+
+            val result: CodeList = mapper.readValue(response["body"] as String)
+            assertEquals(
+                CODE_LIST_0.copy(
+                    codes = listOf(
+                        CODE.copy(name = NAME.copy(nn = "New name"))
+                    )
+                ), result
+            )
+
         }
 
         @Test
@@ -316,6 +338,11 @@ class CodeListTest : ApiTestContext() {
 
             val result: CodeList = mapper.readValue(response["body"] as String)
             assertEquals(result.name, result.description)
+            assertEquals(
+                CODE_LIST_0.copy(
+                    description = "name"
+                ), result
+            )
         }
 
         @Test
@@ -331,7 +358,13 @@ class CodeListTest : ApiTestContext() {
             assertEquals(HttpStatus.OK.value(), response["status"])
 
             val result: CodeList = mapper.readValue(response["body"] as String)
-            assertNull(result.codes[0].name.en)
+            assertEquals(
+                CODE_LIST_0.copy(
+                    codes = listOf(
+                        CODE.copy(name = NAME.copy(en = null))
+                    )
+                ), result
+            )
         }
 
         @Test
@@ -361,8 +394,13 @@ class CodeListTest : ApiTestContext() {
             assertEquals(HttpStatus.OK.value(), response["status"])
 
             val result: CodeList = mapper.readValue(response["body"] as String)
-            assertEquals(CODE_LIST_0.codes[0].name.en, result.name)
-            assertNull(result.codes[0].name.en)
+            assertEquals(
+                CODE_LIST_0.copy(
+                    name = CODE_LIST_0.codes[0].name.en!!, codes = listOf(
+                        CODE.copy(name = NAME.copy(en = null))
+                    )
+                ), result
+            )
         }
 
         @Test

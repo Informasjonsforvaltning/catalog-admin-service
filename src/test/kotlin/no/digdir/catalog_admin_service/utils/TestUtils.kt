@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus
 import java.io.BufferedReader
 import java.net.HttpURLConnection
 import java.net.URL
+import org.bson.conversions.Bson
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -107,8 +108,9 @@ fun resetDB() {
     val client: MongoClient = MongoClients.create(connectionString)
     val mongoDatabase = client.getDatabase(MONGO_COLLECTION).withCodecRegistry(pojoCodecRegistry)
 
-    val sourceCollection = mongoDatabase.getCollection(MONGO_COLLECTION)
-    sourceCollection.insertMany(codeListPopulation())
+    val collection = mongoDatabase.getCollection(MONGO_COLLECTION)
+    collection.deleteMany(org.bson.Document())
+    collection.insertMany(codeListPopulation())
 
     client.close()
 }
