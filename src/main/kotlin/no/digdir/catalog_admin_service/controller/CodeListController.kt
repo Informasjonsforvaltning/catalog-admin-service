@@ -59,10 +59,14 @@ open class CodeListController(
         @PathVariable catalogId: String,
         @PathVariable codeListId: String
     ): ResponseEntity<Unit> =
-        if (endpointPermissions.hasOrgAdminPermission(jwt, catalogId) && codeListService.getCodeListById(catalogId, codeListId) != null) {
-            codeListService.deleteCodeListById(codeListId)
-            ResponseEntity(HttpStatus.NO_CONTENT)
-        } else ResponseEntity(HttpStatus.FORBIDDEN)
+        when {
+            !endpointPermissions.hasOrgAdminPermission(jwt, catalogId) -> ResponseEntity(HttpStatus.FORBIDDEN)
+            codeListService.getCodeListById(catalogId, codeListId) == null -> ResponseEntity(HttpStatus.NOT_FOUND)
+            else -> {
+                codeListService.deleteCodeListById(codeListId)
+                ResponseEntity(HttpStatus.NO_CONTENT)
+            }
+        }
 
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun createCodeList(
