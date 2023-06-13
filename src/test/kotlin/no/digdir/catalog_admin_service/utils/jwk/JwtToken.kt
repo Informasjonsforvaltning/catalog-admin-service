@@ -38,5 +38,5 @@ enum class Access(val authorities: String) {
     ORG_WRITE("organization:910244132:write"),
     ORG_ADMIN("organization:910244132:admin"),
     ROOT("system:root:admin"),
-    WRONG_ORG_READ("organization:123456789:read"),
+    WRONG_ORG_ADMIN("organization:123456789:admin"),
 }

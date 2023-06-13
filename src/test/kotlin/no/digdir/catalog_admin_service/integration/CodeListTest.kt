@@ -15,18 +15,15 @@ import no.digdir.catalog_admin_service.utils.apiAuthorizedRequest
 import no.digdir.catalog_admin_service.utils.apiGet
 import no.digdir.catalog_admin_service.utils.jwk.Access
 import no.digdir.catalog_admin_service.utils.jwk.JwtToken
-import no.digdir.catalog_admin_service.utils.resetDB
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.mockito.kotlin.reset
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ContextConfiguration
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 
 private val mapper = jacksonObjectMapper()
@@ -39,7 +36,6 @@ private val mapper = jacksonObjectMapper()
 @ContextConfiguration(initializers = [ApiTestContext.Initializer::class])
 @Tag("integration")
 class CodeListTest : ApiTestContext() {
-
     @Test
     fun findCodeLists() {
         val response = apiAuthorizedRequest(
@@ -99,7 +95,7 @@ class CodeListTest : ApiTestContext() {
             "/910244132/concepts/code-lists",
             port,
             null,
-            JwtToken(Access.WRONG_ORG_READ).toString(),
+            JwtToken(Access.WRONG_ORG_ADMIN).toString(),
             HttpMethod.GET
         )
         assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
@@ -111,7 +107,7 @@ class CodeListTest : ApiTestContext() {
             "/910244132/concepts/code-lists/123",
             port,
             null,
-            JwtToken(Access.WRONG_ORG_READ).toString(),
+            JwtToken(Access.WRONG_ORG_ADMIN).toString(),
             HttpMethod.GET
         )
         assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
@@ -123,7 +119,7 @@ class CodeListTest : ApiTestContext() {
             "/123456789/concepts/code-lists/123",
             port,
             null,
-            JwtToken(Access.WRONG_ORG_READ).toString(),
+            JwtToken(Access.WRONG_ORG_ADMIN).toString(),
             HttpMethod.GET
         )
         assertEquals(HttpStatus.NOT_FOUND.value(), response["status"])
@@ -142,7 +138,7 @@ class CodeListTest : ApiTestContext() {
         )
         assertEquals(HttpStatus.OK.value(), preResponse["status"])
 
-        val deleteResponse = apiAuthorizedRequest(path, port, null, JwtToken(Access.ORG_ADMIN).toString(), "DELETE")
+        val deleteResponse = apiAuthorizedRequest(path, port, null, JwtToken(Access.ORG_ADMIN).toString(), HttpMethod.DELETE)
         assertEquals(HttpStatus.NO_CONTENT.value(), deleteResponse["status"])
 
         val postResponse = apiAuthorizedRequest(
@@ -259,7 +255,7 @@ class CodeListTest : ApiTestContext() {
                 "/910244132/concepts/code-lists/123",
                 port,
                 mapper.writeValueAsString(operations),
-                JwtToken(Access.WRONG_ORG_READ).toString(),
+                JwtToken(Access.WRONG_ORG_ADMIN).toString(),
                 HttpMethod.PATCH
             )
             assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
@@ -290,7 +286,7 @@ class CodeListTest : ApiTestContext() {
 
         @Test
         fun addNewCodeNameToCodeList() {
-            val operations = listOf(JsonPatchOperation(op = OpEnum.ADD, "/codes/0/name/en", "New name"))
+            val operations = listOf(JsonPatchOperation(op = OpEnum.ADD, "/codes/0/name/nn", "New name"))
             val response = apiAuthorizedRequest(
                 "/910244132/concepts/code-lists/123",
                 port,
