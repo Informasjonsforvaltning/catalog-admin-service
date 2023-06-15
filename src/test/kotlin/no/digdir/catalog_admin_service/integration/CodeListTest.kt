@@ -207,7 +207,6 @@ class CodeListTest : ApiTestContext() {
         )
         assertEquals(HttpStatus.CREATED.value(), createResponse["status"])
 
-
         val after = apiAuthorizedRequest(
             path,
             port,
