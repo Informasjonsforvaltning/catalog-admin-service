@@ -18,11 +18,11 @@ val MONGO_ENV_VALUES: Map<String, String> = ImmutableMap.of(
     "MONGO_INITDB_ROOT_PASSWORD", MONGO_PASSWORD
 )
 
-val name: MultiLanguageTexts = MultiLanguageTexts(en="codeName", nb=null, nn=null)
-val code: Code = Code(id=555, name=name, parentID = null)
-val codes: List<Code> = listOf(code)
-val CODE_LIST_0 = CodeList(id="123", name = "name", description = "description", codes = codes, catalogId = "910244132")
-val CODE_LIST_TO_BE_CREATED_0 = CodeListToBeCreated(name = "name", description = "description", codes = codes)
+val NAME: MultiLanguageTexts = MultiLanguageTexts(en="codeName", nb=null, nn=null)
+val CODE: Code = Code(id=555, name=NAME, parentID = null)
+val CODES: List<Code> = listOf(CODE)
+val CODE_LIST_0 = CodeList(id="123", name = "name", description = "description", codes = CODES, catalogId = "910244132")
+val CODE_LIST_TO_BE_CREATED_0 = CodeListToBeCreated(name = "name", description = "description", codes = CODES)
 
 fun codeListPopulation(): List<Document> =
     listOf(CODE_LIST_0)

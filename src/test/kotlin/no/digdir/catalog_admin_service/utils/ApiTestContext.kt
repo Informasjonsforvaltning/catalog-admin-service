@@ -8,11 +8,17 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.wait.strategy.Wait
 import java.net.HttpURLConnection
 import java.net.URL
+import org.junit.jupiter.api.BeforeEach
 
 abstract class ApiTestContext {
 
     @LocalServerPort
     var port = 0
+
+    @BeforeEach
+    fun resetDatabase() {
+        resetDB()
+    }
 
     internal class Initializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
         override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
