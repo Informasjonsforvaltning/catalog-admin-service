@@ -217,7 +217,6 @@ class CodeListTest : ApiTestContext() {
         )
         assertEquals(HttpStatus.OK.value(), after["status"])
 
-
         val beforeList: CodeLists = mapper.readValue(before["body"] as String)
         val afterList: CodeLists = mapper.readValue(after["body"] as String)
         assertEquals(beforeList.codeLists.size + 1, afterList.codeLists.size)
