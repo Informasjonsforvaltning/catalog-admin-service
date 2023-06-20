@@ -97,7 +97,7 @@ fun resetDB() {
     val connectionString = ConnectionString(
         "mongodb://${MONGO_USER}:${MONGO_PASSWORD}@localhost:${
             mongoContainer.getMappedPort(MONGO_PORT)
-        }/$MONGO_DATABASE?authSource=admin&authMechanism=SCRAM-SHA-1"
+        }/?authSource=admin&authMechanism=SCRAM-SHA-1"
     )
     val pojoCodecRegistry = CodecRegistries.fromRegistries(
         MongoClientSettings.getDefaultCodecRegistry(), CodecRegistries.fromProviders(
@@ -106,11 +106,15 @@ fun resetDB() {
     )
 
     val client: MongoClient = MongoClients.create(connectionString)
-    val mongoDatabase = client.getDatabase(MONGO_COLLECTION).withCodecRegistry(pojoCodecRegistry)
+    val mongoDatabase = client.getDatabase(MONGO_DATABASE).withCodecRegistry(pojoCodecRegistry)
 
-    val collection = mongoDatabase.getCollection(MONGO_COLLECTION)
-    collection.deleteMany(org.bson.Document())
-    collection.insertMany(codeListPopulation())
+    val codeListCollection = mongoDatabase.getCollection(MONGO_CODELIST_COLLECTION)
+    codeListCollection.deleteMany(org.bson.Document())
+    codeListCollection.insertMany(codeListPopulation())
+
+    val designCollection = mongoDatabase.getCollection(MONGO_DESIGN_COLLECTION)
+    designCollection.deleteMany(org.bson.Document())
+    designCollection.insertMany(designPopulation())
 
     client.close()
 }
