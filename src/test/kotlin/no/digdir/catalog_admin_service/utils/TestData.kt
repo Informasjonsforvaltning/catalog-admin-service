@@ -30,6 +30,7 @@ val CODE_LIST_TO_BE_CREATED_0 = CodeListToBeCreated(name = "name", description =
 
 val DESIGN_DTO = DesignDTO(backgroundColor = "#FFFFFF", fontColor="#CCCFFF", logoDescription="FDK Logo")
 val DESIGN_DBO = DesignDBO(backgroundColor = "#FFFFFF", fontColor="#CCCFFF", logoDescription="FDK Logo", catalogId = "910244132")
+val UPDATED_DESIGN_DTO = DesignDTO(backgroundColor = "#FFFFFF", fontColor="#CCCFFF", logoDescription="New FDK Logo")
 
 fun codeListPopulation(): List<Document> =
     listOf(CODE_LIST_0)

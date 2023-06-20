@@ -34,9 +34,7 @@ open class DesignController(
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun getDesign(@AuthenticationPrincipal jwt: Jwt, @PathVariable catalogId: String): ResponseEntity<DesignDTO> =
         if (endpointPermissions.hasOrgReadPermission(jwt, catalogId)) {
-            designService.getDesign(catalogId)
-                ?.let { ResponseEntity(it, HttpStatus.OK) }
-                ?: ResponseEntity(HttpStatus.NOT_FOUND)
+            ResponseEntity(designService.getDesign(catalogId), HttpStatus.OK)
         } else {
             ResponseEntity(HttpStatus.FORBIDDEN)
         }
@@ -46,12 +44,11 @@ open class DesignController(
         @AuthenticationPrincipal jwt: Jwt,
         @PathVariable catalogId: String,
         @RequestBody designDTO: DesignDTO
-    ): ResponseEntity<DesignDBO> = if (endpointPermissions.hasOrgAdminPermission(jwt, catalogId)) {
-        val created = designService.updateDesign(catalogId, designDTO)
+    ): ResponseEntity<DesignDTO> = if (endpointPermissions.hasOrgAdminPermission(jwt, catalogId)) {
         ResponseEntity(
-            created, HttpStatus.OK
+            designService.updateDesign(catalogId, designDTO), HttpStatus.OK
         )
-    } else ResponseEntity<DesignDBO>(HttpStatus.FORBIDDEN)
+    } else ResponseEntity<DesignDTO>(HttpStatus.FORBIDDEN)
 
     @GetMapping(value = ["/logo"], produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
     @ResponseBody

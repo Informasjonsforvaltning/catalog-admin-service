@@ -2,11 +2,10 @@ package no.digdir.catalog_admin_service.integration
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-
 import no.digdir.catalog_admin_service.model.DesignDTO
 import no.digdir.catalog_admin_service.utils.ApiTestContext
-
 import no.digdir.catalog_admin_service.utils.DESIGN_DTO
+import no.digdir.catalog_admin_service.utils.UPDATED_DESIGN_DTO
 import no.digdir.catalog_admin_service.utils.apiAuthorizedRequest
 import no.digdir.catalog_admin_service.utils.apiGet
 import no.digdir.catalog_admin_service.utils.jwk.Access
@@ -50,102 +49,57 @@ class DesignTest : ApiTestContext(
             assertEquals(DESIGN_DTO, result)
         }
 
-        /* @Test
-        fun findCodeListsUnauthorizedWhenMissingJwt() {
-            val response = apiGet(port, "/910244132/concepts/code-lists", null)
-            assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
-        }
 
         @Test
-        fun findCodeListByIdUnauthorizedWhenMissingJwt() {
-            val response = apiGet(port, "/910244132/concepts/code-lists/123", null)
-            assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
-        }
-
-        @Test
-        fun codeListNotFound() {
+        fun updateDesign() {
             val response = apiAuthorizedRequest(
-                "/910244132/concepts/code-lists/xxx",
+                path,
+                port,
+                mapper.writeValueAsString(UPDATED_DESIGN_DTO),
+                JwtToken(Access.ORG_ADMIN).toString(),
+                HttpMethod.POST
+            )
+
+            assertEquals(HttpStatus.OK.value(), response["status"])
+
+            val result: DesignDTO = mapper.readValue(response["body"] as String)
+            assertEquals(
+                DESIGN_DTO.copy(
+                    logoDescription = "New FDK Logo"
+                ), result
+            )
+        }
+
+        @Test
+        fun findDesignUnauthorizedWhenMissingJwt() {
+            val response = apiGet(port, "/910244132/design", null)
+            assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
+        }
+
+        @Test
+        fun designNotFoundInDB() {
+            val response = apiAuthorizedRequest(
+                "/123456789/design",
                 port,
                 null,
                 JwtToken(Access.ROOT).toString(),
                 HttpMethod.GET
             )
-            assertEquals(HttpStatus.NOT_FOUND.value(), response["status"])
+            assertEquals(HttpStatus.OK.value(), response["status"])
+            val result: DesignDTO = mapper.readValue(response["body"] as String)
+            assertEquals(result, DesignDTO(null, null, null))
         }
 
         @Test
-        fun findCodeListsForbiddenForWrongOrg() {
+        fun updateDesignForbiddenForOrgRead() {
             val response = apiAuthorizedRequest(
-                "/910244132/concepts/code-lists",
-                port,
-                null,
-                JwtToken(Access.WRONG_ORG_ADMIN).toString(),
-                HttpMethod.GET
-            )
-            assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
-        }
-
-        @Test
-        fun findCodeListByIdForbiddenForWrongOrg() {
-            val response = apiAuthorizedRequest(
-                "/910244132/concepts/code-lists/123",
-                port,
-                null,
-                JwtToken(Access.WRONG_ORG_ADMIN).toString(),
-                HttpMethod.GET
-            )
-            assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
-        }
-
-        @Test
-        fun findCodeListByIdNotFoundForCodeListNotInCatalog() {
-            val response = apiAuthorizedRequest(
-                "/123456789/concepts/code-lists/123",
-                port,
-                null,
-                JwtToken(Access.WRONG_ORG_ADMIN).toString(),
-                HttpMethod.GET
-            )
-            assertEquals(HttpStatus.NOT_FOUND.value(), response["status"])
-        }
-
-        @Test
-        fun createCodeList() {
-            val path = "/910244132/concepts/code-lists"
-
-            val before = apiAuthorizedRequest(
                 path,
                 port,
-                null,
-                JwtToken(Access.ORG_ADMIN).toString(),
-                HttpMethod.GET
-            )
-            assertEquals(HttpStatus.OK.value(), before["status"])
-
-            val createResponse = apiAuthorizedRequest(
-                path,
-                port,
-                mapper.writeValueAsString(CODE_LIST_TO_BE_CREATED_0),
-                JwtToken(Access.ORG_ADMIN).toString(),
+                mapper.writeValueAsString(UPDATED_DESIGN_DTO),
+                JwtToken(Access.ORG_READ).toString(),
                 HttpMethod.POST
             )
-            assertEquals(HttpStatus.CREATED.value(), createResponse["status"])
-
-            val after = apiAuthorizedRequest(
-                path,
-                port,
-                null,
-                JwtToken(Access.ORG_ADMIN).toString(),
-                HttpMethod.GET
-            )
-            assertEquals(HttpStatus.OK.value(), after["status"])
-
-            val beforeList: CodeLists = mapper.readValue(before["body"] as String)
-            val afterList: CodeLists = mapper.readValue(after["body"] as String)
-            assertEquals(beforeList.codeLists.size + 1, afterList.codeLists.size)
+            assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
         }
-    }*/
-
     }
 }

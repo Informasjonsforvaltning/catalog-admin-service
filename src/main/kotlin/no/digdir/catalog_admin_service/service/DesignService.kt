@@ -10,16 +10,17 @@ import org.springframework.stereotype.Service
 
 @Service
 class DesignService(private val designRepository: DesignRepository, private val logoRepository: LogoRepository) {
-    fun getDesign(catalogId: String): DesignDTO? =
+    fun getDesign(catalogId: String): DesignDTO =
         designRepository.findByIdOrNull(catalogId)?.let {
             DesignDTO(
                 backgroundColor = it.backgroundColor,
                 fontColor = it.fontColor,
                 logoDescription = it.logoDescription
             )
-        }
 
-    fun updateDesign(catalogId: String, design: DesignDTO): DesignDBO? =
+        } ?: DesignDTO(null, null, null)
+
+    fun updateDesign(catalogId: String, design: DesignDTO): DesignDTO =
         designRepository.save(
             DesignDBO(
                 backgroundColor = design.backgroundColor,
@@ -28,6 +29,13 @@ class DesignService(private val designRepository: DesignRepository, private val 
                 catalogId = catalogId
             )
         )
+            .let { saved ->
+                DesignDTO(
+                    backgroundColor = saved.backgroundColor,
+                    fontColor = saved.fontColor,
+                    logoDescription = saved.logoDescription,
+                )
+            }
 
     fun getLogo(catalogId: String): Logo? =
         logoRepository.findByIdOrNull(catalogId)
