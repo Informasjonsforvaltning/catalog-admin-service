@@ -1,16 +1,18 @@
 package no.digdir.catalog_admin_service.controller
 
-import no.digdir.catalog_admin_service.model.DesignDBO
 import no.digdir.catalog_admin_service.model.DesignDTO
 import no.digdir.catalog_admin_service.model.Logo
 import no.digdir.catalog_admin_service.security.EndpointPermissions
 import no.digdir.catalog_admin_service.service.DesignService
+import no.digdir.catalog_admin_service.service.inputStreamResource
+import org.springframework.core.io.InputStreamResource
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.stereotype.Controller
+import org.springframework.util.MimeType
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -18,7 +20,9 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.multipart.MultipartFile
 
 
 @Controller
@@ -50,25 +54,28 @@ open class DesignController(
         )
     } else ResponseEntity<DesignDTO>(HttpStatus.FORBIDDEN)
 
-    @GetMapping(value = ["/logo"], produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
+    @GetMapping(value = ["/logo"])
     @ResponseBody
-    fun getLogoFile(@AuthenticationPrincipal jwt: Jwt, @PathVariable catalogId: String): ResponseEntity<Logo> =
+    fun getLogoFile(@AuthenticationPrincipal jwt: Jwt, @PathVariable catalogId: String): ResponseEntity<InputStreamResource> =
         if (endpointPermissions.hasOrgReadPermission(jwt, catalogId)) {
-            ResponseEntity(designService.getLogo(catalogId), HttpStatus.OK)
+            val logo = designService.getLogo(catalogId)
+            if (logo != null) ResponseEntity
+                .ok()
+                .contentType(MediaType.asMediaType(MimeType.valueOf(logo.contentType)))
+                .body(logo.inputStreamResource())
+            else ResponseEntity(HttpStatus.NOT_FOUND)
         } else {
             ResponseEntity(HttpStatus.FORBIDDEN)
         }
 
-    @PostMapping(value = ["/logo"], consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping(value = ["/logo"], consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun updateLogo(
         @AuthenticationPrincipal jwt: Jwt,
         @PathVariable catalogId: String,
-        @RequestBody logo: ByteArray
+        @RequestPart("logo") logo: MultipartFile
     ): ResponseEntity<Logo> = if (endpointPermissions.hasOrgAdminPermission(jwt, catalogId)) {
-        val created = designService.saveLogo(catalogId, logo)
-        ResponseEntity(
-            created, HttpStatus.OK
-        )
+        designService.saveLogo(catalogId, logo)
+        ResponseEntity(HttpStatus.OK)
     } else ResponseEntity<Logo>(HttpStatus.FORBIDDEN)
 
 

@@ -5,6 +5,7 @@ import no.digdir.catalog_admin_service.model.CodeList
 import no.digdir.catalog_admin_service.model.DesignDTO
 import no.digdir.catalog_admin_service.model.DesignDBO
 import no.digdir.catalog_admin_service.model.CodeListToBeCreated
+import no.digdir.catalog_admin_service.model.Logo
 import no.digdir.catalog_admin_service.model.MultiLanguageTexts
 import org.bson.Document
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap
@@ -32,6 +33,12 @@ val DESIGN_DTO = DesignDTO(backgroundColor = "#FFFFFF", fontColor="#CCCFFF", log
 val DESIGN_DBO = DesignDBO(backgroundColor = "#FFFFFF", fontColor="#CCCFFF", logoDescription="FDK Logo", catalogId = "910244132")
 val UPDATED_DESIGN_DTO = DesignDTO(backgroundColor = "#FFFFFF", fontColor="#CCCFFF", logoDescription="New FDK Logo")
 
+val LOGO = Logo(
+    base64Logo = "PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/Pgo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiPgo8c3ZnIHZlcnNpb249IjEuMSIgYmFzZVByb2ZpbGU9ImZ1bGwiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgICA8cG9seWdvbiBpZD0idHJpYW5nbGUiIHBvaW50cz0iMCwwIDAsNTAgNTAsMCIgZmlsbD0iIzAwOTkwMCIgc3Ryb2tlPSIjMDA0NDAwIi8+Cjwvc3ZnPg==",
+    contentType = "image/svg+xml",
+    catalogId = "910244132"
+)
+
 fun codeListPopulation(): List<Document> =
     listOf(CODE_LIST_0)
         .map { it.mapDBO() }
@@ -53,3 +60,12 @@ private fun DesignDBO.mapDBO(): Document =
         .append("backgroundColor", backgroundColor)
         .append("fontColor", fontColor)
         .append("logoDescription", logoDescription)
+
+fun logoPopulation(): List<Document> =
+    listOf(LOGO)
+        .map { it.mapDBO() }
+private fun Logo.mapDBO(): Document =
+    Document()
+        .append("_id", catalogId)
+        .append("contentType", contentType)
+        .append("base64Logo", base64Logo)

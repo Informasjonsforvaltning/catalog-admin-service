@@ -22,21 +22,6 @@ data class DesignDTO(
 data class Logo(
     @Id
     val catalogId: String,
-    val logo: ByteArray
-) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as Logo
-
-        if (catalogId != other.catalogId) return false
-        return logo.contentEquals(other.logo)
-    }
-
-    override fun hashCode(): Int {
-        var result = catalogId.hashCode()
-        result = 31 * result + logo.contentHashCode()
-        return result
-    }
-}
+    val contentType: String,
+    val base64Logo: String
+)
