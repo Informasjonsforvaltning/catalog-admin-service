@@ -66,4 +66,40 @@ class FieldsTest : ApiTestContext() {
         }
 
     }
+
+    @Nested
+    internal inner class UpdateEditableFields {
+        private val path = "/910244132/concepts/fields/editable"
+
+        @Test
+        fun ableToGetCatalogFieldsForAllOrgRoles() {
+            val body = EditableFields("910244132", "123")
+            val response = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.ORG_ADMIN).toString(), HttpMethod.POST)
+
+            assertEquals(HttpStatus.OK.value(), response["status"])
+
+            val result: EditableFields = mapper.readValue(response["body"] as String)
+            assertEquals(body, result)
+        }
+
+        @Test
+        fun forbiddenForWrongOrgAndNonAdminRoles() {
+            val body = EditableFields("910244132", "123")
+            val readRole = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.ORG_READ).toString(), HttpMethod.POST)
+            val writeRole = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.ORG_WRITE).toString(), HttpMethod.POST)
+            val wrongOrg = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.WRONG_ORG_ADMIN).toString(), HttpMethod.POST)
+
+            assertEquals(HttpStatus.FORBIDDEN.value(), readRole["status"])
+            assertEquals(HttpStatus.FORBIDDEN.value(), writeRole["status"])
+            assertEquals(HttpStatus.FORBIDDEN.value(), wrongOrg["status"])
+        }
+
+        @Test
+        fun unauthorizedWhenMissingToken() {
+            val body = EditableFields("910244132", "123")
+            val response = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), null, HttpMethod.POST)
+            assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
+        }
+
+    }
 }
