@@ -28,4 +28,7 @@ class FieldsService(
         internalFieldsRepository.findFieldsByCatalogId(catalogId)
             .sortedBy { it.id }
 
+    fun updateEditableFields(editableFields: EditableFields): EditableFields =
+        editableFieldsRepository.save(editableFields)
+
 }

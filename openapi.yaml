@@ -143,6 +143,54 @@ paths:
           description: No Content
 
   /{catalogId}/concepts/fields:
+    get:
+      tags:
+        - catalog-admin-service
+      summary: Get concept fields.
+      description: Returns concept fields
+      operationId: getFields
+      parameters:
+        - name: catalogId
+          in: path
+          description: catalog id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fields'
+  /{catalogId}/concepts/fields/editable:
+    post:
+      tags:
+        - catalog-admin-service
+      summary: Update editable fields
+      description: Update editable fields
+      operationId: updateEditableFields
+      parameters:
+        - name: catalogId
+          in: path
+          description: catalog id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EditableFields"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditableFields'
+  /{catalogId}/concepts/fields/internal:
     post:
       tags:
         - catalog-admin-service
@@ -165,27 +213,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Field'
-    get:
-      tags:
-        - catalog-admin-service
-      summary: Get concept fields.
-      description: Returns concept fields
-      operationId: getFields
-      parameters:
-        - name: catalogId
-          in: path
-          description: catalog id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Fields'
-  /{catalogId}/concepts/fields/{fieldId}:
+  /{catalogId}/concepts/fields/internal/{fieldId}:
     get:
       tags:
         - catalog-admin-service
