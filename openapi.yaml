@@ -406,10 +406,23 @@ components:
       type: object
       description: List of concept fields
       properties:
-        fields:
+        editable:
+          $ref: "#/components/schemas/EditableFields"
+        internal:
           type: array
           items:
             $ref: '#/components/schemas/Field'
+
+    EditableFields:
+      type: object
+      description: List of concept fields
+      properties:
+        catalogId:
+          type: string
+          description: catalog id
+        domainCodeListId:
+          type: string
+          description: id of associated code list for the domain field
 
     Field:
       type: object
@@ -418,18 +431,22 @@ components:
         id:
           type: string
           description: field id
-        name:
+        catalogId:
           type: string
-          description: field name
+          description: catalog id
+        label:
+          $ref: "#/components/schemas/MultilanguageTexts"
         description:
-          type: string
-          description: field description / help text
-        codeList:
+          $ref: "#/components/schemas/MultilanguageTexts"
+        codeListId:
           type: string
           description: id to associated code list for fields with type CODE
         type:
           type: string
-          enum: [ TEXT, TEXTAREA, BOOLEAN, CODE ]
+          enum: [ boolean, text_short, text_long, code_list, user_list ]
+        location:
+          type: string
+          enum: [ main_column, right_column ]
 
     MultilanguageTexts:
       description: A generic object to hold multilanguage texts, that has language code (according to ISO 639-1) as keys
