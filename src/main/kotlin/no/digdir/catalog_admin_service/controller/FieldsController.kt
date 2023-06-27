@@ -1,9 +1,12 @@
 package no.digdir.catalog_admin_service.controller
 
 import no.digdir.catalog_admin_service.model.EditableFields
+import no.digdir.catalog_admin_service.model.Field
+import no.digdir.catalog_admin_service.model.FieldToBeCreated
 import no.digdir.catalog_admin_service.model.Fields
 import no.digdir.catalog_admin_service.security.EndpointPermissions
 import no.digdir.catalog_admin_service.service.FieldsService
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -48,4 +51,38 @@ class FieldsController(
             else -> ResponseEntity(fieldsService.updateEditableFields(editableFields), HttpStatus.OK)
         }
 
+    @PostMapping(value = ["/internal"], consumes = [MediaType.APPLICATION_JSON_VALUE])
+    fun createInternalField(
+        @AuthenticationPrincipal jwt: Jwt,
+        @PathVariable catalogId: String,
+        @RequestBody field: FieldToBeCreated
+    ): ResponseEntity<Unit> =
+        when {
+            !endpointPermissions.hasOrgAdminPermission(jwt, catalogId) -> ResponseEntity(HttpStatus.FORBIDDEN)
+            else -> {
+                val created = fieldsService.createInternalField(field, catalogId)
+                ResponseEntity(locationHeaderForCreated(created.id, catalogId), HttpStatus.OK)
+            }
+        }
+
+    @GetMapping(value = ["/internal/{fieldId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getInternalField(
+        @AuthenticationPrincipal jwt: Jwt,
+        @PathVariable catalogId: String,
+        @PathVariable fieldId: String
+    ): ResponseEntity<Field> =
+        if (endpointPermissions.hasOrgReadPermission(jwt, catalogId)) {
+            fieldsService.getInternalField(fieldId, catalogId)
+                ?.let { ResponseEntity(it, HttpStatus.OK) }
+                ?: ResponseEntity(HttpStatus.NOT_FOUND)
+        } else {
+            ResponseEntity(HttpStatus.FORBIDDEN)
+        }
+
 }
+
+private fun locationHeaderForCreated(newId: String, catalogId: String): HttpHeaders =
+    HttpHeaders().apply {
+        add(HttpHeaders.LOCATION, "/$catalogId/concepts/fields/internal/$newId")
+        add(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.LOCATION)
+    }

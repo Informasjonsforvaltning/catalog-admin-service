@@ -1,12 +1,11 @@
 package no.digdir.catalog_admin_service.service
 
-import no.digdir.catalog_admin_service.model.EditableFields
-import no.digdir.catalog_admin_service.model.Field
-import no.digdir.catalog_admin_service.model.Fields
+import no.digdir.catalog_admin_service.model.*
 import no.digdir.catalog_admin_service.repository.EditableFieldsRepository
 import no.digdir.catalog_admin_service.repository.InternalFieldsRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class FieldsService(
@@ -25,10 +24,24 @@ class FieldsService(
             ?: EditableFields(catalogId = catalogId, domainCodeListId = null)
 
     private fun getCatalogInternalFields(catalogId: String): List<Field> =
-        internalFieldsRepository.findFieldsByCatalogId(catalogId)
+        internalFieldsRepository.findByCatalogId(catalogId)
             .sortedBy { it.id }
 
     fun updateEditableFields(editableFields: EditableFields): EditableFields =
         editableFieldsRepository.save(editableFields)
+
+    fun createInternalField(data: FieldToBeCreated, catalogId: String): Field =
+        Field(
+            id = UUID.randomUUID().toString(),
+            catalogId = catalogId,
+            label = data.label,
+            description = data.description ?: MultiLanguageTexts(null, null, null),
+            type = data.type ?: FieldType.TEXT_SHORT,
+            location = data.location ?: FieldLocation.MAIN_COLUMN,
+            codeListId = data.codeListId
+        ).let { internalFieldsRepository.insert(it) }
+
+    fun getInternalField(fieldId: String, catalogId: String): Field? =
+        internalFieldsRepository.findByIdAndCatalogId(fieldId, catalogId)
 
 }
