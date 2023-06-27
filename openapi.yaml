@@ -264,12 +264,31 @@ paths:
         '204':
           description: No Content
 
-  /{catalogId}/general/settings:
+  /{catalogId}/design:
+    get:
+      tags:
+        - catalog-admin-service
+      summary: Get catalog design settings.
+      description: Returns catalog design settings.
+      parameters:
+        - name: catalogId
+          in: path
+          description: catalog id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Design'
     post:
       tags:
         - catalog-admin-service
-      summary: Update general settings for the catalog
-      description: Update general settings for the catalog
+      summary: Update design settings for the catalog
+      description: Update design settings for the catalog
       operationId: updateSettings
       parameters:
         - name: catalogId
@@ -286,8 +305,8 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Settings'
-  /{catalogId}/general/logo:
+              $ref: '#/components/schemas/Design'
+  /{catalogId}/design/logo:
     post:
       tags:
         - catalog-admin-service
@@ -307,17 +326,44 @@ paths:
       requestBody:
         required: true
         content:
-          application/octet-stream:
+          multipart/form-data:
             schema:
-              type: string
-              format: binary
+              type: object
+              properties:
+                logo:
+                  type: string
+                  format: binary
+    get:
+      tags:
+        - catalog-admin-service
+      summary: Get catalog logo.
+      description: Returns catalog logo.
+      parameters:
+        - name: catalogId
+          in: path
+          description: catalog id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/svg+xml:
+              schema:
+                type: string
+                format: binary
 
 components:
   schemas:
     CodeLists:
       type: object
       description: List of code lists
-      properties:    
+      properties:
         codeLists:
           type: array
           items:
@@ -383,12 +429,12 @@ components:
           description: id to associated code list for fields with type CODE
         type:
           type: string
-          enum: [TEXT, TEXTAREA, BOOLEAN, CODE]
+          enum: [ TEXT, TEXTAREA, BOOLEAN, CODE ]
 
     MultilanguageTexts:
       description: A generic object to hold multilanguage texts, that has language code (according to ISO 639-1) as keys
       type: object
-      additionalProperties: {}
+      additionalProperties: { }
 
     JsonPatch:
       description: 'A JSON Schema describing a JSON Patch (https://tools.ietf.org/html/rfc6902)'
@@ -425,11 +471,15 @@ components:
           description: 'A JSON Pointer path pointing to the location to move/copy from.'
           type: string
 
-    Settings:
-      description: 'General configuration for the catalog'
+    Design:
+      description: 'Design configuration for the catalog'
       type: object
       properties:
-        color:
+        backgroundColor:
+          type: string
+        fontColor:
           type: string
         logoDescription:
+          type: string
+        catalogId:
           type: string

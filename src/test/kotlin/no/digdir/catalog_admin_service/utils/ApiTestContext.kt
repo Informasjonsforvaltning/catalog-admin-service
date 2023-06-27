@@ -23,7 +23,11 @@ abstract class ApiTestContext {
     internal class Initializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
         override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
             TestPropertyValues.of(
-                "spring.data.mongodb.uri=mongodb://$MONGO_USER:$MONGO_PASSWORD@localhost:${mongoContainer.getMappedPort(MONGO_PORT)}/$MONGO_COLLECTION?authSource=admin&authMechanism=SCRAM-SHA-1"
+                "spring.data.mongodb.uri=mongodb://$MONGO_USER:$MONGO_PASSWORD@localhost:${
+                    mongoContainer.getMappedPort(
+                        MONGO_PORT
+                    )
+                }/$MONGO_DATABASE?authSource=admin&authMechanism=SCRAM-SHA-1"
             ).applyTo(configurableApplicationContext.environment)
         }
     }
@@ -56,5 +60,5 @@ abstract class ApiTestContext {
     }
 }
 
-// Hack needed because testcontainers use of generics confuses Kotlin
+// Hack needed because test containers use of generics confuses Kotlin
 class KGenericContainer(imageName: String) : GenericContainer<KGenericContainer>(imageName)
