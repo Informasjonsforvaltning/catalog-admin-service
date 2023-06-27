@@ -5,6 +5,9 @@ import no.digdir.catalog_admin_service.model.CodeList
 import no.digdir.catalog_admin_service.model.DesignDTO
 import no.digdir.catalog_admin_service.model.DesignDBO
 import no.digdir.catalog_admin_service.model.CodeListToBeCreated
+import no.digdir.catalog_admin_service.model.Field
+import no.digdir.catalog_admin_service.model.FieldLocation
+import no.digdir.catalog_admin_service.model.FieldType
 import no.digdir.catalog_admin_service.model.Logo
 import no.digdir.catalog_admin_service.model.MultiLanguageTexts
 import org.bson.Document
@@ -17,6 +20,8 @@ const val MONGO_DATABASE = "catalogAdminService"
 const val MONGO_CODELIST_COLLECTION = "codeLists"
 const val MONGO_DESIGN_COLLECTION = "design"
 const val MONGO_LOGO_COLLECTION = "logo"
+const val INTERNAL_FIELDS_COLLECTION = "internalFields"
+const val EDITABLE_COLLECTIONS_COLLECTION = "editableFields"
 
 val MONGO_ENV_VALUES: Map<String, String> = ImmutableMap.of(
     "MONGO_INITDB_ROOT_USERNAME", MONGO_USER,
@@ -39,8 +44,22 @@ val LOGO = Logo(
     catalogId = "910244132"
 )
 
+val FIELD_0 = Field(
+    id="field-0",
+    catalogId = "910244132",
+    label = NAME,
+    description = NAME,
+    type = FieldType.CODE_LIST,
+    location = FieldLocation.RIGHT_COLUMN,
+    codeListId = "123"
+)
+
 fun codeListPopulation(): List<Document> =
     listOf(CODE_LIST_0)
+        .map { it.mapDBO() }
+
+fun internalFieldsPopulation(): List<Document> =
+    listOf(FIELD_0)
         .map { it.mapDBO() }
 
 private fun CodeList.mapDBO(): Document =
@@ -50,6 +69,16 @@ private fun CodeList.mapDBO(): Document =
         .append("catalogId", catalogId)
         .append("description", description)
         .append("codes", codes)
+
+private fun Field.mapDBO(): Document =
+    Document()
+        .append("_id", id)
+        .append("catalogId", catalogId)
+        .append("label", label)
+        .append("description", description)
+        .append("type", type)
+        .append("location", location)
+        .append("codeListId", codeListId)
 
 fun designPopulation(): List<Document> =
     listOf(DESIGN_DBO)

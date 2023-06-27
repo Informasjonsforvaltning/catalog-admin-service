@@ -2,9 +2,9 @@ package no.digdir.catalog_admin_service.integration
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.digdir.catalog_admin_service.model.EditableFields
-import no.digdir.catalog_admin_service.model.Fields
+import no.digdir.catalog_admin_service.model.*
 import no.digdir.catalog_admin_service.utils.ApiTestContext
+import no.digdir.catalog_admin_service.utils.FIELD_0
 import no.digdir.catalog_admin_service.utils.apiAuthorizedRequest
 import no.digdir.catalog_admin_service.utils.jwk.Access
 import no.digdir.catalog_admin_service.utils.jwk.JwtToken
@@ -13,10 +13,12 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ContextConfiguration
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 private val mapper = jacksonObjectMapper()
 
@@ -47,7 +49,7 @@ class FieldsTest : ApiTestContext() {
             val writeResult: Fields = mapper.readValue(writeRsp["body"] as String)
             val adminResult: Fields = mapper.readValue(adminRsp["body"] as String)
 
-            val expected = Fields(editable = EditableFields("910244132", null), internal = emptyList())
+            val expected = Fields(editable = EditableFields("910244132", null), internal = listOf(FIELD_0))
             assertEquals(expected, readResult)
             assertEquals(expected, writeResult)
             assertEquals(expected, adminResult)
@@ -101,5 +103,104 @@ class FieldsTest : ApiTestContext() {
             assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
         }
 
+    }
+
+    @Nested
+    internal inner class CreateInternalField {
+        private val path = "/910244132/concepts/fields/internal"
+
+        @Test
+        fun ableToCreateInternalField() {
+            val body = FieldToBeCreated(
+                MultiLanguageTexts(nb = "label", nn = "label", en = "label"),
+                MultiLanguageTexts(nb = "description", nn = "description", en = "description"),
+                FieldType.BOOLEAN,
+                null,
+                null
+            )
+            val response = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.ORG_ADMIN).toString(), HttpMethod.POST)
+
+            assertEquals(HttpStatus.OK.value(), response["status"])
+
+            val responseHeaders: HttpHeaders = response["header"] as HttpHeaders
+            val location = responseHeaders.location
+            assertNotNull(location)
+
+            val getResponse = apiAuthorizedRequest(location.toString(), port, null, JwtToken(Access.ORG_READ).toString(), HttpMethod.GET)
+            assertEquals(HttpStatus.OK.value(), getResponse["status"])
+            val result: Field = mapper.readValue(getResponse["body"] as String)
+            val expected = Field(
+                id = result.id,
+                catalogId = "910244132",
+                label = MultiLanguageTexts(nb = "label", nn = "label", en = "label"),
+                description = MultiLanguageTexts(nb = "description", nn = "description", en = "description"),
+                type = FieldType.BOOLEAN,
+                location = FieldLocation.MAIN_COLUMN,
+                codeListId = null
+            )
+            assertEquals(expected, result)
+        }
+
+        @Test
+        fun forbiddenForWrongOrgAndNonAdminRoles() {
+            val body = FieldToBeCreated(MultiLanguageTexts(nb = "Test", nn = "Test", en = "Test"), null, null, null, null)
+            val readRole = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.ORG_READ).toString(), HttpMethod.POST)
+            val writeRole = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.ORG_WRITE).toString(), HttpMethod.POST)
+            val wrongOrg = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.WRONG_ORG_ADMIN).toString(), HttpMethod.POST)
+
+            assertEquals(HttpStatus.FORBIDDEN.value(), readRole["status"])
+            assertEquals(HttpStatus.FORBIDDEN.value(), writeRole["status"])
+            assertEquals(HttpStatus.FORBIDDEN.value(), wrongOrg["status"])
+        }
+
+        @Test
+        fun unauthorizedWhenMissingToken() {
+            val body = FieldToBeCreated(MultiLanguageTexts(nb = "Test", nn = "Test", en = "Test"), null, null, null, null)
+            val response = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), null, HttpMethod.POST)
+            assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
+        }
+
+    }
+
+    @Nested
+    internal inner class GetInternalField {
+        private val path = "/910244132/concepts/fields/internal/field-0"
+
+        @Test
+        fun ableToGetFieldForAllOrgRoles() {
+            val readRsp = apiAuthorizedRequest(path, port, null, JwtToken(Access.ORG_READ).toString(), HttpMethod.GET)
+            val writeRsp = apiAuthorizedRequest(path, port, null, JwtToken(Access.ORG_WRITE).toString(), HttpMethod.GET)
+            val adminRsp = apiAuthorizedRequest(path, port, null, JwtToken(Access.ORG_ADMIN).toString(), HttpMethod.GET)
+
+            assertEquals(HttpStatus.OK.value(), readRsp["status"])
+            assertEquals(HttpStatus.OK.value(), writeRsp["status"])
+            assertEquals(HttpStatus.OK.value(), adminRsp["status"])
+
+            val readResult: Field = mapper.readValue(readRsp["body"] as String)
+            val writeResult: Field = mapper.readValue(writeRsp["body"] as String)
+            val adminResult: Field = mapper.readValue(adminRsp["body"] as String)
+
+            assertEquals(FIELD_0, readResult)
+            assertEquals(FIELD_0, writeResult)
+            assertEquals(FIELD_0, adminResult)
+        }
+
+        @Test
+        fun forbiddenForWrongOrg() {
+            val response = apiAuthorizedRequest(path, port, null, JwtToken(Access.WRONG_ORG_ADMIN).toString(), HttpMethod.GET)
+            assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
+        }
+
+        @Test
+        fun unauthorizedWhenMissingToken() {
+            val response = apiAuthorizedRequest(path, port, null, null, HttpMethod.GET)
+            assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
+        }
+
+        @Test
+        fun notFoundForWrongId() {
+            val response = apiAuthorizedRequest("/910244132/concepts/fields/internal/invalid", port, null, JwtToken(Access.ORG_ADMIN).toString(), HttpMethod.GET)
+            assertEquals(HttpStatus.NOT_FOUND.value(), response["status"])
+        }
     }
 }

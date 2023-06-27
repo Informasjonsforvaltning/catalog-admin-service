@@ -6,5 +6,6 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface InternalFieldsRepository : MongoRepository<Field, String> {
-    fun findFieldsByCatalogId(catalogId: String): List<Field>
+    fun findByCatalogId(catalogId: String): List<Field>
+    fun findByIdAndCatalogId(id: String, catalogId: String): Field?
 }

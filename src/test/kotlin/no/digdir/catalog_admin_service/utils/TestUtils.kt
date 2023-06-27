@@ -7,9 +7,11 @@ import com.mongodb.client.MongoClients
 import no.digdir.catalog_admin_service.utils.ApiTestContext.Companion.mongoContainer
 import org.bson.codecs.configuration.CodecRegistries
 import org.bson.codecs.pojo.PojoCodecProvider
+import java.io.BufferedReader
+import java.io.File
+import java.net.HttpURLConnection
+import java.net.URL
 import org.springframework.core.io.ClassPathResource
-import org.springframework.core.io.FileSystemResource
-import org.springframework.core.io.Resource
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -20,10 +22,6 @@ import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
-import java.io.BufferedReader
-import java.io.File
-import java.net.HttpURLConnection
-import java.net.URL
 
 
 fun apiGet(port: Int, endpoint: String, acceptHeader: String?): Map<String, Any> {
@@ -75,13 +73,13 @@ fun apiAuthorizedRequest(
         val response = request.exchange(url, httpMethod, entity, String::class.java)
         mapOf(
             "body" to response.body,
-            "header" to response.headers.toString(),
+            "header" to response.headers,
             "status" to response.statusCode.value()
         )
 
     } catch (e: HttpClientErrorException) {
         mapOf(
-            "status" to e.rawStatusCode,
+            "status" to e.statusCode.value(),
             "header" to " ",
             "body" to e.toString()
         )
@@ -112,13 +110,13 @@ fun apiAuthorizedMultipartLogo(
         val response = request.exchange(url, HttpMethod.POST, entity, String::class.java)
         mapOf(
             "body" to response.body,
-            "header" to response.headers.toString(),
+            "header" to response.headers,
             "status" to response.statusCode.value()
         )
 
     } catch (e: HttpClientErrorException) {
         mapOf(
-            "status" to e.rawStatusCode,
+            "status" to e.statusCode.value(),
             "header" to " ",
             "body" to e.toString()
         )
@@ -162,6 +160,13 @@ fun resetDB() {
     val logoCollection = mongoDatabase.getCollection(MONGO_LOGO_COLLECTION)
     logoCollection.deleteMany(org.bson.Document())
     logoCollection.insertMany(logoPopulation())
+
+    val internalCollection = mongoDatabase.getCollection(INTERNAL_FIELDS_COLLECTION)
+    internalCollection.deleteMany(org.bson.Document())
+    internalCollection.insertMany(internalFieldsPopulation())
+
+    val editableCollection = mongoDatabase.getCollection(EDITABLE_COLLECTIONS_COLLECTION)
+    editableCollection.deleteMany(org.bson.Document())
 
     client.close()
 }
