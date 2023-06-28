@@ -203,4 +203,41 @@ class FieldsTest : ApiTestContext() {
             assertEquals(HttpStatus.NOT_FOUND.value(), response["status"])
         }
     }
+
+    @Nested
+    internal inner class DeleteInternalField {
+        private val path = "/910244132/concepts/fields/internal/field-0"
+
+        @Test
+        fun adminIsAbleToDeleteField() {
+            val deleteResponse = apiAuthorizedRequest(path, port, null, JwtToken(Access.ORG_ADMIN).toString(), HttpMethod.DELETE)
+            assertEquals(HttpStatus.NO_CONTENT.value(), deleteResponse["status"])
+
+            val getResponse = apiAuthorizedRequest(path, port, null, JwtToken(Access.ORG_ADMIN).toString(), HttpMethod.GET)
+            assertEquals(HttpStatus.NOT_FOUND.value(), getResponse["status"])
+        }
+
+        @Test
+        fun forbiddenForWrongOrgAndNonAdminRoles() {
+            val wrongOrg = apiAuthorizedRequest(path, port, null, JwtToken(Access.WRONG_ORG_ADMIN).toString(), HttpMethod.DELETE)
+            val readRole = apiAuthorizedRequest(path, port, null, JwtToken(Access.ORG_READ).toString(), HttpMethod.DELETE)
+            val writeRole = apiAuthorizedRequest(path, port, null, JwtToken(Access.ORG_WRITE).toString(), HttpMethod.DELETE)
+
+            assertEquals(HttpStatus.FORBIDDEN.value(), wrongOrg["status"])
+            assertEquals(HttpStatus.FORBIDDEN.value(), readRole["status"])
+            assertEquals(HttpStatus.FORBIDDEN.value(), writeRole["status"])
+        }
+
+        @Test
+        fun unauthorizedWhenMissingToken() {
+            val response = apiAuthorizedRequest(path, port, null, null, HttpMethod.DELETE)
+            assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
+        }
+
+        @Test
+        fun notFoundForWrongId() {
+            val response = apiAuthorizedRequest("/910244132/concepts/fields/internal/invalid", port, null, JwtToken(Access.ORG_ADMIN).toString(), HttpMethod.DELETE)
+            assertEquals(HttpStatus.NOT_FOUND.value(), response["status"])
+        }
+    }
 }

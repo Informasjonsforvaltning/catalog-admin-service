@@ -4,7 +4,9 @@ import no.digdir.catalog_admin_service.model.*
 import no.digdir.catalog_admin_service.repository.EditableFieldsRepository
 import no.digdir.catalog_admin_service.repository.InternalFieldsRepository
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
 import java.util.*
 
 @Service
@@ -43,5 +45,10 @@ class FieldsService(
 
     fun getInternalField(fieldId: String, catalogId: String): Field? =
         internalFieldsRepository.findByIdAndCatalogId(fieldId, catalogId)
+
+    fun deleteInternalField(fieldId: String, catalogId: String): Unit =
+        internalFieldsRepository.findByIdAndCatalogId(fieldId, catalogId)
+            ?.run { internalFieldsRepository.delete(this) }
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
 
 }
