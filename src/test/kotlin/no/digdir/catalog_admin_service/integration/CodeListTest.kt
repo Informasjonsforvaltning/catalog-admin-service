@@ -426,5 +426,19 @@ class CodeListTest : ApiTestContext() {
 
             assertEquals(HttpStatus.BAD_REQUEST.value(), response["status"])
         }
+
+        @Test
+        fun badRequestWhenUpdatingCatalogId() {
+            val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, path = "/catalogId", value = "1234"))
+            val response = apiAuthorizedRequest(
+                "/910244132/concepts/code-lists/123",
+                port,
+                mapper.writeValueAsString(operations),
+                JwtToken(Access.ORG_ADMIN).toString(),
+                HttpMethod.PATCH
+            )
+
+            assertEquals(HttpStatus.BAD_REQUEST.value(), response["status"])
+        }
     }
 }
