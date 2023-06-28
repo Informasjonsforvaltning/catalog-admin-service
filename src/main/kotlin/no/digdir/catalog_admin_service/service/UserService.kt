@@ -43,32 +43,8 @@ class UserService(private val userRepository: UserRepository) {
         ).let { userRepository.insert(it) }
 
 
-    fun updateUser(userId: String, catalogId: String, operations: List<JsonPatchOperation>): User? {
-        val patched = userRepository.findUserByUserIdAndCatalogId(userId, catalogId)
-            ?.let { dbUser ->
-                try {
-                    patchUser(dbUser, operations)
-                } catch (ex: Exception) {
-                    logger.error("PATCH failed for $userId", ex)
-                    when (ex) {
-                        is JsonException -> throw ResponseStatusException(HttpStatus.BAD_REQUEST, ex.message)
-                        is JsonProcessingException -> throw ResponseStatusException(HttpStatus.BAD_REQUEST, ex.message)
-                        is IllegalArgumentException -> throw ResponseStatusException(HttpStatus.BAD_REQUEST, ex.message)
-                        else -> throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, ex.message)
-                    }
-                }
-            }
-
-        when {
-            patched != null && patched.userId != userId -> throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST, "Unable to patch ID"
-            )
-
-            patched != null && patched.catalogId != catalogId -> throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST, "Unable to patch catalogID"
-            )
-        }
-
-        return patched?.let { userRepository.save(it) }
-    }
+    fun updateUser(userId: String, catalogId: String, operations: List<JsonPatchOperation>): User? =
+        userRepository.findUserByUserIdAndCatalogId(userId, catalogId)
+            ?.let { dbUser -> patchOriginal(dbUser, operations) }
+            ?.let { userRepository.save(it) }
 }

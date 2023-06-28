@@ -18,10 +18,12 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ContextConfiguration
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 
 private val mapper = jacksonObjectMapper()
@@ -163,6 +165,7 @@ class UserTest : ApiTestContext() {
         )
         assertEquals(HttpStatus.FORBIDDEN.value(), preResponse["status"])
     }
+
     @Test
     fun deleteUserReadOnly() {
         val path = "$path/123"
@@ -191,232 +194,211 @@ class UserTest : ApiTestContext() {
 
     @Test
     fun createUser() {
-        val path = path
 
-        val before = apiAuthorizedRequest(
-            path,
-            port,
-            null,
-            JwtToken(Access.ORG_ADMIN).toString(),
-            HttpMethod.GET
-        )
-        assertEquals(HttpStatus.OK.value(), before["status"])
-
-        val createResponse = apiAuthorizedRequest(
+        val response = apiAuthorizedRequest(
             path,
             port,
             mapper.writeValueAsString(USER_TO_BE_CREATED),
             JwtToken(Access.ORG_ADMIN).toString(),
             HttpMethod.POST
         )
-        assertEquals(HttpStatus.CREATED.value(), createResponse["status"])
+        val responseHeaders: HttpHeaders = response["header"] as HttpHeaders
+        val location = responseHeaders.location
+        assertNotNull(location)
 
-        val after = apiAuthorizedRequest(
-            path,
-            port,
-            null,
-            JwtToken(Access.ORG_ADMIN).toString(),
-            HttpMethod.GET
+        val getResponse =
+            apiAuthorizedRequest(location.toString(), port, null, JwtToken(Access.ORG_READ).toString(), HttpMethod.GET)
+        assertEquals(HttpStatus.OK.value(), getResponse["status"])
+        val result: User = mapper.readValue(getResponse["body"] as String)
+        val expected = User(
+            name = result.name,
+            telephoneNumber = result.telephoneNumber,
+            userId = result.userId,
+            catalogId = result.catalogId,
+            email = result.email
         )
-        assertEquals(HttpStatus.OK.value(), after["status"])
-
-        val beforeList: Users = mapper.readValue(before["body"] as String)
-        val afterList: Users = mapper.readValue(after["body"] as String)
-        assertEquals(beforeList.users.size + 1, afterList.users.size)
+        assertEquals(expected, result)
     }
 
-    @Nested
-    internal inner class Update {
 
-        @Test
-        fun updateUserUnauthorizedWhenMissingJwt() {
-            val response = apiGet(port, path, null)
-            assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
-        }
+@Nested
+internal inner class Update {
 
-        @Test
-        fun updateUserForbiddenForReadOnly() {
-            val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, "/name", "Updated name"))
-            val response = apiAuthorizedRequest(
-                "$path/123",
-                port,
-                mapper.writeValueAsString(operations),
-                JwtToken(Access.ORG_READ).toString(),
-                HttpMethod.PATCH
-            )
-            assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
-        }
-
-        @Test
-        fun updateUserForbiddenForWrongOrg() {
-            val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, "/name", "Updated name"))
-            val response = apiAuthorizedRequest(
-                "$path/123",
-                port,
-                mapper.writeValueAsString(operations),
-                JwtToken(Access.WRONG_ORG_ADMIN).toString(),
-                HttpMethod.PATCH
-            )
-            assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
-        }
-
-        @Test
-        fun updateUser() {
-            val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, "/name", "Updated name"))
-            val response = apiAuthorizedRequest(
-                "$path/123",
-                port,
-                mapper.writeValueAsString(operations),
-                JwtToken(Access.ORG_ADMIN).toString(),
-                HttpMethod.PATCH
-            )
-
-            assertEquals(HttpStatus.OK.value(), response["status"])
-
-            val result: User = mapper.readValue(response["body"] as String)
-            assertEquals(
-                USER.copy(
-                    name = "Updated name"
-                ), result
-            )
-        }
-
-        @Test
-        fun addNewEmailToUser() {
-            val operations = listOf(JsonPatchOperation(op = OpEnum.ADD, "/email", "new@mail.com"))
-            val response = apiAuthorizedRequest(
-                "$path/123",
-                port,
-                mapper.writeValueAsString(operations),
-                JwtToken(Access.ORG_ADMIN).toString(),
-                HttpMethod.PATCH
-            )
-            assertEquals(HttpStatus.OK.value(), response["status"])
-
-            val result: User = mapper.readValue(response["body"] as String)
-            assertEquals(
-                USER.copy(
-                    email = "new@mail.com"
-                ), result
-            )
-
-        }
-
-        @Test
-        fun updateUserNotFound() {
-            val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, "/email", "mail@mail.com"))
-            val response = apiAuthorizedRequest(
-                "$path/xxx",
-                port,
-                mapper.writeValueAsString(operations),
-                JwtToken(Access.ORG_ADMIN).toString(),
-                HttpMethod.PATCH
-            )
-            assertEquals(HttpStatus.NOT_FOUND.value(), response["status"])
-        }
-
-        @Test
-        fun updateUserWithCopy() {
-            val operations = listOf(JsonPatchOperation(op = OpEnum.COPY, path = "/name", from = "/email"))
-            val response = apiAuthorizedRequest(
-                "$path/123",
-                port,
-                mapper.writeValueAsString(operations),
-                JwtToken(Access.ORG_ADMIN).toString(),
-                HttpMethod.PATCH
-            )
-            assertEquals(HttpStatus.OK.value(), response["status"])
-
-            val result: User = mapper.readValue(response["body"] as String)
-            assertEquals(result.name, result.name)
-            assertEquals(
-                USER.copy(
-                    name = "test@mail.com"
-                ), result
-            )
-        }
-
-        @Test
-        fun updateUserRemove() {
-            val operations = listOf(JsonPatchOperation(op = OpEnum.REMOVE, path = "/telephoneNumber"))
-            val response = apiAuthorizedRequest(
-                "$path/123",
-                port,
-                mapper.writeValueAsString(operations),
-                JwtToken(Access.ORG_ADMIN).toString(),
-                HttpMethod.PATCH
-            )
-            assertEquals(HttpStatus.OK.value(), response["status"])
-
-            val result: User = mapper.readValue(response["body"] as String)
-            assertEquals(
-                USER.copy(
-                    telephoneNumber = null
-                ), result
-            )
-        }
-
-        @Test
-        fun cannotRemoveRequiredValue() {
-            val operations = listOf(JsonPatchOperation(op = OpEnum.REMOVE, path = "name"))
-            val response = apiAuthorizedRequest(
-                "$path/123",
-                port,
-                mapper.writeValueAsString(operations),
-                JwtToken(Access.ORG_ADMIN).toString(),
-                HttpMethod.PATCH
-            )
-            assertEquals(HttpStatus.BAD_REQUEST.value(), response["status"])
-        }
-
-        @Test
-        fun updateUserMove() {
-            val operations = listOf(JsonPatchOperation(op = OpEnum.MOVE, path = "/name", from = "/email"))
-            val response = apiAuthorizedRequest(
-                "$path/123",
-                port,
-                mapper.writeValueAsString(operations),
-                JwtToken(Access.ORG_ADMIN).toString(),
-                HttpMethod.PATCH
-            )
-
-            assertEquals(HttpStatus.OK.value(), response["status"])
-
-            val result: User = mapper.readValue(response["body"] as String)
-            assertEquals(
-                USER.copy(
-                    name = "test@mail.com",
-                    email = null,
-                ), result
-            )
-        }
-
-        /*@Test
-        fun badRequestWhenInvalidValue() {
-            val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, path = "/codes", value = "1234"))
-            val response = apiAuthorizedRequest(
-                "$path/123",
-                port,
-                mapper.writeValueAsString(operations),
-                JwtToken(Access.ORG_ADMIN).toString(),
-                HttpMethod.PATCH
-            )
-
-            assertEquals(HttpStatus.BAD_REQUEST.value(), response["status"])
-        }*/
-
-        @Test
-        fun badRequestWhenUpdatingId() {
-            val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, path = "/userId", value = "1111"))
-            val response = apiAuthorizedRequest(
-                "$path/123",
-                port,
-                mapper.writeValueAsString(operations),
-                JwtToken(Access.ORG_ADMIN).toString(),
-                HttpMethod.PATCH
-            )
-
-            assertEquals(HttpStatus.BAD_REQUEST.value(), response["status"])
-        }
+    @Test
+    fun updateUserUnauthorizedWhenMissingJwt() {
+        val response = apiGet(port, path, null)
+        assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
     }
+
+    @Test
+    fun updateUserForbiddenForReadOnly() {
+        val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, "/name", "Updated name"))
+        val response = apiAuthorizedRequest(
+            "$path/123",
+            port,
+            mapper.writeValueAsString(operations),
+            JwtToken(Access.ORG_READ).toString(),
+            HttpMethod.PATCH
+        )
+        assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
+    }
+
+    @Test
+    fun updateUserForbiddenForWrongOrg() {
+        val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, "/name", "Updated name"))
+        val response = apiAuthorizedRequest(
+            "$path/123",
+            port,
+            mapper.writeValueAsString(operations),
+            JwtToken(Access.WRONG_ORG_ADMIN).toString(),
+            HttpMethod.PATCH
+        )
+        assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
+    }
+
+    @Test
+    fun updateUser() {
+        val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, "/name", "Updated name"))
+        val response = apiAuthorizedRequest(
+            "$path/123",
+            port,
+            mapper.writeValueAsString(operations),
+            JwtToken(Access.ORG_ADMIN).toString(),
+            HttpMethod.PATCH
+        )
+
+        assertEquals(HttpStatus.OK.value(), response["status"])
+
+        val result: User = mapper.readValue(response["body"] as String)
+        assertEquals(
+            USER.copy(
+                name = "Updated name"
+            ), result
+        )
+    }
+
+    @Test
+    fun addNewEmailToUser() {
+        val operations = listOf(JsonPatchOperation(op = OpEnum.ADD, "/email", "new@mail.com"))
+        val response = apiAuthorizedRequest(
+            "$path/123",
+            port,
+            mapper.writeValueAsString(operations),
+            JwtToken(Access.ORG_ADMIN).toString(),
+            HttpMethod.PATCH
+        )
+        assertEquals(HttpStatus.OK.value(), response["status"])
+
+        val result: User = mapper.readValue(response["body"] as String)
+        assertEquals(
+            USER.copy(
+                email = "new@mail.com"
+            ), result
+        )
+
+    }
+
+    @Test
+    fun updateUserNotFound() {
+        val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, "/email", "mail@mail.com"))
+        val response = apiAuthorizedRequest(
+            "$path/xxx",
+            port,
+            mapper.writeValueAsString(operations),
+            JwtToken(Access.ORG_ADMIN).toString(),
+            HttpMethod.PATCH
+        )
+        assertEquals(HttpStatus.NOT_FOUND.value(), response["status"])
+    }
+
+    @Test
+    fun updateUserWithCopy() {
+        val operations = listOf(JsonPatchOperation(op = OpEnum.COPY, path = "/name", from = "/email"))
+        val response = apiAuthorizedRequest(
+            "$path/123",
+            port,
+            mapper.writeValueAsString(operations),
+            JwtToken(Access.ORG_ADMIN).toString(),
+            HttpMethod.PATCH
+        )
+        assertEquals(HttpStatus.OK.value(), response["status"])
+
+        val result: User = mapper.readValue(response["body"] as String)
+        assertEquals(result.name, result.name)
+        assertEquals(
+            USER.copy(
+                name = "test@mail.com"
+            ), result
+        )
+    }
+
+    @Test
+    fun updateUserRemove() {
+        val operations = listOf(JsonPatchOperation(op = OpEnum.REMOVE, path = "/telephoneNumber"))
+        val response = apiAuthorizedRequest(
+            "$path/123",
+            port,
+            mapper.writeValueAsString(operations),
+            JwtToken(Access.ORG_ADMIN).toString(),
+            HttpMethod.PATCH
+        )
+        assertEquals(HttpStatus.OK.value(), response["status"])
+
+        val result: User = mapper.readValue(response["body"] as String)
+        assertEquals(
+            USER.copy(
+                telephoneNumber = null
+            ), result
+        )
+    }
+
+    @Test
+    fun cannotRemoveRequiredValue() {
+        val operations = listOf(JsonPatchOperation(op = OpEnum.REMOVE, path = "name"))
+        val response = apiAuthorizedRequest(
+            "$path/123",
+            port,
+            mapper.writeValueAsString(operations),
+            JwtToken(Access.ORG_ADMIN).toString(),
+            HttpMethod.PATCH
+        )
+        assertEquals(HttpStatus.BAD_REQUEST.value(), response["status"])
+    }
+
+    @Test
+    fun updateUserMove() {
+        val operations = listOf(JsonPatchOperation(op = OpEnum.MOVE, path = "/name", from = "/email"))
+        val response = apiAuthorizedRequest(
+            "$path/123",
+            port,
+            mapper.writeValueAsString(operations),
+            JwtToken(Access.ORG_ADMIN).toString(),
+            HttpMethod.PATCH
+        )
+
+        assertEquals(HttpStatus.OK.value(), response["status"])
+
+        val result: User = mapper.readValue(response["body"] as String)
+        assertEquals(
+            USER.copy(
+                name = "test@mail.com",
+                email = null,
+            ), result
+        )
+    }
+
+    @Test
+    fun badRequestWhenUpdatingId() {
+        val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, path = "/userId", value = "1111"))
+        val response = apiAuthorizedRequest(
+            "$path/123",
+            port,
+            mapper.writeValueAsString(operations),
+            JwtToken(Access.ORG_ADMIN).toString(),
+            HttpMethod.PATCH
+        )
+
+        assertEquals(HttpStatus.BAD_REQUEST.value(), response["status"])
+    }
+}
 }

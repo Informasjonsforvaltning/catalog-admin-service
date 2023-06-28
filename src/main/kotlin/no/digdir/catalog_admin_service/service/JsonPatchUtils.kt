@@ -19,6 +19,10 @@ inline fun <reified T> patchOriginal(original: T, operations: List<JsonPatchOper
         operations.find { patch -> patch.path == "/catalogId" } != null -> throw ResponseStatusException(
             HttpStatus.BAD_REQUEST, "Unable to patch catalogID"
         )
+
+        operations.find { patch -> patch.path == "/userId" } != null -> throw ResponseStatusException(
+            HttpStatus.BAD_REQUEST, "Unable to patch userId"
+        )
     }
 
     try {
