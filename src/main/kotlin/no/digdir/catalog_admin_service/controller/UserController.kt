@@ -103,6 +103,6 @@ open class UserController(
 
 private fun locationHeaderForCreated(newId: String, catalogId: String): HttpHeaders =
     HttpHeaders().apply {
-        add(HttpHeaders.LOCATION, "/$catalogId/general/user-list$newId")
+        add(HttpHeaders.LOCATION, "/$catalogId/general/user-list/$newId")
         add(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.LOCATION)
     }
