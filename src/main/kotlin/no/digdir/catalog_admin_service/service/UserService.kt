@@ -42,18 +42,6 @@ class UserService(private val userRepository: UserRepository) {
             telephoneNumber = data.telephoneNumber
         ).let { userRepository.insert(it) }
 
-    private fun patchUser(user: User, operations: List<JsonPatchOperation>): User {
-        if (operations.isNotEmpty()) {
-            with(mapper) {
-                val changes = Json.createReader(StringReader(writeValueAsString(operations))).readArray()
-                val original = Json.createReader(StringReader(writeValueAsString(user))).readObject()
-
-                return Json.createPatch(changes).apply(original)
-                    .let { readValue(it.toString()) }
-            }
-        }
-        return user
-    }
 
     fun updateUser(userId: String, catalogId: String, operations: List<JsonPatchOperation>): User? {
         val patched = userRepository.findUserByUserIdAndCatalogId(userId, catalogId)
