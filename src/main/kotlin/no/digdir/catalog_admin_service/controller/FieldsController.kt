@@ -1,9 +1,11 @@
 package no.digdir.catalog_admin_service.controller
 
+import no.digdir.catalog_admin_service.model.CodeList
 import no.digdir.catalog_admin_service.model.EditableFields
 import no.digdir.catalog_admin_service.model.Field
 import no.digdir.catalog_admin_service.model.FieldToBeCreated
 import no.digdir.catalog_admin_service.model.Fields
+import no.digdir.catalog_admin_service.model.JsonPatchOperation
 import no.digdir.catalog_admin_service.security.EndpointPermissions
 import no.digdir.catalog_admin_service.service.FieldsService
 import org.springframework.http.HttpHeaders
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -89,6 +92,21 @@ class FieldsController(
         if (endpointPermissions.hasOrgAdminPermission(jwt, catalogId)) {
             fieldsService.deleteInternalField(fieldId, catalogId)
             ResponseEntity(HttpStatus.NO_CONTENT)
+        } else {
+            ResponseEntity(HttpStatus.FORBIDDEN)
+        }
+
+    @PatchMapping(value = ["/internal/{fieldId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun patchInternalField(
+        @AuthenticationPrincipal jwt: Jwt,
+        @PathVariable catalogId: String,
+        @PathVariable fieldId: String,
+        @RequestBody patchOperations: List<JsonPatchOperation>
+    ): ResponseEntity<Field> =
+        if (endpointPermissions.hasOrgAdminPermission(jwt, catalogId)) {
+            fieldsService.updateInternalField(fieldId, catalogId, patchOperations)
+                ?.let { ResponseEntity(it, HttpStatus.OK) }
+                ?: ResponseEntity(HttpStatus.NOT_FOUND)
         } else {
             ResponseEntity(HttpStatus.FORBIDDEN)
         }

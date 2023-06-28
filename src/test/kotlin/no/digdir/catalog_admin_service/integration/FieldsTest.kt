@@ -240,4 +240,45 @@ class FieldsTest : ApiTestContext() {
             assertEquals(HttpStatus.NOT_FOUND.value(), response["status"])
         }
     }
+
+    @Nested
+    internal inner class UpdateInternalField {
+        private val path = "/910244132/concepts/fields/internal/field-0"
+
+        @Test
+        fun adminIsAbleToUpdateField() {
+            val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, "/description/nn", "New description"))
+            val response = apiAuthorizedRequest(path, port, mapper.writeValueAsString(operations), JwtToken(Access.ORG_ADMIN).toString(), HttpMethod.PATCH)
+            assertEquals(HttpStatus.OK.value(), response["status"])
+
+            val result: Field = mapper.readValue(response["body"] as String)
+            assertEquals(FIELD_0.copy(description = FIELD_0.description.copy(nn = "New description")), result)
+        }
+
+        @Test
+        fun forbiddenForWrongOrgAndNonAdminRoles() {
+            val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, "/description/nn", "New description"))
+            val wrongOrg = apiAuthorizedRequest(path, port, mapper.writeValueAsString(operations), JwtToken(Access.WRONG_ORG_ADMIN).toString(), HttpMethod.PATCH)
+            val readRole = apiAuthorizedRequest(path, port, mapper.writeValueAsString(operations), JwtToken(Access.ORG_READ).toString(), HttpMethod.PATCH)
+            val writeRole = apiAuthorizedRequest(path, port, mapper.writeValueAsString(operations), JwtToken(Access.ORG_WRITE).toString(), HttpMethod.PATCH)
+
+            assertEquals(HttpStatus.FORBIDDEN.value(), wrongOrg["status"])
+            assertEquals(HttpStatus.FORBIDDEN.value(), readRole["status"])
+            assertEquals(HttpStatus.FORBIDDEN.value(), writeRole["status"])
+        }
+
+        @Test
+        fun unauthorizedWhenMissingToken() {
+            val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, "/description/nn", "New description"))
+            val response = apiAuthorizedRequest(path, port, mapper.writeValueAsString(operations), null, HttpMethod.DELETE)
+            assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
+        }
+
+        @Test
+        fun notFoundForWrongId() {
+            val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, "/description/nn", "New description"))
+            val response = apiAuthorizedRequest("/910244132/concepts/fields/internal/invalid", port, mapper.writeValueAsString(operations), JwtToken(Access.ORG_ADMIN).toString(), HttpMethod.DELETE)
+            assertEquals(HttpStatus.NOT_FOUND.value(), response["status"])
+        }
+    }
 }

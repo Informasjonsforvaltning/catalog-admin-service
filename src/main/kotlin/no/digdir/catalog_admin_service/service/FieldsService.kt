@@ -51,4 +51,9 @@ class FieldsService(
             ?.run { internalFieldsRepository.delete(this) }
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
 
+    fun updateInternalField(fieldId: String, catalogId: String, operations: List<JsonPatchOperation>): Field? =
+        internalFieldsRepository.findByIdAndCatalogId(fieldId, catalogId)
+            ?.let { dbField -> patchOriginal(dbField, operations) }
+            ?.let { internalFieldsRepository.save(it) }
+
 }
