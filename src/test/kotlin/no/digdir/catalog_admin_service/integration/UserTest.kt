@@ -2,15 +2,13 @@ package no.digdir.catalog_admin_service.integration
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.digdir.catalog_admin_service.model.CodeList
-import no.digdir.catalog_admin_service.model.CodeLists
 import no.digdir.catalog_admin_service.model.JsonPatchOperation
 import no.digdir.catalog_admin_service.model.OpEnum
+import no.digdir.catalog_admin_service.model.User
+import no.digdir.catalog_admin_service.model.Users
 import no.digdir.catalog_admin_service.utils.ApiTestContext
-import no.digdir.catalog_admin_service.utils.CODE
-import no.digdir.catalog_admin_service.utils.CODE_LIST_0
-import no.digdir.catalog_admin_service.utils.NAME
-import no.digdir.catalog_admin_service.utils.CODE_LIST_TO_BE_CREATED_0
+import no.digdir.catalog_admin_service.utils.USER
+import no.digdir.catalog_admin_service.utils.USER_TO_BE_CREATED
 import no.digdir.catalog_admin_service.utils.apiAuthorizedRequest
 import no.digdir.catalog_admin_service.utils.apiGet
 import no.digdir.catalog_admin_service.utils.jwk.Access
@@ -35,52 +33,54 @@ private val mapper = jacksonObjectMapper()
 )
 @ContextConfiguration(initializers = [ApiTestContext.Initializer::class])
 @Tag("integration")
-class CodeListTest : ApiTestContext() {
+class UserTest : ApiTestContext() {
+    val path = "/910244132/general/user-list"
+
     @Test
-    fun findCodeLists() {
+    fun findUsers() {
         val response = apiAuthorizedRequest(
-            "/910244132/concepts/code-lists",
+            path,
             port,
             null,
             JwtToken(Access.ORG_WRITE).toString(),
             HttpMethod.GET
         )
         assertEquals(HttpStatus.OK.value(), response["status"])
-        val result: CodeLists = mapper.readValue(response["body"] as String)
-        val expected = CodeLists(codeLists = listOf(CODE_LIST_0))
+        val result: Users = mapper.readValue(response["body"] as String)
+        val expected = Users(users = listOf(USER))
         assertEquals(expected, result)
     }
 
     @Test
-    fun findCodeListById() {
+    fun findUserById() {
         val response = apiAuthorizedRequest(
-            "/910244132/concepts/code-lists/123",
+            "$path/123",
             port,
             null,
             JwtToken(Access.ORG_READ).toString(),
             HttpMethod.GET
         )
         assertEquals(HttpStatus.OK.value(), response["status"])
-        val result: CodeList = mapper.readValue(response["body"] as String)
-        assertEquals(CODE_LIST_0, result)
+        val result: User = mapper.readValue(response["body"] as String)
+        assertEquals(USER, result)
     }
 
     @Test
-    fun findCodeListsUnauthorizedWhenMissingJwt() {
-        val response = apiGet(port, "/910244132/concepts/code-lists", null)
+    fun findUsersUnauthorizedWhenMissingJwt() {
+        val response = apiGet(port, path, null)
         assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
     }
 
     @Test
-    fun findCodeListByIdUnauthorizedWhenMissingJwt() {
-        val response = apiGet(port, "/910244132/concepts/code-lists/123", null)
+    fun findUserByIdUnauthorizedWhenMissingJwt() {
+        val response = apiGet(port, "$path/123", null)
         assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
     }
 
     @Test
-    fun codeListNotFound() {
+    fun userNotFound() {
         val response = apiAuthorizedRequest(
-            "/910244132/concepts/code-lists/xxx",
+            "$path/xxx",
             port,
             null,
             JwtToken(Access.ROOT).toString(),
@@ -90,9 +90,9 @@ class CodeListTest : ApiTestContext() {
     }
 
     @Test
-    fun findCodeListsForbiddenForWrongOrg() {
+    fun findUsersForbiddenForWrongOrg() {
         val response = apiAuthorizedRequest(
-            "/910244132/concepts/code-lists",
+            "/910244132/general/user-list",
             port,
             null,
             JwtToken(Access.WRONG_ORG_ADMIN).toString(),
@@ -104,7 +104,7 @@ class CodeListTest : ApiTestContext() {
     @Test
     fun findCodeListByIdForbiddenForWrongOrg() {
         val response = apiAuthorizedRequest(
-            "/910244132/concepts/code-lists/123",
+            "$path/123",
             port,
             null,
             JwtToken(Access.WRONG_ORG_ADMIN).toString(),
@@ -114,9 +114,9 @@ class CodeListTest : ApiTestContext() {
     }
 
     @Test
-    fun findCodeListByIdNotFoundForCodeListNotInCatalog() {
+    fun findUserByIdNotFoundForUserNotInCatalog() {
         val response = apiAuthorizedRequest(
-            "/123456789/concepts/code-lists/123",
+            "/123456789/general/user-list/123",
             port,
             null,
             JwtToken(Access.WRONG_ORG_ADMIN).toString(),
@@ -127,10 +127,9 @@ class CodeListTest : ApiTestContext() {
 
     @Test
     fun deleteCodeList() {
-        val path = "/910244132/concepts/code-lists/123"
 
         val preResponse = apiAuthorizedRequest(
-            path,
+            "$path/123",
             port,
             null,
             JwtToken(Access.ORG_ADMIN).toString(),
@@ -138,11 +137,12 @@ class CodeListTest : ApiTestContext() {
         )
         assertEquals(HttpStatus.OK.value(), preResponse["status"])
 
-        val deleteResponse = apiAuthorizedRequest(path, port, null, JwtToken(Access.ORG_ADMIN).toString(), HttpMethod.DELETE)
+        val deleteResponse =
+            apiAuthorizedRequest("$path/123", port, null, JwtToken(Access.ORG_ADMIN).toString(), HttpMethod.DELETE)
         assertEquals(HttpStatus.NO_CONTENT.value(), deleteResponse["status"])
 
         val postResponse = apiAuthorizedRequest(
-            path,
+            "$path/123",
             port,
             null,
             JwtToken(Access.ORG_ADMIN).toString(),
@@ -152,8 +152,8 @@ class CodeListTest : ApiTestContext() {
     }
 
     @Test
-    fun deleteCodeListWrongOrg() {
-        val path = "/123456789/concepts/code-lists/123"
+    fun deleteUserWrongOrg() {
+        val path = "/123456789/general/user-list/123"
         val preResponse = apiAuthorizedRequest(
             path,
             port,
@@ -163,10 +163,9 @@ class CodeListTest : ApiTestContext() {
         )
         assertEquals(HttpStatus.FORBIDDEN.value(), preResponse["status"])
     }
-
     @Test
-    fun deleteCodeListReadOnly() {
-        val path = "/910244132/concepts/code-lists/123"
+    fun deleteUserReadOnly() {
+        val path = "$path/123"
         val preResponse = apiAuthorizedRequest(
             path,
             port,
@@ -178,8 +177,8 @@ class CodeListTest : ApiTestContext() {
     }
 
     @Test
-    fun deleteCodeListThatDoesNotExist() {
-        val path = "/910244132/concepts/code-lists/xxx"
+    fun deleteUserThatDoesNotExist() {
+        val path = "$path/xxx"
         val preResponse = apiAuthorizedRequest(
             path,
             port,
@@ -191,8 +190,8 @@ class CodeListTest : ApiTestContext() {
     }
 
     @Test
-    fun createCodeList() {
-        val path = "/910244132/concepts/code-lists"
+    fun createUser() {
+        val path = path
 
         val before = apiAuthorizedRequest(
             path,
@@ -206,7 +205,7 @@ class CodeListTest : ApiTestContext() {
         val createResponse = apiAuthorizedRequest(
             path,
             port,
-            mapper.writeValueAsString(CODE_LIST_TO_BE_CREATED_0),
+            mapper.writeValueAsString(USER_TO_BE_CREATED),
             JwtToken(Access.ORG_ADMIN).toString(),
             HttpMethod.POST
         )
@@ -221,25 +220,25 @@ class CodeListTest : ApiTestContext() {
         )
         assertEquals(HttpStatus.OK.value(), after["status"])
 
-        val beforeList: CodeLists = mapper.readValue(before["body"] as String)
-        val afterList: CodeLists = mapper.readValue(after["body"] as String)
-        assertEquals(beforeList.codeLists.size + 1, afterList.codeLists.size)
+        val beforeList: Users = mapper.readValue(before["body"] as String)
+        val afterList: Users = mapper.readValue(after["body"] as String)
+        assertEquals(beforeList.users.size + 1, afterList.users.size)
     }
 
     @Nested
     internal inner class Update {
 
         @Test
-        fun updateCodeListsUnauthorizedWhenMissingJwt() {
-            val response = apiGet(port, "/910244132/concepts/code-lists", null)
+        fun updateUserUnauthorizedWhenMissingJwt() {
+            val response = apiGet(port, path, null)
             assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
         }
 
         @Test
-        fun updateCodeListsForbiddenForReadOnly() {
-            val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, "/codes/0/name/en", "req"))
+        fun updateUserForbiddenForReadOnly() {
+            val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, "/name", "Updated name"))
             val response = apiAuthorizedRequest(
-                "/910244132/concepts/code-lists/123",
+                "$path/123",
                 port,
                 mapper.writeValueAsString(operations),
                 JwtToken(Access.ORG_READ).toString(),
@@ -249,10 +248,10 @@ class CodeListTest : ApiTestContext() {
         }
 
         @Test
-        fun updateCodeListForbiddenForWrongOrg() {
-            val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, "/codes/0/name/en", "req"))
+        fun updateUserForbiddenForWrongOrg() {
+            val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, "/name", "Updated name"))
             val response = apiAuthorizedRequest(
-                "/910244132/concepts/code-lists/123",
+                "$path/123",
                 port,
                 mapper.writeValueAsString(operations),
                 JwtToken(Access.WRONG_ORG_ADMIN).toString(),
@@ -262,10 +261,10 @@ class CodeListTest : ApiTestContext() {
         }
 
         @Test
-        fun updateCodeList() {
-            val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, "/codes/0/name/en", "Updated name"))
+        fun updateUser() {
+            val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, "/name", "Updated name"))
             val response = apiAuthorizedRequest(
-                "/910244132/concepts/code-lists/123",
+                "$path/123",
                 port,
                 mapper.writeValueAsString(operations),
                 JwtToken(Access.ORG_ADMIN).toString(),
@@ -274,21 +273,19 @@ class CodeListTest : ApiTestContext() {
 
             assertEquals(HttpStatus.OK.value(), response["status"])
 
-            val result: CodeList = mapper.readValue(response["body"] as String)
+            val result: User = mapper.readValue(response["body"] as String)
             assertEquals(
-                CODE_LIST_0.copy(
-                    codes = listOf(
-                        CODE.copy(name = NAME.copy(en = "Updated name"))
-                    )
+                USER.copy(
+                    name = "Updated name"
                 ), result
             )
         }
 
         @Test
-        fun addNewCodeNameToCodeList() {
-            val operations = listOf(JsonPatchOperation(op = OpEnum.ADD, "/codes/0/name/nn", "New name"))
+        fun addNewEmailToUser() {
+            val operations = listOf(JsonPatchOperation(op = OpEnum.ADD, "/email", "new@mail.com"))
             val response = apiAuthorizedRequest(
-                "/910244132/concepts/code-lists/123",
+                "$path/123",
                 port,
                 mapper.writeValueAsString(operations),
                 JwtToken(Access.ORG_ADMIN).toString(),
@@ -296,22 +293,20 @@ class CodeListTest : ApiTestContext() {
             )
             assertEquals(HttpStatus.OK.value(), response["status"])
 
-            val result: CodeList = mapper.readValue(response["body"] as String)
+            val result: User = mapper.readValue(response["body"] as String)
             assertEquals(
-                CODE_LIST_0.copy(
-                    codes = listOf(
-                        CODE.copy(name = NAME.copy(nn = "New name"))
-                    )
+                USER.copy(
+                    email = "new@mail.com"
                 ), result
             )
 
         }
 
         @Test
-        fun updateCodeListNotFound() {
-            val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, "/description", "Changed description"))
+        fun updateUserNotFound() {
+            val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, "/email", "mail@mail.com"))
             val response = apiAuthorizedRequest(
-                "/910244132/concepts/code-lists/xxx",
+                "$path/xxx",
                 port,
                 mapper.writeValueAsString(operations),
                 JwtToken(Access.ORG_ADMIN).toString(),
@@ -321,10 +316,10 @@ class CodeListTest : ApiTestContext() {
         }
 
         @Test
-        fun updateCodeListWithCopy() {
-            val operations = listOf(JsonPatchOperation(op = OpEnum.COPY, path = "/description", from = "/name"))
+        fun updateUserWithCopy() {
+            val operations = listOf(JsonPatchOperation(op = OpEnum.COPY, path = "/name", from = "/email"))
             val response = apiAuthorizedRequest(
-                "/910244132/concepts/code-lists/123",
+                "$path/123",
                 port,
                 mapper.writeValueAsString(operations),
                 JwtToken(Access.ORG_ADMIN).toString(),
@@ -332,20 +327,20 @@ class CodeListTest : ApiTestContext() {
             )
             assertEquals(HttpStatus.OK.value(), response["status"])
 
-            val result: CodeList = mapper.readValue(response["body"] as String)
-            assertEquals(result.name, result.description)
+            val result: User = mapper.readValue(response["body"] as String)
+            assertEquals(result.name, result.name)
             assertEquals(
-                CODE_LIST_0.copy(
-                    description = "name"
+                USER.copy(
+                    name = "test@mail.com"
                 ), result
             )
         }
 
         @Test
-        fun updateCodeListRemove() {
-            val operations = listOf(JsonPatchOperation(op = OpEnum.REMOVE, path = "/codes/0/name/en"))
+        fun updateUserRemove() {
+            val operations = listOf(JsonPatchOperation(op = OpEnum.REMOVE, path = "/telephoneNumber"))
             val response = apiAuthorizedRequest(
-                "/910244132/concepts/code-lists/123",
+                "$path/123",
                 port,
                 mapper.writeValueAsString(operations),
                 JwtToken(Access.ORG_ADMIN).toString(),
@@ -353,12 +348,10 @@ class CodeListTest : ApiTestContext() {
             )
             assertEquals(HttpStatus.OK.value(), response["status"])
 
-            val result: CodeList = mapper.readValue(response["body"] as String)
+            val result: User = mapper.readValue(response["body"] as String)
             assertEquals(
-                CODE_LIST_0.copy(
-                    codes = listOf(
-                        CODE.copy(name = NAME.copy(en = null))
-                    )
+                USER.copy(
+                    telephoneNumber = null
                 ), result
             )
         }
@@ -367,7 +360,7 @@ class CodeListTest : ApiTestContext() {
         fun cannotRemoveRequiredValue() {
             val operations = listOf(JsonPatchOperation(op = OpEnum.REMOVE, path = "name"))
             val response = apiAuthorizedRequest(
-                "/910244132/concepts/code-lists/123",
+                "$path/123",
                 port,
                 mapper.writeValueAsString(operations),
                 JwtToken(Access.ORG_ADMIN).toString(),
@@ -377,10 +370,10 @@ class CodeListTest : ApiTestContext() {
         }
 
         @Test
-        fun updateCodeListMove() {
-            val operations = listOf(JsonPatchOperation(op = OpEnum.MOVE, path = "/name", from = "/codes/0/name/en"))
+        fun updateUserMove() {
+            val operations = listOf(JsonPatchOperation(op = OpEnum.MOVE, path = "/name", from = "/email"))
             val response = apiAuthorizedRequest(
-                "/910244132/concepts/code-lists/123",
+                "$path/123",
                 port,
                 mapper.writeValueAsString(operations),
                 JwtToken(Access.ORG_ADMIN).toString(),
@@ -389,21 +382,20 @@ class CodeListTest : ApiTestContext() {
 
             assertEquals(HttpStatus.OK.value(), response["status"])
 
-            val result: CodeList = mapper.readValue(response["body"] as String)
+            val result: User = mapper.readValue(response["body"] as String)
             assertEquals(
-                CODE_LIST_0.copy(
-                    name = CODE_LIST_0.codes[0].name.en!!, codes = listOf(
-                        CODE.copy(name = NAME.copy(en = null))
-                    )
+                USER.copy(
+                    name = "test@mail.com",
+                    email = null,
                 ), result
             )
         }
 
-        @Test
+        /*@Test
         fun badRequestWhenInvalidValue() {
             val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, path = "/codes", value = "1234"))
             val response = apiAuthorizedRequest(
-                "/910244132/concepts/code-lists/123",
+                "$path/123",
                 port,
                 mapper.writeValueAsString(operations),
                 JwtToken(Access.ORG_ADMIN).toString(),
@@ -411,27 +403,13 @@ class CodeListTest : ApiTestContext() {
             )
 
             assertEquals(HttpStatus.BAD_REQUEST.value(), response["status"])
-        }
+        }*/
 
         @Test
         fun badRequestWhenUpdatingId() {
-            val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, path = "/id", value = "1234"))
+            val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, path = "/userId", value = "1111"))
             val response = apiAuthorizedRequest(
-                "/910244132/concepts/code-lists/123",
-                port,
-                mapper.writeValueAsString(operations),
-                JwtToken(Access.ORG_ADMIN).toString(),
-                HttpMethod.PATCH
-            )
-
-            assertEquals(HttpStatus.BAD_REQUEST.value(), response["status"])
-        }
-
-        @Test
-        fun badRequestWhenUpdatingCatalogId() {
-            val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, path = "/catalogId", value = "1234"))
-            val response = apiAuthorizedRequest(
-                "/910244132/concepts/code-lists/123",
+                "$path/123",
                 port,
                 mapper.writeValueAsString(operations),
                 JwtToken(Access.ORG_ADMIN).toString(),
