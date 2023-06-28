@@ -164,7 +164,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Fields'
   /{catalogId}/concepts/fields/editable:
-    post:
+    patch:
       tags:
         - catalog-admin-service
       summary: Update editable fields
@@ -177,6 +177,12 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonPatch'
       responses:
         '200':
           description: OK
@@ -184,12 +190,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/EditableFields"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EditableFields'
   /{catalogId}/concepts/fields/internal:
     post:
       tags:

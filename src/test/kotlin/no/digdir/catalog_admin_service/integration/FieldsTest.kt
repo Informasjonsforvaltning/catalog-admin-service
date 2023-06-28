@@ -74,22 +74,31 @@ class FieldsTest : ApiTestContext() {
         private val path = "/910244132/concepts/fields/editable"
 
         @Test
-        fun ableToGetCatalogFieldsForAllOrgRoles() {
-            val body = EditableFields("910244132", "123")
-            val response = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.ORG_ADMIN).toString(), HttpMethod.POST)
+        fun ableToUpdateEditableFields() {
+            val operations = listOf(JsonPatchOperation(op = OpEnum.ADD, "/domainCodeListId", "123"))
+            val response = apiAuthorizedRequest(path, port, mapper.writeValueAsString(operations), JwtToken(Access.ORG_ADMIN).toString(), HttpMethod.PATCH)
 
             assertEquals(HttpStatus.OK.value(), response["status"])
 
             val result: EditableFields = mapper.readValue(response["body"] as String)
-            assertEquals(body, result)
+            val expected = EditableFields("910244132", "123")
+            assertEquals(expected, result)
+        }
+
+        @Test
+        fun badRequestWhenUpdatingCatalogId() {
+            val operations = listOf(JsonPatchOperation(op = OpEnum.ADD, "/catalogId", "12345678"))
+            val response = apiAuthorizedRequest(path, port, mapper.writeValueAsString(operations), JwtToken(Access.ORG_ADMIN).toString(), HttpMethod.PATCH)
+
+            assertEquals(HttpStatus.BAD_REQUEST.value(), response["status"])
         }
 
         @Test
         fun forbiddenForWrongOrgAndNonAdminRoles() {
-            val body = EditableFields("910244132", "123")
-            val readRole = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.ORG_READ).toString(), HttpMethod.POST)
-            val writeRole = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.ORG_WRITE).toString(), HttpMethod.POST)
-            val wrongOrg = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.WRONG_ORG_ADMIN).toString(), HttpMethod.POST)
+            val body = listOf(JsonPatchOperation(op = OpEnum.ADD, "/domainCodeListId", "123"))
+            val readRole = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.ORG_READ).toString(), HttpMethod.PATCH)
+            val writeRole = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.ORG_WRITE).toString(), HttpMethod.PATCH)
+            val wrongOrg = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.WRONG_ORG_ADMIN).toString(), HttpMethod.PATCH)
 
             assertEquals(HttpStatus.FORBIDDEN.value(), readRole["status"])
             assertEquals(HttpStatus.FORBIDDEN.value(), writeRole["status"])
@@ -98,8 +107,8 @@ class FieldsTest : ApiTestContext() {
 
         @Test
         fun unauthorizedWhenMissingToken() {
-            val body = EditableFields("910244132", "123")
-            val response = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), null, HttpMethod.POST)
+            val body = listOf(JsonPatchOperation(op = OpEnum.ADD, "/domainCodeListId", "123"))
+            val response = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), null, HttpMethod.PATCH)
             assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
         }
 

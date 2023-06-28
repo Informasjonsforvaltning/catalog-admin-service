@@ -29,8 +29,9 @@ class FieldsService(
         internalFieldsRepository.findByCatalogId(catalogId)
             .sortedBy { it.id }
 
-    fun updateEditableFields(editableFields: EditableFields): EditableFields =
-        editableFieldsRepository.save(editableFields)
+    fun updateEditableFields(catalogId: String, operations: List<JsonPatchOperation>): EditableFields =
+        patchOriginal(getCatalogEditableFields(catalogId), operations)
+            .let { editableFieldsRepository.save(it) }
 
     fun createInternalField(data: FieldToBeCreated, catalogId: String): Field =
         Field(

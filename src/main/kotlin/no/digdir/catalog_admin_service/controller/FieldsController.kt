@@ -43,17 +43,15 @@ class FieldsController(
             ResponseEntity(HttpStatus.FORBIDDEN)
         }
 
-    @PostMapping(value = ["/editable"], consumes = [MediaType.APPLICATION_JSON_VALUE])
-    fun updateEditableFields(
+    @PatchMapping(value = ["/editable"], consumes = [MediaType.APPLICATION_JSON_VALUE])
+    fun patchEditableFields(
         @AuthenticationPrincipal jwt: Jwt,
         @PathVariable catalogId: String,
-        @RequestBody editableFields: EditableFields
+        @RequestBody patchOperations: List<JsonPatchOperation>
     ): ResponseEntity<EditableFields> =
-        when {
-            !endpointPermissions.hasOrgAdminPermission(jwt, catalogId) -> ResponseEntity(HttpStatus.FORBIDDEN)
-            editableFields.catalogId != catalogId -> ResponseEntity(HttpStatus.BAD_REQUEST)
-            else -> ResponseEntity(fieldsService.updateEditableFields(editableFields), HttpStatus.OK)
-        }
+        if (endpointPermissions.hasOrgAdminPermission(jwt, catalogId)) {
+            ResponseEntity(fieldsService.updateEditableFields(catalogId, patchOperations), HttpStatus.OK)
+        } else ResponseEntity(HttpStatus.FORBIDDEN)
 
     @PostMapping(value = ["/internal"], consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun createInternalField(
