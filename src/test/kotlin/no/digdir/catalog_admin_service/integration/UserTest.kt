@@ -157,16 +157,28 @@ class UserTest : ApiTestContext() {
     }
 
     @Test
-    fun deleteUserWrongOrg() {
+    fun deleteUserForbiddenWhenAdminAccessToWrongOrg() {
+        val preResponse = apiAuthorizedRequest(
+            "$path/123",
+            port,
+            null,
+            JwtToken(Access.WRONG_ORG_ADMIN).toString(),
+            HttpMethod.DELETE
+        )
+        assertEquals(HttpStatus.FORBIDDEN.value(), preResponse["status"])
+    }
+
+    @Test
+    fun deleteUserNotFoundWhenTryingToDeleteFromWrongOrg() {
         val path = "/123456789/general/user-list/123"
         val preResponse = apiAuthorizedRequest(
             path,
             port,
             null,
-            JwtToken(Access.ORG_ADMIN).toString(),
+            JwtToken(Access.WRONG_ORG_ADMIN).toString(),
             HttpMethod.DELETE
         )
-        assertEquals(HttpStatus.FORBIDDEN.value(), preResponse["status"])
+        assertEquals(HttpStatus.NOT_FOUND.value(), preResponse["status"])
     }
 
     @Test
