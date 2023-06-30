@@ -1,15 +1,8 @@
 package no.digdir.catalog_admin_service.service
 
-import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
-import jakarta.json.Json
-import jakarta.json.JsonException
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import org.springframework.web.server.ResponseStatusException
-import java.io.StringReader
 import java.util.*
 import no.digdir.catalog_admin_service.model.JsonPatchOperation
 import no.digdir.catalog_admin_service.model.User
@@ -18,8 +11,6 @@ import no.digdir.catalog_admin_service.model.Users
 import no.digdir.catalog_admin_service.repository.UserRepository
 
 
-private val mapper = jacksonObjectMapper()
-private val logger = LoggerFactory.getLogger(CodeListService::class.java)
 
 
 @Service

@@ -56,7 +56,7 @@ open class UserController(
         }
 
     @PatchMapping(value = ["/{userId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun patchCodeList(
+    fun patchUser(
         @AuthenticationPrincipal jwt: Jwt,
         @PathVariable catalogId: String,
         @PathVariable userId: String,

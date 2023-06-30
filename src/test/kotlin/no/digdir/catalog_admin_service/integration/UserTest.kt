@@ -107,7 +107,7 @@ class UserTest : ApiTestContext() {
     }
 
     @Test
-    fun findCodeListByIdForbiddenForWrongOrg() {
+    fun findUserByIdForbiddenForWrongOrg() {
         val response = apiAuthorizedRequest(
             "$path/123",
             port,
@@ -131,7 +131,7 @@ class UserTest : ApiTestContext() {
     }
 
     @Test
-    fun deleteCodeList() {
+    fun deleteUser() {
 
         val preResponse = apiAuthorizedRequest(
             "$path/123",
