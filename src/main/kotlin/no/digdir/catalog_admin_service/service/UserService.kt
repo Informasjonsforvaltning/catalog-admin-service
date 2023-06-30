@@ -10,9 +10,6 @@ import no.digdir.catalog_admin_service.model.UserToBeCreated
 import no.digdir.catalog_admin_service.model.Users
 import no.digdir.catalog_admin_service.repository.UserRepository
 
-
-
-
 @Service
 class UserService(private val userRepository: UserRepository) {
     fun getUsers(catalogId: String): Users =
