@@ -22,6 +22,9 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ContextConfiguration
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.ResponseBody
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
@@ -194,7 +197,6 @@ class UserTest : ApiTestContext() {
 
     @Test
     fun createUser() {
-
         val response = apiAuthorizedRequest(
             path,
             port,
@@ -211,11 +213,11 @@ class UserTest : ApiTestContext() {
         assertEquals(HttpStatus.OK.value(), getResponse["status"])
         val result: User = mapper.readValue(getResponse["body"] as String)
         val expected = User(
-            name = result.name,
-            telephoneNumber = result.telephoneNumber,
+            name = USER_TO_BE_CREATED.name,
+            telephoneNumber = USER_TO_BE_CREATED.telephoneNumber,
             userId = result.userId,
-            catalogId = result.catalogId,
-            email = result.email
+            catalogId = "910244132",
+            email = USER_TO_BE_CREATED.email
         )
         assertEquals(expected, result)
     }
