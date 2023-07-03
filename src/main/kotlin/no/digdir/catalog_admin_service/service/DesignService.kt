@@ -3,6 +3,7 @@ package no.digdir.catalog_admin_service.service
 import com.github.bgalek.security.svg.SvgSecurityValidator
 import no.digdir.catalog_admin_service.model.DesignDBO
 import no.digdir.catalog_admin_service.model.DesignDTO
+import no.digdir.catalog_admin_service.model.JsonPatchOperation
 import no.digdir.catalog_admin_service.model.Logo
 import no.digdir.catalog_admin_service.repository.DesignRepository
 import no.digdir.catalog_admin_service.repository.LogoRepository
@@ -24,32 +25,25 @@ private val logger = LoggerFactory.getLogger(DesignService::class.java)
 
 @Service
 class DesignService(private val designRepository: DesignRepository, private val logoRepository: LogoRepository) {
-    fun getDesign(catalogId: String): DesignDTO =
-        designRepository.findByIdOrNull(catalogId)?.let {
-            DesignDTO(
-                backgroundColor = it.backgroundColor,
-                fontColor = it.fontColor,
-                logoDescription = it.logoDescription
-            )
 
-        } ?: DesignDTO(null, null, null)
+    private fun getDesignDBO(catalogId: String): DesignDBO =
+        designRepository.findByIdOrNull(catalogId)
+            ?: DesignDBO(catalogId, null, null, null)
 
-    fun updateDesign(catalogId: String, design: DesignDTO): DesignDTO =
-        designRepository.save(
-            DesignDBO(
-                backgroundColor = design.backgroundColor,
-                fontColor = design.fontColor,
-                logoDescription = design.logoDescription,
-                catalogId = catalogId
-            )
+    private fun DesignDBO.mapToDTO(): DesignDTO =
+        DesignDTO(
+            backgroundColor = backgroundColor,
+            fontColor = fontColor,
+            logoDescription = logoDescription
         )
-            .let { saved ->
-                DesignDTO(
-                    backgroundColor = saved.backgroundColor,
-                    fontColor = saved.fontColor,
-                    logoDescription = saved.logoDescription,
-                )
-            }
+
+    fun getDesign(catalogId: String): DesignDTO =
+        getDesignDBO(catalogId).mapToDTO()
+
+    fun updateDesign(catalogId: String, operations: List<JsonPatchOperation>): DesignDTO =
+        patchOriginal(getDesignDBO(catalogId), operations)
+            .let { designRepository.save(it) }
+            .mapToDTO()
 
     fun getLogo(catalogId: String): Logo? =
         logoRepository.findByIdOrNull(catalogId)

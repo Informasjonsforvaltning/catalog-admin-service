@@ -1,6 +1,7 @@
 package no.digdir.catalog_admin_service.controller
 
 import no.digdir.catalog_admin_service.model.DesignDTO
+import no.digdir.catalog_admin_service.model.JsonPatchOperation
 import no.digdir.catalog_admin_service.model.Logo
 import no.digdir.catalog_admin_service.security.EndpointPermissions
 import no.digdir.catalog_admin_service.service.DesignService
@@ -16,6 +17,7 @@ import org.springframework.util.MimeType
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -43,14 +45,14 @@ open class DesignController(
             ResponseEntity(HttpStatus.FORBIDDEN)
         }
 
-    @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @PatchMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun updateDesign(
         @AuthenticationPrincipal jwt: Jwt,
         @PathVariable catalogId: String,
-        @RequestBody designDTO: DesignDTO
+        @RequestBody patchOperations: List<JsonPatchOperation>
     ): ResponseEntity<DesignDTO> = if (endpointPermissions.hasOrgAdminPermission(jwt, catalogId)) {
         ResponseEntity(
-            designService.updateDesign(catalogId, designDTO), HttpStatus.OK
+            designService.updateDesign(catalogId, patchOperations), HttpStatus.OK
         )
     } else ResponseEntity<DesignDTO>(HttpStatus.FORBIDDEN)
 
