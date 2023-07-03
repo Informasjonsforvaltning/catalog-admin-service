@@ -10,6 +10,8 @@ import no.digdir.catalog_admin_service.model.FieldLocation
 import no.digdir.catalog_admin_service.model.FieldType
 import no.digdir.catalog_admin_service.model.Logo
 import no.digdir.catalog_admin_service.model.MultiLanguageTexts
+import no.digdir.catalog_admin_service.model.User
+import no.digdir.catalog_admin_service.model.UserToBeCreated
 import org.bson.Document
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap
 
@@ -20,6 +22,7 @@ const val MONGO_DATABASE = "catalogAdminService"
 const val MONGO_CODELIST_COLLECTION = "codeLists"
 const val MONGO_DESIGN_COLLECTION = "design"
 const val MONGO_LOGO_COLLECTION = "logo"
+const val MONGO_USER_COLLECTION = "users"
 const val INTERNAL_FIELDS_COLLECTION = "internalFields"
 const val EDITABLE_COLLECTIONS_COLLECTION = "editableFields"
 
@@ -28,15 +31,21 @@ val MONGO_ENV_VALUES: Map<String, String> = ImmutableMap.of(
     "MONGO_INITDB_ROOT_PASSWORD", MONGO_PASSWORD
 )
 
-val NAME: MultiLanguageTexts = MultiLanguageTexts(en="codeName", nb=null, nn=null)
-val CODE: Code = Code(id=555, name=NAME, parentID = null)
+val NAME: MultiLanguageTexts = MultiLanguageTexts(en = "codeName", nb = null, nn = null)
+val CODE: Code = Code(id = 555, name = NAME, parentID = null)
 val CODES: List<Code> = listOf(CODE)
-val CODE_LIST_0 = CodeList(id="123", name = "name", description = "description", codes = CODES, catalogId = "910244132")
+val CODE_LIST_0 =
+    CodeList(id = "123", name = "name", description = "description", codes = CODES, catalogId = "910244132")
 val CODE_LIST_TO_BE_CREATED_0 = CodeListToBeCreated(name = "name", description = "description", codes = CODES)
 
-val DESIGN_DTO = DesignDTO(backgroundColor = "#FFFFFF", fontColor="#CCCFFF", logoDescription="FDK Logo")
-val DESIGN_DBO = DesignDBO(backgroundColor = "#FFFFFF", fontColor="#CCCFFF", logoDescription="FDK Logo", catalogId = "910244132")
-val UPDATED_DESIGN_DTO = DesignDTO(backgroundColor = "#FFFFFF", fontColor="#CCCFFF", logoDescription="New FDK Logo")
+val DESIGN_DTO = DesignDTO(backgroundColor = "#FFFFFF", fontColor = "#CCCFFF", logoDescription = "FDK Logo")
+val DESIGN_DBO =
+    DesignDBO(backgroundColor = "#FFFFFF", fontColor = "#CCCFFF", logoDescription = "FDK Logo", catalogId = "910244132")
+val UPDATED_DESIGN_DTO = DesignDTO(backgroundColor = "#FFFFFF", fontColor = "#CCCFFF", logoDescription = "New FDK Logo")
+
+val USER =
+    User(name = "Test User", userId = "123", catalogId = "910244132", email = "test@mail.com", telephoneNumber = 12345678)
+val USER_TO_BE_CREATED = UserToBeCreated(name = "Test User", email = "test@mail.com", telephoneNumber = 12345678)
 
 val LOGO = Logo(
     base64Logo = "PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/Pgo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiPgo8c3ZnIHZlcnNpb249IjEuMSIgYmFzZVByb2ZpbGU9ImZ1bGwiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgICA8cG9seWdvbiBpZD0idHJpYW5nbGUiIHBvaW50cz0iMCwwIDAsNTAgNTAsMCIgZmlsbD0iIzAwOTkwMCIgc3Ryb2tlPSIjMDA0NDAwIi8+Cjwvc3ZnPg==",
@@ -98,3 +107,16 @@ private fun Logo.mapDBO(): Document =
         .append("_id", catalogId)
         .append("contentType", contentType)
         .append("base64Logo", base64Logo)
+
+fun userPopulation(): List<Document> =
+    listOf(USER)
+        .map { it.mapDBO() }
+
+private fun User.mapDBO(): Document =
+    Document()
+        .append("_id", userId)
+        .append("name", name)
+        .append("catalogId", catalogId)
+        .append("email", email)
+        .append("telephoneNumber", telephoneNumber)
+

@@ -152,7 +152,7 @@ class CodeListTest : ApiTestContext() {
     }
 
     @Test
-    fun deleteCodeListWrongOrd() {
+    fun deleteCodeListWrongOrg() {
         val path = "/123456789/concepts/code-lists/123"
         val preResponse = apiAuthorizedRequest(
             path,

@@ -168,5 +168,9 @@ fun resetDB() {
     val editableCollection = mongoDatabase.getCollection(EDITABLE_COLLECTIONS_COLLECTION)
     editableCollection.deleteMany(org.bson.Document())
 
+    val userCollection = mongoDatabase.getCollection(MONGO_USER_COLLECTION)
+    userCollection.deleteMany(org.bson.Document())
+    userCollection.insertMany(userPopulation())
+
     client.close()
 }
