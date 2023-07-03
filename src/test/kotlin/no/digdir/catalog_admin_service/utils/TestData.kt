@@ -38,7 +38,7 @@ val CODE_LIST_0 =
     CodeList(id = "123", name = "name", description = "description", codes = CODES, catalogId = "910244132")
 val CODE_LIST_TO_BE_CREATED_0 = CodeListToBeCreated(name = "name", description = "description", codes = CODES)
 
-val DESIGN_DTO = DesignDTO(backgroundColor = "#FFFFFF", fontColor = "#CCCFFF", logoDescription = "FDK Logo")
+val DESIGN_DTO = DesignDTO(backgroundColor = "#FFFFFF", fontColor = "#CCCFFF", logoDescription = "FDK Logo", hasLogo = false)
 val DESIGN_DBO =
     DesignDBO(backgroundColor = "#FFFFFF", fontColor = "#CCCFFF", logoDescription = "FDK Logo", catalogId = "910244132")
 
@@ -97,6 +97,7 @@ private fun DesignDBO.mapDBO(): Document =
         .append("backgroundColor", backgroundColor)
         .append("fontColor", fontColor)
         .append("logoDescription", logoDescription)
+        .append("hasLogo", hasLogo)
 
 fun logoPopulation(): List<Document> =
     listOf(LOGO)

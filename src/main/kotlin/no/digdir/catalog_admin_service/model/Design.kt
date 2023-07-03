@@ -9,13 +9,15 @@ data class DesignDBO(
     val catalogId: String,
     val backgroundColor: String?,
     val fontColor: String?,
-    val logoDescription: String?
+    val logoDescription: String?,
+    val hasLogo: Boolean = false
 )
 
 data class DesignDTO(
     val backgroundColor: String?,
     val fontColor: String?,
-    val logoDescription: String?
+    val logoDescription: String?,
+    val hasLogo: Boolean
 )
 
 @Document(collection = "logo")

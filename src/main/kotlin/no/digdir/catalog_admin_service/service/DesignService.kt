@@ -13,6 +13,7 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.server.ResponseStatusException
 import java.io.ByteArrayInputStream
@@ -24,7 +25,7 @@ import javax.imageio.ImageIO
 private val logger = LoggerFactory.getLogger(DesignService::class.java)
 
 @Service
-class DesignService(private val designRepository: DesignRepository, private val logoRepository: LogoRepository) {
+open class DesignService(private val designRepository: DesignRepository, private val logoRepository: LogoRepository) {
 
     private fun getDesignDBO(catalogId: String): DesignDBO =
         designRepository.findByIdOrNull(catalogId)
@@ -34,7 +35,8 @@ class DesignService(private val designRepository: DesignRepository, private val 
         DesignDTO(
             backgroundColor = backgroundColor,
             fontColor = fontColor,
-            logoDescription = logoDescription
+            logoDescription = logoDescription,
+            hasLogo = hasLogo
         )
 
     fun getDesign(catalogId: String): DesignDTO =
@@ -51,7 +53,8 @@ class DesignService(private val designRepository: DesignRepository, private val 
     fun deleteLogo(catalogId: String) =
         logoRepository.deleteById(catalogId)
 
-    fun saveLogo(catalogId: String, logoFile: MultipartFile) {
+    @Transactional
+    open fun saveLogo(catalogId: String, logoFile: MultipartFile) {
         logger.info("uploading logo for $catalogId")
         val contentType = logoFile.contentType
         val bytes: ByteArray = logoFile.inputStream.readAllBytes()
@@ -72,6 +75,10 @@ class DesignService(private val designRepository: DesignRepository, private val 
                 catalogId = catalogId
             )
         )
+
+        getDesignDBO(catalogId)
+            .copy(hasLogo = true)
+            .run { designRepository.save(this) }
     }
 
     private fun validatePNG(inputStream: InputStream) {
