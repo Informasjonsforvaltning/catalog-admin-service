@@ -12,6 +12,7 @@ import no.digdir.catalog_admin_service.utils.apiAuthorizedRequest
 import no.digdir.catalog_admin_service.utils.apiGet
 import no.digdir.catalog_admin_service.utils.jwk.Access
 import no.digdir.catalog_admin_service.utils.jwk.JwtToken
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -21,6 +22,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ContextConfiguration
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 
 private val mapper = jacksonObjectMapper()
 
@@ -50,7 +52,6 @@ class DesignTest : ApiTestContext(
             val result: DesignDTO = mapper.readValue(response["body"] as String)
             assertEquals(DESIGN_DTO, result)
         }
-
 
         @Test
         fun updateDesign() {
@@ -90,7 +91,7 @@ class DesignTest : ApiTestContext(
             )
             assertEquals(HttpStatus.OK.value(), response["status"])
             val result: DesignDTO = mapper.readValue(response["body"] as String)
-            assertEquals(result, DesignDTO(null, null, null))
+            assertEquals(result, DesignDTO(null, null, null, false))
         }
 
         @Test
@@ -104,6 +105,20 @@ class DesignTest : ApiTestContext(
                 HttpMethod.PATCH
             )
             assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
+        }
+
+        @Test
+        fun badRequestWhenUpdatingHasLogo() {
+            val operations = listOf(JsonPatchOperation(op = OpEnum.ADD, "/hasLogo", true))
+            val response = apiAuthorizedRequest(
+                path,
+                port,
+                mapper.writeValueAsString(operations),
+                JwtToken(Access.ORG_ADMIN).toString(),
+                HttpMethod.PATCH
+            )
+
+            assertEquals(HttpStatus.BAD_REQUEST.value(), response["status"])
         }
     }
     @Nested
@@ -130,8 +145,16 @@ class DesignTest : ApiTestContext(
 
         @Test
         fun uploadPNG() {
+            val before = apiAuthorizedRequest("/910244132/design", port, null, JwtToken(Access.ORG_READ).toString(), HttpMethod.GET)
+            val resultBefore: DesignDTO = mapper.readValue(before["body"] as String)
+            assertFalse(resultBefore.hasLogo)
+
             val response = apiAuthorizedMultipartLogo(path, port, "safe.png", JwtToken(Access.ORG_ADMIN).toString())
             assertEquals(HttpStatus.OK.value(), response["status"])
+
+            val after = apiAuthorizedRequest("/910244132/design", port, null, JwtToken(Access.ORG_READ).toString(), HttpMethod.GET)
+            val resultAfter: DesignDTO = mapper.readValue(after["body"] as String)
+            assertTrue(resultAfter.hasLogo)
         }
 
         @Test
@@ -142,8 +165,16 @@ class DesignTest : ApiTestContext(
 
         @Test
         fun uploadSVG() {
+            val before = apiAuthorizedRequest("/910244132/design", port, null, JwtToken(Access.ORG_READ).toString(), HttpMethod.GET)
+            val resultBefore: DesignDTO = mapper.readValue(before["body"] as String)
+            assertFalse(resultBefore.hasLogo)
+
             val response = apiAuthorizedMultipartLogo(path, port, "safe.svg", JwtToken(Access.ORG_ADMIN).toString())
             assertEquals(HttpStatus.OK.value(), response["status"])
+
+            val after = apiAuthorizedRequest("/910244132/design", port, null, JwtToken(Access.ORG_READ).toString(), HttpMethod.GET)
+            val resultAfter: DesignDTO = mapper.readValue(after["body"] as String)
+            assertTrue(resultAfter.hasLogo)
         }
 
         @Test

@@ -532,3 +532,5 @@ components:
           type: string
         catalogId:
           type: string
+        hasLogo:
+          type: boolean
