@@ -312,7 +312,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Design'
-    post:
+    patch:
       tags:
         - catalog-admin-service
       summary: Update design settings for the catalog
@@ -325,15 +325,19 @@ paths:
           required: true
           schema:
             type: string
-      responses:
-        '200':
-          description: No content
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Design'
+              $ref: '#/components/schemas/JsonPatch'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Design'
   /{catalogId}/design/logo:
     post:
       tags:

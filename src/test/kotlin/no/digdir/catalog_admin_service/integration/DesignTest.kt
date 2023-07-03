@@ -3,9 +3,10 @@ package no.digdir.catalog_admin_service.integration
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.digdir.catalog_admin_service.model.DesignDTO
+import no.digdir.catalog_admin_service.model.JsonPatchOperation
+import no.digdir.catalog_admin_service.model.OpEnum
 import no.digdir.catalog_admin_service.utils.ApiTestContext
 import no.digdir.catalog_admin_service.utils.DESIGN_DTO
-import no.digdir.catalog_admin_service.utils.UPDATED_DESIGN_DTO
 import no.digdir.catalog_admin_service.utils.apiAuthorizedMultipartLogo
 import no.digdir.catalog_admin_service.utils.apiAuthorizedRequest
 import no.digdir.catalog_admin_service.utils.apiGet
@@ -53,12 +54,13 @@ class DesignTest : ApiTestContext(
 
         @Test
         fun updateDesign() {
+            val operations = listOf(JsonPatchOperation(op = OpEnum.ADD, "/logoDescription", "New FDK Logo"))
             val response = apiAuthorizedRequest(
                 path,
                 port,
-                mapper.writeValueAsString(UPDATED_DESIGN_DTO),
+                mapper.writeValueAsString(operations),
                 JwtToken(Access.ORG_ADMIN).toString(),
-                HttpMethod.POST
+                HttpMethod.PATCH
             )
 
             assertEquals(HttpStatus.OK.value(), response["status"])
@@ -93,12 +95,13 @@ class DesignTest : ApiTestContext(
 
         @Test
         fun updateDesignForbiddenForOrgRead() {
+            val operations = listOf(JsonPatchOperation(op = OpEnum.ADD, "/logoDescription", "New FDK Logo"))
             val response = apiAuthorizedRequest(
                 path,
                 port,
-                mapper.writeValueAsString(UPDATED_DESIGN_DTO),
+                mapper.writeValueAsString(operations),
                 JwtToken(Access.ORG_READ).toString(),
-                HttpMethod.POST
+                HttpMethod.PATCH
             )
             assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
         }
