@@ -1,6 +1,5 @@
 package no.digdir.catalog_admin_service.service
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.*
@@ -9,6 +8,8 @@ import no.digdir.catalog_admin_service.model.User
 import no.digdir.catalog_admin_service.model.UserToBeCreated
 import no.digdir.catalog_admin_service.model.Users
 import no.digdir.catalog_admin_service.repository.UserRepository
+
+private val logger = LoggerFactory.getLogger(UserService::class.java)
 
 @Service
 class UserService(private val userRepository: UserRepository) {
@@ -19,20 +20,34 @@ class UserService(private val userRepository: UserRepository) {
         userRepository.findUserByUserIdAndCatalogId(userId, catalogId)
 
     fun deleteUserById(userId: String) =
-        userRepository.deleteById(userId)
+        try {
+            userRepository.deleteById(userId)
+        } catch (ex: Exception) {
+            logger.error("Failed to delete user with id $userId", ex)
+            throw ex
+        }
 
     fun createUser(data: UserToBeCreated, catalogId: String): User =
-        User(
-            userId = UUID.randomUUID().toString(),
-            name = data.name,
-            catalogId = catalogId,
-            email = data.email,
-            telephoneNumber = data.telephoneNumber
-        ).let { userRepository.insert(it) }
-
+        try {
+            User(
+                userId = UUID.randomUUID().toString(),
+                name = data.name,
+                catalogId = catalogId,
+                email = data.email,
+                telephoneNumber = data.telephoneNumber
+            ).let { userRepository.insert(it) }
+        } catch (ex: Exception) {
+            logger.error("Failed to create user for catalog $catalogId", ex)
+            throw ex
+        }
 
     fun updateUser(userId: String, catalogId: String, operations: List<JsonPatchOperation>): User? =
-        userRepository.findUserByUserIdAndCatalogId(userId, catalogId)
-            ?.let { dbUser -> patchOriginal(dbUser, operations) }
-            ?.let { userRepository.save(it) }
+        try {
+            userRepository.findUserByUserIdAndCatalogId(userId, catalogId)
+                ?.let { dbUser -> patchOriginal(dbUser, operations) }
+                ?.let { userRepository.save(it) }
+        } catch (ex: Exception) {
+            logger.error("Failed to update user with id $userId in catalog $catalogId", ex)
+            throw ex
+        }
 }
