@@ -129,7 +129,7 @@ class FieldsTest : ApiTestContext() {
             )
             val response = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.ORG_ADMIN).toString(), HttpMethod.POST)
 
-            assertEquals(HttpStatus.OK.value(), response["status"])
+            assertEquals(HttpStatus.CREATED.value(), response["status"])
 
             val responseHeaders: HttpHeaders = response["header"] as HttpHeaders
             val location = responseHeaders.location
