@@ -43,15 +43,25 @@ open class DesignService(private val designRepository: DesignRepository, private
         getDesignDBO(catalogId).mapToDTO()
 
     fun updateDesign(catalogId: String, operations: List<JsonPatchOperation>): DesignDTO =
-        patchOriginal(getDesignDBO(catalogId), operations)
-            .let { designRepository.save(it) }
-            .mapToDTO()
+        try {
+            patchOriginal(getDesignDBO(catalogId), operations)
+                .let { designRepository.save(it) }
+                .mapToDTO()
+        } catch (ex: Exception) {
+            logger.error("Failed to update design for catalog $catalogId", ex)
+            throw ex
+        }
 
     fun getLogo(catalogId: String): Logo? =
         logoRepository.findByIdOrNull(catalogId)
 
     fun deleteLogo(catalogId: String) =
-        logoRepository.deleteById(catalogId)
+        try {
+            logoRepository.deleteById(catalogId)
+        } catch (ex: Exception) {
+            logger.error("Failed to delete logo for catalog $catalogId", ex)
+            throw ex
+        }
 
     @Transactional
     open fun saveLogo(catalogId: String, logoFile: MultipartFile) {
