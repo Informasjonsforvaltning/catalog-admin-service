@@ -63,7 +63,7 @@ class FieldsController(
             !endpointPermissions.hasOrgAdminPermission(jwt, catalogId) -> ResponseEntity(HttpStatus.FORBIDDEN)
             else -> {
                 val created = fieldsService.createInternalField(field, catalogId)
-                ResponseEntity(locationHeaderForCreated(created.id, catalogId), HttpStatus.OK)
+                ResponseEntity(locationHeaderForCreated(created.id, catalogId), HttpStatus.CREATED)
             }
         }
 
