@@ -20,10 +20,12 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ContextConfiguration
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 
 private val mapper = jacksonObjectMapper()
@@ -193,16 +195,6 @@ class CodeListTest : ApiTestContext() {
     @Test
     fun createCodeList() {
         val path = "/910244132/concepts/code-lists"
-
-        val before = apiAuthorizedRequest(
-            path,
-            port,
-            null,
-            JwtToken(Access.ORG_ADMIN).toString(),
-            HttpMethod.GET
-        )
-        assertEquals(HttpStatus.OK.value(), before["status"])
-
         val createResponse = apiAuthorizedRequest(
             path,
             port,
@@ -212,18 +204,21 @@ class CodeListTest : ApiTestContext() {
         )
         assertEquals(HttpStatus.CREATED.value(), createResponse["status"])
 
-        val after = apiAuthorizedRequest(
-            path,
-            port,
-            null,
-            JwtToken(Access.ORG_ADMIN).toString(),
-            HttpMethod.GET
-        )
-        assertEquals(HttpStatus.OK.value(), after["status"])
+        val responseHeaders: HttpHeaders = createResponse["header"] as HttpHeaders
+        val location = responseHeaders.location
+        assertNotNull(location)
 
-        val beforeList: CodeLists = mapper.readValue(before["body"] as String)
-        val afterList: CodeLists = mapper.readValue(after["body"] as String)
-        assertEquals(beforeList.codeLists.size + 1, afterList.codeLists.size)
+        val getResponse = apiAuthorizedRequest(location.toString(), port, null, JwtToken(Access.ORG_READ).toString(), HttpMethod.GET)
+        assertEquals(HttpStatus.OK.value(), getResponse["status"])
+        val result: CodeList = mapper.readValue(getResponse["body"] as String)
+        val expected = CodeList(
+            id = result.id,
+            catalogId = "910244132",
+            name = CODE_LIST_TO_BE_CREATED_0.name,
+            description = CODE_LIST_TO_BE_CREATED_0.description,
+            codes = CODE_LIST_TO_BE_CREATED_0.codes
+        )
+        assertEquals(expected, result)
     }
 
     @Nested

@@ -107,6 +107,6 @@ open class CodeListController(
 
 private fun locationHeaderForCreated(newId: String, catalogId: String): HttpHeaders =
     HttpHeaders().apply {
-        add(HttpHeaders.LOCATION, "/$catalogId/concepts/code-lists$newId")
+        add(HttpHeaders.LOCATION, "/$catalogId/concepts/code-lists/$newId")
         add(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.LOCATION)
     }
