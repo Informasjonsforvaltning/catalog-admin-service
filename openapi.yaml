@@ -393,8 +393,8 @@ paths:
     get:
       tags:
         - catalog-admin-service
-      summary: Get catalog user list.
-      description: Returns catalog user list.
+      summary: Get list of users associated with the catalog.
+      description: Returns list of users associated with the catalog.
       parameters:
         - name: catalogId
           in: path
@@ -412,8 +412,8 @@ paths:
     post:
       tags:
         - catalog-admin-service
-      summary: Create user for the catalog
-      description: Create user for the catalog
+      summary: Create user associated with the catalog.
+      description: Create user associated with the catalog.
       operationId: updateSettings
       parameters:
         - name: catalogId
@@ -435,8 +435,8 @@ paths:
     get:
       tags:
         - catalog-admin-service
-      summary: Get catalog user by id.
-      description: Returns catalog user by id.
+      summary: Get user associated with the catalog by id.
+      description: Returns user associated with the catalog by id.
       parameters:
         - name: catalogId
           in: path
@@ -491,7 +491,7 @@ paths:
       delete:
         tags:
           - catalog-admin-service
-        description: Delete user
+        description: Delete user associated with the catalog.
         operationId: deleteCodeList
         parameters:
           - name: catalogId
@@ -656,7 +656,7 @@ components:
           type: boolean
 
     User:
-      description: 'User in the catalog'
+      description: 'User associated with the catalog'
       type: object
       properties:
         name:
