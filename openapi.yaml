@@ -488,27 +488,27 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
-      delete:
-        tags:
-          - catalog-admin-service
-        description: Delete user associated with the catalog.
-        operationId: deleteCodeList
-        parameters:
-          - name: catalogId
-            in: path
-            description: catalog id
-            required: true
-            schema:
-              type: string
-          - name: userId
-            in: path
-            description: user id
-            required: true
-            schema:
-              type: string
-        responses:
-          '204':
-            description: No Content
+    delete:
+      tags:
+        - catalog-admin-service
+      description: Delete user associated with the catalog.
+      operationId: deleteUser
+      parameters:
+        - name: catalogId
+          in: path
+          description: catalog id
+          required: true
+          schema:
+            type: string
+        - name: userId
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No Content
 
 components:
   schemas:
