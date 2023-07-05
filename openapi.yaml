@@ -423,8 +423,8 @@ paths:
           schema:
             type: string
       responses:
-        '200':
-          description: No content
+        '201':
+          description: Created
       requestBody:
         required: true
         content:
@@ -454,14 +454,9 @@ paths:
         '200':
           description: OK
           content:
-            image/png:
+            application/json:
               schema:
-                type: string
-                format: binary
-            image/svg+xml:
-              schema:
-                type: string
-                format: binary
+                $ref: '#/components/schemas/User'
     patch:
       tags:
         - catalog-admin-service
