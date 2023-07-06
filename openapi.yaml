@@ -389,6 +389,126 @@ paths:
               schema:
                 type: string
                 format: binary
+  /{catalogId}/user-list:
+    get:
+      tags:
+        - catalog-admin-service
+      summary: Get list of users associated with the catalog.
+      description: Returns list of users associated with the catalog.
+      parameters:
+        - name: catalogId
+          in: path
+          description: catalog id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    post:
+      tags:
+        - catalog-admin-service
+      summary: Create user associated with the catalog.
+      description: Create user associated with the catalog.
+      operationId: updateSettings
+      parameters:
+        - name: catalogId
+          in: path
+          description: catalog id
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+  /{catalogId}/user-list/{userId}:
+    get:
+      tags:
+        - catalog-admin-service
+      summary: Get user associated with the catalog by id.
+      description: Returns user associated with the catalog by id.
+      parameters:
+        - name: catalogId
+          in: path
+          description: catalog id
+          required: true
+          schema:
+            type: string
+        - name: userId
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    patch:
+      tags:
+        - catalog-admin-service
+      description: Update field
+      operationId: updateField
+      parameters:
+        - name: catalogId
+          in: path
+          description: catalog id
+          required: true
+          schema:
+            type: string
+        - name: userId
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonPatch'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    delete:
+      tags:
+        - catalog-admin-service
+      description: Delete user associated with the catalog.
+      operationId: deleteUser
+      parameters:
+        - name: catalogId
+          in: path
+          description: catalog id
+          required: true
+          schema:
+            type: string
+        - name: userId
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No Content
 
 components:
   schemas:
@@ -534,3 +654,14 @@ components:
           type: string
         hasLogo:
           type: boolean
+
+    User:
+      description: 'User associated with the catalog'
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        telephone:
+          type: number
