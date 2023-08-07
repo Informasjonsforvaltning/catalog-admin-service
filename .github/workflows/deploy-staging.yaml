@@ -10,7 +10,7 @@ jobs:
   build-catalog-admin-service:
     name: Build when pull request is created
     if: github.event.pull_request.draft == false
-    uses: Informasjonsforvaltning/workflows/.github/workflows/build-push.yaml@chore/hos/build-push-maven
+    uses: Informasjonsforvaltning/workflows/.github/workflows/build-push.yaml@main
     with:
       app_name: catalog-admin-service
       environment: staging
