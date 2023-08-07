@@ -1,0 +1,10 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - deployment-catalog-admin-service.yaml
+  - service-catalog-admin-service.yaml
+images:
+  - name: catalog-admin-service
+    newName: eu.gcr.io/digdir-fdk-infra/catalog-admin-service
+    newTag: $(GIT_COMMIT_SHA)
