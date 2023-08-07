@@ -1,0 +1,46 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catalog-admin-service
+  labels:
+    app: catalog-admin-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: catalog-admin-service
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: catalog-admin-service
+      annotations:
+        prometheus.io/scrape: "false"
+    spec:
+      containers:
+        - name: catalog-admin-service
+          image: catalog-admin-service
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 30
+            successThreshold: 1
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 30
+            successThreshold: 1
+            failureThreshold: 5
+          resources:
+            requests:
+              memory: 100Mi
