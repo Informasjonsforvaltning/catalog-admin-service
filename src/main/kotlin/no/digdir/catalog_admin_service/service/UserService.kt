@@ -17,7 +17,7 @@ class UserService(private val userRepository: UserRepository) {
         Users(users = userRepository.findUsersByCatalogId(catalogId))
 
     fun getUserById(userId: String, catalogId: String): User? =
-        userRepository.findUserByUserIdAndCatalogId(userId, catalogId)
+        userRepository.findUserByIdAndCatalogId(userId, catalogId)
 
     fun deleteUserById(userId: String) =
         try {
@@ -30,7 +30,7 @@ class UserService(private val userRepository: UserRepository) {
     fun createUser(data: UserToBeCreated, catalogId: String): User =
         try {
             User(
-                userId = UUID.randomUUID().toString(),
+                id = UUID.randomUUID().toString(),
                 name = data.name,
                 catalogId = catalogId,
                 email = data.email,
@@ -43,7 +43,7 @@ class UserService(private val userRepository: UserRepository) {
 
     fun updateUser(userId: String, catalogId: String, operations: List<JsonPatchOperation>): User? =
         try {
-            userRepository.findUserByUserIdAndCatalogId(userId, catalogId)
+            userRepository.findUserByIdAndCatalogId(userId, catalogId)
                 ?.let { dbUser -> patchOriginal(dbUser, operations) }
                 ?.let { userRepository.save(it) }
         } catch (ex: Exception) {

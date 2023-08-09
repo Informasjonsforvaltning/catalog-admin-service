@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository
 @Repository
 interface UserRepository: MongoRepository<User, String>  {
     fun findUsersByCatalogId(catalogId: String): List<User>
-    fun findUserByUserIdAndCatalogId(userId: String, catalogId: String): User?
+    fun findUserByIdAndCatalogId(id: String, catalogId: String): User?
 }

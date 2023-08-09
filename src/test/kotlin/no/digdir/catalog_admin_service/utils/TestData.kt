@@ -43,7 +43,7 @@ val DESIGN_DBO =
     DesignDBO(backgroundColor = "#FFFFFF", fontColor = "#CCCFFF", logoDescription = "FDK Logo", catalogId = "910244132")
 
 val USER =
-    User(name = "Test User", userId = "123", catalogId = "910244132", email = "test@mail.com", telephoneNumber = 12345678)
+    User(name = "Test User", id = "123", catalogId = "910244132", email = "test@mail.com", telephoneNumber = 12345678)
 val USER_TO_BE_CREATED = UserToBeCreated(name = "Test User", email = "test@mail.com", telephoneNumber = 12345678)
 
 val LOGO = Logo(
@@ -114,7 +114,7 @@ fun userPopulation(): List<Document> =
 
 private fun User.mapDBO(): Document =
     Document()
-        .append("_id", userId)
+        .append("_id", id)
         .append("name", name)
         .append("catalogId", catalogId)
         .append("email", email)

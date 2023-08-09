@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 @Controller
 @CrossOrigin
 @RequestMapping(
-    value = ["/{catalogId}/general/user-list"],
+    value = ["/{catalogId}/general/users"],
     produces = ["application/json"]
 )
 open class UserController(
@@ -94,7 +94,7 @@ open class UserController(
         if (endpointPermissions.hasOrgAdminPermission(jwt, catalogId)) {
             val created = userService.createUser(newUser, catalogId)
             ResponseEntity(
-                locationHeaderForCreated(newId = created.userId, catalogId),
+                locationHeaderForCreated(newId = created.id, catalogId),
                 HttpStatus.CREATED
             )
 
@@ -103,6 +103,6 @@ open class UserController(
 
 private fun locationHeaderForCreated(newId: String, catalogId: String): HttpHeaders =
     HttpHeaders().apply {
-        add(HttpHeaders.LOCATION, "/$catalogId/general/user-list/$newId")
+        add(HttpHeaders.LOCATION, "/$catalogId/general/users/$newId")
         add(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.LOCATION)
     }
