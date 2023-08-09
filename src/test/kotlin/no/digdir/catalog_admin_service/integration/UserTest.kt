@@ -22,9 +22,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ContextConfiguration
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.ResponseBody
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
@@ -39,7 +36,7 @@ private val mapper = jacksonObjectMapper()
 @ContextConfiguration(initializers = [ApiTestContext.Initializer::class])
 @Tag("integration")
 class UserTest : ApiTestContext() {
-    val path = "/910244132/general/user-list"
+    val path = "/910244132/general/users"
 
     @Test
     fun findUsers() {
@@ -97,7 +94,7 @@ class UserTest : ApiTestContext() {
     @Test
     fun findUsersForbiddenForWrongOrg() {
         val response = apiAuthorizedRequest(
-            "/910244132/general/user-list",
+            "/910244132/general/users",
             port,
             null,
             JwtToken(Access.WRONG_ORG_ADMIN).toString(),
@@ -121,7 +118,7 @@ class UserTest : ApiTestContext() {
     @Test
     fun findUserByIdNotFoundForUserNotInCatalog() {
         val response = apiAuthorizedRequest(
-            "/123456789/general/user-list/123",
+            "/123456789/general/users/123",
             port,
             null,
             JwtToken(Access.WRONG_ORG_ADMIN).toString(),
@@ -170,7 +167,7 @@ class UserTest : ApiTestContext() {
 
     @Test
     fun deleteUserNotFoundWhenTryingToDeleteFromWrongOrg() {
-        val path = "/123456789/general/user-list/123"
+        val path = "/123456789/general/users/123"
         val preResponse = apiAuthorizedRequest(
             path,
             port,
@@ -227,7 +224,7 @@ class UserTest : ApiTestContext() {
         val expected = User(
             name = USER_TO_BE_CREATED.name,
             telephoneNumber = USER_TO_BE_CREATED.telephoneNumber,
-            userId = result.userId,
+            id = result.id,
             catalogId = "910244132",
             email = USER_TO_BE_CREATED.email
         )
