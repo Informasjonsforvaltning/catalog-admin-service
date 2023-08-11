@@ -5,6 +5,8 @@ import com.mongodb.MongoClientSettings
 import com.mongodb.client.MongoClient
 import com.mongodb.client.MongoClients
 import no.digdir.catalog_admin_service.utils.ApiTestContext.Companion.mongoContainer
+import org.apache.jena.rdf.model.Model
+import org.apache.jena.rdf.model.ModelFactory
 import org.bson.codecs.configuration.CodecRegistries
 import org.bson.codecs.pojo.PojoCodecProvider
 import java.io.BufferedReader
@@ -22,6 +24,9 @@ import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
+import java.io.InputStreamReader
+import java.io.Reader
+import java.nio.charset.StandardCharsets
 
 
 fun apiGet(port: Int, endpoint: String, acceptHeader: String?): Map<String, Any> {
@@ -167,10 +172,23 @@ fun resetDB() {
 
     val editableCollection = mongoDatabase.getCollection(EDITABLE_COLLECTIONS_COLLECTION)
     editableCollection.deleteMany(org.bson.Document())
+    editableCollection.insertMany(editableFieldsPopulation())
 
     val userCollection = mongoDatabase.getCollection(MONGO_USER_COLLECTION)
     userCollection.deleteMany(org.bson.Document())
     userCollection.insertMany(userPopulation())
 
     client.close()
+}
+
+class TestResponseReader {
+    private fun resourceAsReader(resourceName: String): Reader {
+        return InputStreamReader(javaClass.classLoader.getResourceAsStream(resourceName)!!, StandardCharsets.UTF_8)
+    }
+
+    fun parseTurtleFile(filename: String): Model {
+        val expected = ModelFactory.createDefaultModel()
+        expected.read(resourceAsReader(filename), "", "TURTLE")
+        return expected
+    }
 }

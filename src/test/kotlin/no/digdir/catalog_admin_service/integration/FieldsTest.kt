@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.digdir.catalog_admin_service.model.*
 import no.digdir.catalog_admin_service.utils.ApiTestContext
+import no.digdir.catalog_admin_service.utils.CODE_LIST_0
 import no.digdir.catalog_admin_service.utils.FIELD_0
 import no.digdir.catalog_admin_service.utils.apiAuthorizedRequest
 import no.digdir.catalog_admin_service.utils.jwk.Access
@@ -49,7 +50,7 @@ class FieldsTest : ApiTestContext() {
             val writeResult: Fields = mapper.readValue(writeRsp["body"] as String)
             val adminResult: Fields = mapper.readValue(adminRsp["body"] as String)
 
-            val expected = Fields(editable = EditableFields("910244132", null), internal = listOf(FIELD_0))
+            val expected = Fields(editable = EditableFields("910244132", CODE_LIST_0.id), internal = listOf(FIELD_0))
             assertEquals(expected, readResult)
             assertEquals(expected, writeResult)
             assertEquals(expected, adminResult)
@@ -75,13 +76,13 @@ class FieldsTest : ApiTestContext() {
 
         @Test
         fun ableToUpdateEditableFields() {
-            val operations = listOf(JsonPatchOperation(op = OpEnum.ADD, "/domainCodeListId", "123"))
+            val operations = listOf(JsonPatchOperation(op = OpEnum.REMOVE, "/domainCodeListId"))
             val response = apiAuthorizedRequest(path, port, mapper.writeValueAsString(operations), JwtToken(Access.ORG_ADMIN).toString(), HttpMethod.PATCH)
 
             assertEquals(HttpStatus.OK.value(), response["status"])
 
             val result: EditableFields = mapper.readValue(response["body"] as String)
-            val expected = EditableFields("910244132", "123")
+            val expected = EditableFields("910244132", null)
             assertEquals(expected, result)
         }
 

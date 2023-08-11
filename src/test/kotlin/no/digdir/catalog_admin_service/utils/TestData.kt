@@ -5,6 +5,7 @@ import no.digdir.catalog_admin_service.model.CodeList
 import no.digdir.catalog_admin_service.model.DesignDTO
 import no.digdir.catalog_admin_service.model.DesignDBO
 import no.digdir.catalog_admin_service.model.CodeListToBeCreated
+import no.digdir.catalog_admin_service.model.EditableFields
 import no.digdir.catalog_admin_service.model.Field
 import no.digdir.catalog_admin_service.model.FieldLocation
 import no.digdir.catalog_admin_service.model.FieldType
@@ -36,6 +37,13 @@ val CODE: Code = Code(id = 555, name = NAME, parentID = null)
 val CODES: List<Code> = listOf(CODE)
 val CODE_LIST_0 =
     CodeList(id = "123", name = "name", description = "description", codes = CODES, catalogId = "910244132")
+val CODES_1 = listOf(
+    Code(1, MultiLanguageTexts("nb 1", "nn 1", "en 1"), null),
+    Code(2, MultiLanguageTexts("nb 2", "nn 2", "en 2"), 1),
+    Code(3, MultiLanguageTexts("nb 3", "nn 3", null), 1)
+)
+val CODE_LIST_1 =
+    CodeList(id = "321", name = "code list 1", description = "description of code list 1", codes = CODES_1, catalogId = "123456789")
 val CODE_LIST_TO_BE_CREATED_0 = CodeListToBeCreated(name = "name", description = "description", codes = CODES)
 
 val DESIGN_DTO = DesignDTO(backgroundColor = "#FFFFFF", fontColor = "#CCCFFF", logoDescription = "FDK Logo", hasLogo = false)
@@ -63,12 +71,23 @@ val FIELD_0 = Field(
 )
 
 fun codeListPopulation(): List<Document> =
-    listOf(CODE_LIST_0)
+    listOf(CODE_LIST_0, CODE_LIST_1)
         .map { it.mapDBO() }
 
 fun internalFieldsPopulation(): List<Document> =
     listOf(FIELD_0)
         .map { it.mapDBO() }
+
+fun editableFieldsPopulation(): List<Document> =
+    listOf(
+        EditableFields(catalogId = CODE_LIST_0.catalogId, domainCodeListId = CODE_LIST_0.id),
+        EditableFields(catalogId = CODE_LIST_1.catalogId, domainCodeListId = CODE_LIST_1.id)
+        ).map { it.mapDBO() }
+
+private fun EditableFields.mapDBO(): Document =
+    Document()
+        .append("_id", catalogId)
+        .append("domainCodeListId", domainCodeListId)
 
 private fun CodeList.mapDBO(): Document =
     Document()

@@ -10,6 +10,8 @@ spring:
   security.oauth2.resourceserver.jwt:
     jwk-set-uri: ${SSO_HOST:https://sso.staging.fellesdatakatalog.digdir.no}/auth/realms/fdk/protocol/openid-connect/certs
     issuer-uri: ${SSO_HOST:https://sso.staging.fellesdatakatalog.digdir.no}/auth/realms/fdk
+application:
+  adminServiceUri: ${CATALOG_ADMIN_SERVICE_URI:https://catalog-admin-service.staging.fellesdatakatalog.digdir.no}
 ---
 spring:
   config.activate.on-profile: develop
