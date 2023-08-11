@@ -18,6 +18,8 @@ open class SecurityConfig {
             authorize.requestMatchers(HttpMethod.OPTIONS).permitAll()
                 .requestMatchers(HttpMethod.GET, "/ping").permitAll()
                 .requestMatchers(HttpMethod.GET, "/ready").permitAll()
+                .requestMatchers(HttpMethod.GET, "/concept-subjects").permitAll()
+                .requestMatchers(HttpMethod.GET, "/*/concepts/code-list/subjects").permitAll()
                 .anyRequest().authenticated() }
             .oauth2ResourceServer { resourceServer -> resourceServer.jwt() }
         return http.build()

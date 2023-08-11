@@ -28,6 +28,7 @@
 
         <kotlin.version>1.8.21</kotlin.version>
         <testcontainers.version>1.18.1</testcontainers.version>
+        <jena.version>4.9.0</jena.version>
     </properties>
 
     <dependencies>
@@ -48,6 +49,17 @@
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
             <version>7.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.jena</groupId>
+            <artifactId>jena-core</artifactId>
+            <version>${jena.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.jena</groupId>
+            <artifactId>jena-arq</artifactId>
+            <version>${jena.version}</version>
         </dependency>
 
         <!-- Kotlin dependencies -->
