@@ -82,9 +82,13 @@ open class DesignService(private val designRepository: DesignRepository, private
             Logo(
                 base64Logo = Base64.getEncoder().encodeToString(bytes),
                 contentType = contentType,
-                catalogId = catalogId
+                catalogId = catalogId,
+                filename = logoFile.originalFilename
             )
         )
+
+        logger.info("org: ${logoFile.originalFilename}, name ${logoFile.name}" )
+
 
         getDesignDBO(catalogId)
             .copy(hasLogo = true)

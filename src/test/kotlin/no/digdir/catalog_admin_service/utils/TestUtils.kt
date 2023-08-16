@@ -98,6 +98,7 @@ fun apiAuthorizedMultipartLogo(
     val file = ClassPathResource(filePath)
     val parts: MultiValueMap<String, Any> = LinkedMultiValueMap()
     parts.add("logo", file)
+    parts.add("filename", filePath)
     val request = RestTemplate()
     request.requestFactory = HttpComponentsClientHttpRequestFactory()
     val url = "http://localhost:$port$path"
