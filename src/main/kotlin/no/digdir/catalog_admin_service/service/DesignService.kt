@@ -87,9 +87,6 @@ open class DesignService(private val designRepository: DesignRepository, private
             )
         )
 
-        logger.info("org: ${logoFile.originalFilename}, name ${logoFile.name}" )
-
-
         getDesignDBO(catalogId)
             .copy(hasLogo = true)
             .run { designRepository.save(this) }
