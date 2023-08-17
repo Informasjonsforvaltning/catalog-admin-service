@@ -64,7 +64,6 @@ open class DesignController(
     fun getLogoFile(@AuthenticationPrincipal jwt: Jwt, @PathVariable catalogId: String): ResponseEntity<InputStreamResource> =
         if (endpointPermissions.hasOrgReadPermission(jwt, catalogId)) {
             val logo = designService.getLogo(catalogId)
-            logger.info("Header: ${logo?.fileNameHeader()?.get(HttpHeaders.CONTENT_DISPOSITION)}" )
             if (logo != null) ResponseEntity
                 .ok()
                 .contentType(MediaType.asMediaType(MimeType.valueOf(logo.contentType)))
