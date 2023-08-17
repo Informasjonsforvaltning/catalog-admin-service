@@ -82,7 +82,8 @@ open class DesignService(private val designRepository: DesignRepository, private
             Logo(
                 base64Logo = Base64.getEncoder().encodeToString(bytes),
                 contentType = contentType,
-                catalogId = catalogId
+                catalogId = catalogId,
+                filename = logoFile.originalFilename ?: "logo.${fileEndingFromContentType(contentType)}"
             )
         )
 
@@ -90,6 +91,13 @@ open class DesignService(private val designRepository: DesignRepository, private
             .copy(hasLogo = true)
             .run { designRepository.save(this) }
     }
+
+    private fun fileEndingFromContentType(contentType: String): String =
+        when {
+            contentType.contains("svg") -> "svg"
+            contentType.contains("png") -> "png"
+            else -> throw ResponseStatusException(HttpStatus.BAD_REQUEST)
+        }
 
     private fun validatePNG(inputStream: InputStream) {
         try {

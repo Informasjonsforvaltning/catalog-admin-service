@@ -6,7 +6,9 @@ import no.digdir.catalog_admin_service.model.Logo
 import no.digdir.catalog_admin_service.security.EndpointPermissions
 import no.digdir.catalog_admin_service.service.DesignService
 import no.digdir.catalog_admin_service.service.inputStreamResource
+import org.slf4j.LoggerFactory
 import org.springframework.core.io.InputStreamResource
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.multipart.MultipartFile
 
+private val logger = LoggerFactory.getLogger(DesignController::class.java)
 
 @Controller
 @CrossOrigin
@@ -64,6 +67,7 @@ open class DesignController(
             if (logo != null) ResponseEntity
                 .ok()
                 .contentType(MediaType.asMediaType(MimeType.valueOf(logo.contentType)))
+                .headers(logo.fileNameHeader())
                 .body(logo.inputStreamResource())
             else ResponseEntity(HttpStatus.NOT_FOUND)
         } else {
@@ -93,3 +97,8 @@ open class DesignController(
         }
     }
 }
+
+private fun Logo.fileNameHeader(): HttpHeaders =
+    HttpHeaders().apply {
+        add(HttpHeaders.CONTENT_DISPOSITION, """filename="$filename"""")
+    }

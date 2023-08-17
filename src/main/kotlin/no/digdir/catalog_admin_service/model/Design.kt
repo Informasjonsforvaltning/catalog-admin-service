@@ -25,5 +25,6 @@ data class Logo(
     @Id
     val catalogId: String,
     val contentType: String,
-    val base64Logo: String
+    val base64Logo: String,
+    val filename: String
 )

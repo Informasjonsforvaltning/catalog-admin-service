@@ -57,7 +57,8 @@ val USER_TO_BE_CREATED = UserToBeCreated(name = "Test User", email = "test@mail.
 val LOGO = Logo(
     base64Logo = "PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/Pgo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiPgo8c3ZnIHZlcnNpb249IjEuMSIgYmFzZVByb2ZpbGU9ImZ1bGwiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgICA8cG9seWdvbiBpZD0idHJpYW5nbGUiIHBvaW50cz0iMCwwIDAsNTAgNTAsMCIgZmlsbD0iIzAwOTkwMCIgc3Ryb2tlPSIjMDA0NDAwIi8+Cjwvc3ZnPg==",
     contentType = "image/svg+xml",
-    catalogId = "910244132"
+    catalogId = "910244132",
+    filename = "test.svg"
 )
 
 val FIELD_0 = Field(
@@ -126,6 +127,7 @@ private fun Logo.mapDBO(): Document =
         .append("_id", catalogId)
         .append("contentType", contentType)
         .append("base64Logo", base64Logo)
+        .append("filename", filename)
 
 fun userPopulation(): List<Document> =
     listOf(USER)
