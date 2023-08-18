@@ -11,7 +11,7 @@ spec:
     matchLabels:
       app: catalog-admin-service
   strategy:
-    type: Recreate
+    type: RollingUpdate
   template:
     metadata:
       labels:
