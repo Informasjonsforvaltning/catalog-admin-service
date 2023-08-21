@@ -13,7 +13,6 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.server.ResponseStatusException
 import java.io.ByteArrayInputStream
@@ -55,15 +54,17 @@ open class DesignService(private val designRepository: DesignRepository, private
     fun getLogo(catalogId: String): Logo? =
         logoRepository.findByIdOrNull(catalogId)
 
-    fun deleteLogo(catalogId: String) =
+    fun deleteLogo(catalogId: String): DesignDBO =
         try {
             logoRepository.deleteById(catalogId)
+            getDesignDBO(catalogId)
+                .copy(hasLogo = false)
+                .run { designRepository.save(this) }
         } catch (ex: Exception) {
             logger.error("Failed to delete logo for catalog $catalogId", ex)
             throw ex
         }
 
-    @Transactional
     open fun saveLogo(catalogId: String, logoFile: MultipartFile) {
         logger.info("uploading logo for $catalogId")
         val contentType = logoFile.contentType
