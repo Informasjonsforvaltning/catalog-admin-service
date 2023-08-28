@@ -68,7 +68,8 @@ val FIELD_0 = Field(
     description = NAME,
     type = FieldType.CODE_LIST,
     location = FieldLocation.RIGHT_COLUMN,
-    codeListId = "123"
+    codeListId = "123",
+    enableFilter = null
 )
 
 fun codeListPopulation(): List<Document> =
