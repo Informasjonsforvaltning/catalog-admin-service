@@ -19,7 +19,8 @@ data class Field(
     val description: MultiLanguageTexts,
     val type: FieldType,
     val location: FieldLocation,
-    val codeListId: String?
+    val codeListId: String?,
+    val enableFilter: Boolean?
 )
 
 @Document(collection = "editableFields")
@@ -35,7 +36,8 @@ data class FieldToBeCreated(
     val description: MultiLanguageTexts?,
     val type: FieldType?,
     val location: FieldLocation?,
-    val codeListId: String?
+    val codeListId: String?,
+    val enableFilter: Boolean?
 )
 
 enum class FieldType(private val value: String) {

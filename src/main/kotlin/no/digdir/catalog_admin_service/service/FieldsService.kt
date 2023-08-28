@@ -50,7 +50,8 @@ class FieldsService(
                 description = data.description ?: MultiLanguageTexts(null, null, null),
                 type = data.type ?: FieldType.TEXT_SHORT,
                 location = data.location ?: FieldLocation.MAIN_COLUMN,
-                codeListId = data.codeListId
+                codeListId = data.codeListId,
+                enableFilter = data.enableFilter
             ).let { internalFieldsRepository.insert(it) }
         } catch (ex: Exception) {
             logger.error("Failed to create internal field for catalog $catalogId", ex)

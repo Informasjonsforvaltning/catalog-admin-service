@@ -126,7 +126,8 @@ class FieldsTest : ApiTestContext() {
                 MultiLanguageTexts(nb = "description", nn = "description", en = "description"),
                 FieldType.BOOLEAN,
                 null,
-                null
+                null,
+                false
             )
             val response = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.ORG_ADMIN).toString(), HttpMethod.POST)
 
@@ -146,14 +147,15 @@ class FieldsTest : ApiTestContext() {
                 description = MultiLanguageTexts(nb = "description", nn = "description", en = "description"),
                 type = FieldType.BOOLEAN,
                 location = FieldLocation.MAIN_COLUMN,
-                codeListId = null
+                codeListId = null,
+                enableFilter = false
             )
             assertEquals(expected, result)
         }
 
         @Test
         fun forbiddenForWrongOrgAndNonAdminRoles() {
-            val body = FieldToBeCreated(MultiLanguageTexts(nb = "Test", nn = "Test", en = "Test"), null, null, null, null)
+            val body = FieldToBeCreated(MultiLanguageTexts(nb = "Test", nn = "Test", en = "Test"), null, null, null, null, null)
             val readRole = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.ORG_READ).toString(), HttpMethod.POST)
             val writeRole = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.ORG_WRITE).toString(), HttpMethod.POST)
             val wrongOrg = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.WRONG_ORG_ADMIN).toString(), HttpMethod.POST)
@@ -165,7 +167,7 @@ class FieldsTest : ApiTestContext() {
 
         @Test
         fun unauthorizedWhenMissingToken() {
-            val body = FieldToBeCreated(MultiLanguageTexts(nb = "Test", nn = "Test", en = "Test"), null, null, null, null)
+            val body = FieldToBeCreated(MultiLanguageTexts(nb = "Test", nn = "Test", en = "Test"), null, null, null, null, null)
             val response = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), null, HttpMethod.POST)
             assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
         }
