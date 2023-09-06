@@ -72,9 +72,15 @@ val FIELD_0 = Field(
     enableFilter = null
 )
 
+val LIST_OF_CODE_LISTS_TO_BE_CREATED: List<CodeListToBeCreated> = listOf(
+    CodeListToBeCreated(name = "name 1", description = "description", codes = CODES),
+    CodeListToBeCreated(name = "name 2", description = "description", codes = CODES),
+    CodeListToBeCreated(name = "name 3", description = "description", codes = CODES)
+)
+
 fun codeListPopulation(): List<Document> =
-    listOf(CODE_LIST_0, CODE_LIST_1)
-        .map { it.mapDBO() }
+listOf(CODE_LIST_0, CODE_LIST_1)
+    .map { it.mapDBO() }
 
 fun internalFieldsPopulation(): List<Document> =
     listOf(FIELD_0)

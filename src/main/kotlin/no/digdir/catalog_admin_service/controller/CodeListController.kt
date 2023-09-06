@@ -103,6 +103,25 @@ open class CodeListController(
             )
 
         } else ResponseEntity<Unit>(HttpStatus.FORBIDDEN)
+
+    @PostMapping(
+        value = ["/import"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    fun createListOfCodeLists(
+        @AuthenticationPrincipal jwt: Jwt,
+        @PathVariable catalogId: String,
+        @RequestBody codeLists: List<CodeListToBeCreated>
+    ): ResponseEntity<Unit> {
+        if (endpointPermissions.hasOrgAdminPermission(jwt, catalogId)) {
+            logger.info("Creating ${codeLists.size} code lists for $catalogId")
+            codeListService.createListOfCodeLists(codeLists, catalogId)
+            return ResponseEntity(HttpStatus.CREATED)
+        } else {
+            return ResponseEntity<Unit>(HttpStatus.FORBIDDEN)
+        }
+    }
 }
 
 private fun locationHeaderForCreated(newId: String, catalogId: String): HttpHeaders =
