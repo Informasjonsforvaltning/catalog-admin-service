@@ -240,6 +240,31 @@ class CodeListTest : ApiTestContext() {
         assertEquals(4, result.codeLists.size)
     }
 
+    @Test
+    fun importCodeListsForbiddenForWrongOrg() {
+        val response = apiAuthorizedRequest(
+            "/910244132/concepts/code-lists/import",
+            port,
+            mapper.writeValueAsString(LIST_OF_CODE_LISTS_TO_BE_CREATED),
+            JwtToken(Access.WRONG_ORG_ADMIN).toString(),
+            HttpMethod.POST
+        )
+        assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
+    }
+
+    @Test
+    fun importCodeListsForbiddenForReadOnly() {
+        val response = apiAuthorizedRequest(
+            "/910244132/concepts/code-lists/import",
+            port,
+            mapper.writeValueAsString(LIST_OF_CODE_LISTS_TO_BE_CREATED),
+            JwtToken(Access.ORG_READ).toString(),
+            HttpMethod.POST
+        )
+        assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
+    }
+
+
     @Nested
     internal inner class Update {
 
