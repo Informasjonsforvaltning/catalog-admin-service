@@ -11,6 +11,7 @@ import no.digdir.catalog_admin_service.utils.CODE
 import no.digdir.catalog_admin_service.utils.CODE_LIST_0
 import no.digdir.catalog_admin_service.utils.NAME
 import no.digdir.catalog_admin_service.utils.CODE_LIST_TO_BE_CREATED_0
+import no.digdir.catalog_admin_service.utils.LIST_OF_CODE_LISTS_TO_BE_CREATED
 import no.digdir.catalog_admin_service.utils.apiAuthorizedRequest
 import no.digdir.catalog_admin_service.utils.apiGet
 import no.digdir.catalog_admin_service.utils.jwk.Access
@@ -220,6 +221,49 @@ class CodeListTest : ApiTestContext() {
         )
         assertEquals(expected, result)
     }
+
+    @Test
+    fun importThreeCodeLists() {
+        val path = "/910244132/concepts/code-lists/import"
+        val createResponse = apiAuthorizedRequest(
+            path,
+            port,
+            mapper.writeValueAsString(LIST_OF_CODE_LISTS_TO_BE_CREATED),
+            JwtToken(Access.ORG_ADMIN).toString(),
+            HttpMethod.POST
+        )
+        assertEquals(HttpStatus.CREATED.value(), createResponse["status"])
+
+        val getResponse = apiAuthorizedRequest( "/910244132/concepts/code-lists", port, null, JwtToken(Access.ORG_READ).toString(), HttpMethod.GET)
+        assertEquals(HttpStatus.OK.value(), getResponse["status"])
+        val result: CodeLists = mapper.readValue(getResponse["body"] as String)
+        assertEquals(4, result.codeLists.size)
+    }
+
+    @Test
+    fun importCodeListsForbiddenForWrongOrg() {
+        val response = apiAuthorizedRequest(
+            "/910244132/concepts/code-lists/import",
+            port,
+            mapper.writeValueAsString(LIST_OF_CODE_LISTS_TO_BE_CREATED),
+            JwtToken(Access.WRONG_ORG_ADMIN).toString(),
+            HttpMethod.POST
+        )
+        assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
+    }
+
+    @Test
+    fun importCodeListsForbiddenForReadOnly() {
+        val response = apiAuthorizedRequest(
+            "/910244132/concepts/code-lists/import",
+            port,
+            mapper.writeValueAsString(LIST_OF_CODE_LISTS_TO_BE_CREATED),
+            JwtToken(Access.ORG_READ).toString(),
+            HttpMethod.POST
+        )
+        assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
+    }
+
 
     @Nested
     internal inner class Update {

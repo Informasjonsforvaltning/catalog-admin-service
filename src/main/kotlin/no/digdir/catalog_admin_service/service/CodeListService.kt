@@ -49,19 +49,30 @@ class CodeListService(
             throw ex
         }
 
+    private fun CodeListToBeCreated.mapCodeListToBeCreatedToCodeList(catalogId: String): CodeList =
+        CodeList(
+            id = UUID.randomUUID().toString(),
+            name = name,
+            catalogId = catalogId,
+            description = description,
+            codes = codes
+        )
+
+
     fun createCodeList(data: CodeListToBeCreated, catalogId: String): CodeList =
         try {
-            CodeList(
-                id = UUID.randomUUID().toString(),
-                name = data.name,
-                catalogId = catalogId,
-                description = data.description,
-                codes = data.codes
-            ).let { codeListRepository.insert(it) }
+            data.mapCodeListToBeCreatedToCodeList(catalogId)
+                .let { codeListRepository.insert(it) }
         } catch (ex: Exception) {
             logger.error("Failed to create code-list for catalog $catalogId", ex)
             throw ex
         }
+
+    fun createListOfCodeLists(codeListsToBeCreated: List<CodeListToBeCreated>, catalogId: String) {
+        codeListsToBeCreated
+            .map { it.mapCodeListToBeCreatedToCodeList(catalogId) }
+            .run { codeListRepository.saveAll(this) }
+    }
 
     fun updateCodeList(codeListId: String, catalogId: String, operations: List<JsonPatchOperation>): CodeList? =
         try {
