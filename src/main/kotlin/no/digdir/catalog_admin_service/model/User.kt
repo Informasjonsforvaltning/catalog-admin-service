@@ -11,12 +11,12 @@ data class User(
     val catalogId: String,
     val name: String,
     val email: String?,
-    val telephoneNumber: Number?
+    val telephoneNumber: String?
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class UserToBeCreated(
     val name: String,
     val email: String?,
-    val telephoneNumber: Number?
+    val telephoneNumber: String?
 )
