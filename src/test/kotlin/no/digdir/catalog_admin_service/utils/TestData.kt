@@ -51,8 +51,8 @@ val DESIGN_DBO =
     DesignDBO(backgroundColor = "#FFFFFF", fontColor = "#CCCFFF", logoDescription = "FDK Logo", catalogId = "910244132")
 
 val USER =
-    User(name = "Test User", id = "123", catalogId = "910244132", email = "test@mail.com", telephoneNumber = 12345678)
-val USER_TO_BE_CREATED = UserToBeCreated(name = "Test User", email = "test@mail.com", telephoneNumber = 12345678)
+    User(name = "Test User", id = "123", catalogId = "910244132", email = "test@mail.com", telephoneNumber = "12345678")
+val USER_TO_BE_CREATED = UserToBeCreated(name = "Test User", email = "test@mail.com", telephoneNumber = "12345678")
 
 val LOGO = Logo(
     base64Logo = "PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/Pgo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiPgo8c3ZnIHZlcnNpb249IjEuMSIgYmFzZVByb2ZpbGU9ImZ1bGwiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgICA8cG9seWdvbiBpZD0idHJpYW5nbGUiIHBvaW50cz0iMCwwIDAsNTAgNTAsMCIgZmlsbD0iIzAwOTkwMCIgc3Ryb2tlPSIjMDA0NDAwIi8+Cjwvc3ZnPg==",
