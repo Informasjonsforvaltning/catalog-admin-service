@@ -30,7 +30,6 @@ class FieldsService(
 
     private fun getCatalogInternalFields(catalogId: String): List<Field> =
         internalFieldsRepository.findByCatalogId(catalogId)
-            .sortedBy { it.id }
 
     fun updateEditableFields(catalogId: String, operations: List<JsonPatchOperation>): EditableFields =
         try {
