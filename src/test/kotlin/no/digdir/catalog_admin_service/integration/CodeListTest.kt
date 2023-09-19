@@ -9,6 +9,8 @@ import no.digdir.catalog_admin_service.model.OpEnum
 import no.digdir.catalog_admin_service.utils.ApiTestContext
 import no.digdir.catalog_admin_service.utils.CODE
 import no.digdir.catalog_admin_service.utils.CODE_LIST_0
+import no.digdir.catalog_admin_service.utils.CODE_LIST_2
+import no.digdir.catalog_admin_service.utils.CODE_LIST_3
 import no.digdir.catalog_admin_service.utils.NAME
 import no.digdir.catalog_admin_service.utils.CODE_LIST_TO_BE_CREATED_0
 import no.digdir.catalog_admin_service.utils.LIST_OF_CODE_LISTS_TO_BE_CREATED
@@ -50,7 +52,7 @@ class CodeListTest : ApiTestContext() {
         )
         assertEquals(HttpStatus.OK.value(), response["status"])
         val result: CodeLists = mapper.readValue(response["body"] as String)
-        val expected = CodeLists(codeLists = listOf(CODE_LIST_0))
+        val expected = CodeLists(codeLists = listOf(CODE_LIST_0, CODE_LIST_2, CODE_LIST_3))
         assertEquals(expected, result)
     }
 
@@ -130,7 +132,7 @@ class CodeListTest : ApiTestContext() {
 
     @Test
     fun deleteCodeList() {
-        val path = "/910244132/concepts/code-lists/123"
+        val path = "/910244132/concepts/code-lists/456"
 
         val preResponse = apiAuthorizedRequest(
             path,
@@ -152,6 +154,20 @@ class CodeListTest : ApiTestContext() {
             HttpMethod.DELETE
         )
         assertEquals(HttpStatus.NOT_FOUND.value(), postResponse["status"])
+    }
+
+    @Test
+    fun badRequestWhenDeletingCodeListInUseEditableField() {
+        val path = "/910244132/concepts/code-lists/123"
+        val deleteResponse = apiAuthorizedRequest(path, port, null, JwtToken(Access.ORG_ADMIN).toString(), HttpMethod.DELETE)
+        assertEquals(HttpStatus.BAD_REQUEST.value(), deleteResponse["status"])
+    }
+
+    @Test
+    fun badRequestWhenDeletingCodeListInUseInternalField() {
+        val path = "/910244132/concepts/code-lists/678"
+        val deleteResponse = apiAuthorizedRequest(path, port, null, JwtToken(Access.ORG_ADMIN).toString(), HttpMethod.DELETE)
+        assertEquals(HttpStatus.BAD_REQUEST.value(), deleteResponse["status"])
     }
 
     @Test
@@ -237,7 +253,7 @@ class CodeListTest : ApiTestContext() {
         val getResponse = apiAuthorizedRequest( "/910244132/concepts/code-lists", port, null, JwtToken(Access.ORG_READ).toString(), HttpMethod.GET)
         assertEquals(HttpStatus.OK.value(), getResponse["status"])
         val result: CodeLists = mapper.readValue(getResponse["body"] as String)
-        assertEquals(4, result.codeLists.size)
+        assertEquals(6, result.codeLists.size)
     }
 
     @Test
