@@ -42,8 +42,10 @@ val CODES_1 = listOf(
     Code(2, MultiLanguageTexts("nb 2", "nn 2", "en 2"), 1),
     Code(3, MultiLanguageTexts("nb 3", "nn 3", null), 1)
 )
-val CODE_LIST_1 =
-    CodeList(id = "321", name = "code list 1", description = "description of code list 1", codes = CODES_1, catalogId = "123456789")
+val CODE_LIST_1 = CodeList(id = "321", name = "code list 1", description = "description of code list 1", codes = CODES_1, catalogId = "123456789")
+val CODE_LIST_2 = CodeList(id = "456", name = "code list 2", description = "description of code list 2", codes = CODES_1, catalogId = "910244132")
+val CODE_LIST_3 = CodeList(id = "678", name = "code list 3", description = "description of code list 3", codes = CODES_1, catalogId = "910244132")
+
 val CODE_LIST_TO_BE_CREATED_0 = CodeListToBeCreated(name = "name", description = "description", codes = CODES)
 
 val DESIGN_DTO = DesignDTO(backgroundColor = "#FFFFFF", fontColor = "#CCCFFF", logoDescription = "FDK Logo", hasLogo = false)
@@ -68,7 +70,7 @@ val FIELD_0 = Field(
     description = NAME,
     type = FieldType.CODE_LIST,
     location = FieldLocation.RIGHT_COLUMN,
-    codeListId = "123",
+    codeListId = "678",
     enableFilter = null
 )
 
@@ -79,7 +81,7 @@ val LIST_OF_CODE_LISTS_TO_BE_CREATED: List<CodeListToBeCreated> = listOf(
 )
 
 fun codeListPopulation(): List<Document> =
-listOf(CODE_LIST_0, CODE_LIST_1)
+listOf(CODE_LIST_0, CODE_LIST_1, CODE_LIST_2, CODE_LIST_3)
     .map { it.mapDBO() }
 
 fun internalFieldsPopulation(): List<Document> =

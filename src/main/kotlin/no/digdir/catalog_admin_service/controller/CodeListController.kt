@@ -83,7 +83,7 @@ open class CodeListController(
             !endpointPermissions.hasOrgAdminPermission(jwt, catalogId) -> ResponseEntity(HttpStatus.FORBIDDEN)
             codeListService.getCodeListById(catalogId, codeListId) == null -> ResponseEntity(HttpStatus.NOT_FOUND)
             else -> {
-                codeListService.deleteCodeListById(codeListId)
+                codeListService.deleteCodeListById(catalogId, codeListId)
                 ResponseEntity(HttpStatus.NO_CONTENT)
             }
         }

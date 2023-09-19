@@ -6,6 +6,7 @@ import java.util.*
 import no.digdir.catalog_admin_service.model.CodeList
 import no.digdir.catalog_admin_service.model.CodeListToBeCreated
 import no.digdir.catalog_admin_service.model.CodeLists
+import no.digdir.catalog_admin_service.model.FieldType
 import no.digdir.catalog_admin_service.repository.CodeListRepository
 import org.springframework.stereotype.Service
 import no.digdir.catalog_admin_service.model.JsonPatchOperation
@@ -13,6 +14,7 @@ import no.digdir.catalog_admin_service.model.MultiLanguageTexts
 import no.digdir.catalog_admin_service.rdf.UNESKOS
 import no.digdir.catalog_admin_service.rdf.turtleResponse
 import no.digdir.catalog_admin_service.repository.EditableFieldsRepository
+import no.digdir.catalog_admin_service.repository.InternalFieldsRepository
 import org.apache.jena.datatypes.xsd.impl.XSDDateType
 import org.apache.jena.rdf.model.Model
 import org.apache.jena.rdf.model.ModelFactory
@@ -22,6 +24,8 @@ import org.apache.jena.vocabulary.SKOS
 import org.apache.jena.vocabulary.XSD
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.http.HttpStatus
+import org.springframework.web.server.ResponseStatusException
 
 private val logger = LoggerFactory.getLogger(CodeListService::class.java)
 
@@ -29,7 +33,8 @@ private val logger = LoggerFactory.getLogger(CodeListService::class.java)
 class CodeListService(
     private val codeListRepository: CodeListRepository,
     private val editableFieldsRepository: EditableFieldsRepository,
-    private val applicationProperties: ApplicationProperties
+    private val applicationProperties: ApplicationProperties,
+    private val internalFieldsRepository: InternalFieldsRepository,
 ) {
     private fun CodeList.subjectsURI() = "${applicationProperties.adminServiceUri}/$catalogId/concepts/subjects"
     private fun createCodeURI(codeListUri: String, codeId: Int) = "$codeListUri#$codeId"
@@ -41,13 +46,29 @@ class CodeListService(
     fun getCodeListById(catalogId: String, codeListId: String): CodeList? =
         codeListRepository.findCodeListByIdAndCatalogId(codeListId, catalogId)
 
-    fun deleteCodeListById(codeListId: String) =
-        try {
-            codeListRepository.deleteById(codeListId)
-        } catch (ex: Exception) {
-            logger.error("Failed to delete code-list with id $codeListId", ex)
-            throw ex
+    fun deleteCodeListById(catalogId: String, codeListId: String) {
+        val codeListsInInternalFields = internalFieldsRepository.findByCatalogIdAndTypeAndCodeListId(catalogId, FieldType.CODE_LIST, codeListId)
+        val domainCodeListInEditableField = editableFieldsRepository.findByIdOrNull(catalogId)?.domainCodeListId
+
+        when {
+            codeListsInInternalFields.isNotEmpty() -> {
+                logger.error("Cannot delete a code list that is in use in internal fields.")
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST)
+            }
+            domainCodeListInEditableField == codeListId -> {
+                logger.error("Cannot delete a code list that is in use in editable fields.")
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST)
+            }
+            else -> {
+                try {
+                    codeListRepository.deleteById(codeListId)
+                } catch (ex: Exception) {
+                    logger.error("Failed to delete code list with id $codeListId", ex)
+                    throw ex
+                }
+            }
         }
+    }
 
     private fun CodeListToBeCreated.mapCodeListToBeCreatedToCodeList(catalogId: String): CodeList =
         CodeList(
