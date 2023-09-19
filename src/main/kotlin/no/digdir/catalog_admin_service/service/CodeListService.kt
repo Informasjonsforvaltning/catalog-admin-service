@@ -46,25 +46,31 @@ class CodeListService(
     fun getCodeListById(catalogId: String, codeListId: String): CodeList? =
         codeListRepository.findCodeListByIdAndCatalogId(codeListId, catalogId)
 
-    fun deleteCodeListById(catalogId: String, codeListId: String) =
-        if (internalFieldsRepository.findByCatalogIdAndTypeAndCodeListId(catalogId, FieldType.CODE_LIST, codeListId).isNotEmpty())
-        {
-            logger.error("Cannot delete a code list that is in use in internal fields.")
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST)
-        }
-        else if (editableFieldsRepository.findByIdOrNull(catalogId)?.domainCodeListId == codeListId)
-             {
+    fun deleteCodeListById(catalogId: String, codeListId: String) {
+        val codeListsInInternalFields = internalFieldsRepository.findByCatalogIdAndTypeAndCodeListId(catalogId, FieldType.CODE_LIST, codeListId)
+        val domainCodeListInEditableField = editableFieldsRepository.findByIdOrNull(catalogId)?.domainCodeListId
+
+        when {
+            codeListsInInternalFields.isNotEmpty() -> {
+                logger.error("Cannot delete a code list that is in use in internal fields.")
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST)
+            }
+            domainCodeListInEditableField == codeListId -> {
                 logger.error("Cannot delete a code list that is in use in editable fields.")
                 throw ResponseStatusException(HttpStatus.BAD_REQUEST)
             }
-        else {
-            try {
-                codeListRepository.deleteById(codeListId)
-            } catch (ex: Exception) {
-                logger.error("Failed to delete code-list with id $codeListId", ex)
-                throw ex
+            else -> {
+                try {
+                    codeListRepository.deleteById(codeListId)
+                } catch (ex: Exception) {
+                    logger.error("Failed to delete code list with id $codeListId", ex)
+                    throw ex
+                }
             }
         }
+    }
+
+
 
     private fun CodeListToBeCreated.mapCodeListToBeCreatedToCodeList(catalogId: String): CodeList =
         CodeList(
