@@ -52,7 +52,7 @@ class CodeListService(
             logger.error("Cannot delete a code list that is in use in internal fields.")
             throw ResponseStatusException(HttpStatus.BAD_REQUEST)
         }
-        else if (editableFieldsRepository.findByCatalogIdAndDomainCodeListId(catalogId, codeListId) != null)
+        else if (editableFieldsRepository.findByIdOrNull(catalogId)?.domainCodeListId == codeListId)
              {
                 logger.error("Cannot delete a code list that is in use in editable fields.")
                 throw ResponseStatusException(HttpStatus.BAD_REQUEST)

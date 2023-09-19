@@ -5,6 +5,4 @@ import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface EditableFieldsRepository : MongoRepository<EditableFields, String> {
-    fun findByCatalogIdAndDomainCodeListId(catalogId: String, codeListId: String): EditableFields?
-}
+interface EditableFieldsRepository : MongoRepository<EditableFields, String>
