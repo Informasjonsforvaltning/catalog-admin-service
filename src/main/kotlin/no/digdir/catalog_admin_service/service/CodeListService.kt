@@ -70,8 +70,6 @@ class CodeListService(
         }
     }
 
-
-
     private fun CodeListToBeCreated.mapCodeListToBeCreatedToCodeList(catalogId: String): CodeList =
         CodeList(
             id = UUID.randomUUID().toString(),
