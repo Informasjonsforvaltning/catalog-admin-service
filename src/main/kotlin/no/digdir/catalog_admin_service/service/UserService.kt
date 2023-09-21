@@ -14,7 +14,7 @@ private val logger = LoggerFactory.getLogger(UserService::class.java)
 @Service
 class UserService(private val userRepository: UserRepository) {
     fun getUsers(catalogId: String): Users =
-        Users(users = userRepository.findUsersByCatalogId(catalogId))
+        Users(users = userRepository.findUsersByCatalogId(catalogId).sortedBy { it.name })
 
     fun getUserById(userId: String, catalogId: String): User? =
         userRepository.findUserByIdAndCatalogId(userId, catalogId)
