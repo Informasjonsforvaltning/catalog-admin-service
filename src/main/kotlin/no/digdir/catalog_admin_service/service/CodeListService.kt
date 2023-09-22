@@ -41,7 +41,7 @@ class CodeListService(
     private fun publisherURI(publisherId: String) = "https://data.brreg.no/enhetsregisteret/api/enheter/$publisherId"
 
     fun getCodeLists(catalogId: String): CodeLists =
-        CodeLists(codeLists = codeListRepository.findCodeListsByCatalogId(catalogId))
+        CodeLists(codeLists = codeListRepository.findCodeListsByCatalogId(catalogId).sortedBy { it.name })
 
     fun getCodeListById(catalogId: String, codeListId: String): CodeList? =
         codeListRepository.findCodeListByIdAndCatalogId(codeListId, catalogId)
