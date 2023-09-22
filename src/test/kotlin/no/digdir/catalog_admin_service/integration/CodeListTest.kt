@@ -52,7 +52,7 @@ class CodeListTest : ApiTestContext() {
         )
         assertEquals(HttpStatus.OK.value(), response["status"])
         val result: CodeLists = mapper.readValue(response["body"] as String)
-        val expected = CodeLists(codeLists = listOf(CODE_LIST_0, CODE_LIST_2, CODE_LIST_3))
+        val expected = CodeLists(codeLists = listOf(CODE_LIST_2, CODE_LIST_3, CODE_LIST_0))
         assertEquals(expected, result)
     }
 
