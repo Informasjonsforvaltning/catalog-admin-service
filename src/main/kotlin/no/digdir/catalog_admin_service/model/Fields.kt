@@ -3,6 +3,8 @@ package no.digdir.catalog_admin_service.model
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonValue
 import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.index.CompoundIndex
+import org.springframework.data.mongodb.core.index.CompoundIndexes
 import org.springframework.data.mongodb.core.mapping.Document
 
 data class Fields(
@@ -11,6 +13,10 @@ data class Fields(
 )
 
 @Document(collection = "internalFields")
+@CompoundIndexes(value = [
+    CompoundIndex(name = "catalog_id", def = "{'catalogId' : 1}"),
+    CompoundIndex(name = "catalog_id_type_code_list_id", def = "{'catalogId' : 1, 'type' : 1, 'codeListId' : 1}")
+])
 data class Field(
     @Id
     val id: String,
