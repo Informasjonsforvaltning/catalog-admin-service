@@ -6,7 +6,9 @@ logging:
 server:
   port: 8080
 spring:
-  data.mongodb.uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongodb:27017/catalogAdminService?authSource=admin&authMechanism=SCRAM-SHA-1
+  data.mongodb:
+    uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongodb:27017/catalogAdminService?authSource=admin&authMechanism=SCRAM-SHA-1
+    auto-index-creation: true
   security.oauth2.resourceserver.jwt:
     jwk-set-uri: ${SSO_HOST:https://sso.staging.fellesdatakatalog.digdir.no}/auth/realms/fdk/protocol/openid-connect/certs
     issuer-uri: ${SSO_HOST:https://sso.staging.fellesdatakatalog.digdir.no}/auth/realms/fdk
