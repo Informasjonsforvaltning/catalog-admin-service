@@ -33,14 +33,14 @@ val MONGO_ENV_VALUES: Map<String, String> = ImmutableMap.of(
 )
 
 val NAME: MultiLanguageTexts = MultiLanguageTexts(en = "codeName", nb = null, nn = null)
-val CODE: Code = Code(id = 555, name = NAME, parentID = null)
+val CODE: Code = Code(id = "555", name = NAME, parentID = null)
 val CODES: List<Code> = listOf(CODE)
 val CODE_LIST_0 =
     CodeList(id = "123", name = "name", description = "description", codes = CODES, catalogId = "910244132")
 val CODES_1 = listOf(
-    Code(1, MultiLanguageTexts("nb 1", "nn 1", "en 1"), null),
-    Code(2, MultiLanguageTexts("nb 2", "nn 2", "en 2"), 1),
-    Code(3, MultiLanguageTexts("nb 3", "nn 3", null), 1)
+    Code("1", MultiLanguageTexts("nb 1", "nn 1", "en 1"), null),
+    Code("2", MultiLanguageTexts("nb 2", "nn 2", "en 2"), "1"),
+    Code("3", MultiLanguageTexts("nb 3", "nn 3", null), "1")
 )
 val CODE_LIST_1 = CodeList(id = "321", name = "code list 1", description = "description of code list 1", codes = CODES_1, catalogId = "123456789")
 val CODE_LIST_2 = CodeList(id = "456", name = "code list 2", description = "description of code list 2", codes = CODES_1, catalogId = "910244132")
