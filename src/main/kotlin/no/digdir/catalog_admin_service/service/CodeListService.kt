@@ -37,7 +37,7 @@ class CodeListService(
     private val internalFieldsRepository: InternalFieldsRepository,
 ) {
     private fun CodeList.subjectsURI() = "${applicationProperties.adminServiceUri}/$catalogId/concepts/subjects"
-    private fun createCodeURI(codeListUri: String, codeId: Int) = "$codeListUri#$codeId"
+    private fun createCodeURI(codeListUri: String, codeId: String) = "$codeListUri#$codeId"
     private fun publisherURI(publisherId: String) = "https://data.brreg.no/enhetsregisteret/api/enheter/$publisherId"
 
     fun getCodeLists(catalogId: String): CodeLists =
@@ -151,7 +151,7 @@ class CodeListService(
         return this
     }
 
-    private fun Resource.createCodeResource(code: Code, childrenIds: List<Int>): Resource {
+    private fun Resource.createCodeResource(code: Code, childrenIds: List<String>): Resource {
         val codeURI = createCodeURI(uri, code.id)
         return model.createResource(codeURI, SKOS.Concept)
             .addProperty(DCTerms.identifier, model.createTypedLiteral(codeURI, XSDDateType.XSDanyURI))
@@ -168,12 +168,12 @@ class CodeListService(
         return this
     }
 
-    private fun Resource.addBroader(codeListUri: String, parentId: Int?): Resource {
+    private fun Resource.addBroader(codeListUri: String, parentId: String?): Resource {
         if (parentId != null) addProperty(SKOS.broader, model.getResource(createCodeURI(codeListUri, parentId)))
         return this
     }
 
-    private fun Resource.addNarrower(codeListUri: String, childrenIds: List<Int>): Resource {
+    private fun Resource.addNarrower(codeListUri: String, childrenIds: List<String>): Resource {
         childrenIds.forEach { addProperty(SKOS.narrower, model.getResource(createCodeURI(codeListUri, it))) }
         return this
     }
