@@ -1,6 +1,6 @@
 # catalog-admin-service
 
-This service is responsible for settings in concept catalogs. This includes code lists, internal fields and editable fields. It is also responsible for settings across different catalogs including design and responsible users. 
+This service is responsible for settings in registration catalogs. This includes code lists, internal fields, editable fields for concepts, and settings across different catalogs including design and responsible users. 
 
 This is a REST API. The Open-API spec can be found [here](https://raw.githubusercontent.com/Informasjonsforvaltning/catalog-admin-service/main/openapi.yaml). 
 
@@ -25,7 +25,7 @@ mvn spring-boot:run -Dspring-boot.run.profiles=develop
 
 
 ## Usage examples
-Obs! Remember to use correct catalogId. 
+NB! Remember to use correct catalogId. 
 
 ### Example: create code list
 
