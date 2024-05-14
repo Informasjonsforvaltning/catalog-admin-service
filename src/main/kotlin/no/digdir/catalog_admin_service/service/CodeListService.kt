@@ -105,20 +105,26 @@ class CodeListService(
             throw ex
         }
 
-    fun getAllConceptSubjectCodeLists(): String {
-        val allConceptSubjects = ModelFactory.createDefaultModel()
+    fun getAllConceptSubjectCodeLists(): List<CodeList> =
         editableFieldsRepository.findAll()
             .mapNotNull { it.domainCodeListId }
             .mapNotNull { codeListRepository.findByIdOrNull(it) }
+
+    fun getAllConceptSubjectCodeListsRDF(): String {
+        val allConceptSubjects = ModelFactory.createDefaultModel()
+        getAllConceptSubjectCodeLists()
             .forEach { allConceptSubjects.add(it.createModel()) }
 
         return allConceptSubjects.addDefaultCodeListPrefixes().turtleResponse()
     }
 
-    fun getConceptSubjectsForCatalog(catalogId: String): String? =
+    fun getConceptSubjectsForCatalog(catalogId: String): CodeList? =
         editableFieldsRepository.findByIdOrNull(catalogId)
             ?.domainCodeListId
             ?.let { codeListRepository.findByIdOrNull(it) }
+
+    fun getConceptSubjectsForCatalogRDF(catalogId: String): String? =
+        getConceptSubjectsForCatalog(catalogId)
             ?.createModel()
             ?.addDefaultCodeListPrefixes()
             ?.turtleResponse()
