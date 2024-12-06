@@ -1,6 +1,5 @@
 package no.digdir.catalog_admin_service.controller
 
-import no.digdir.catalog_admin_service.model.CodeList
 import no.digdir.catalog_admin_service.model.EditableFields
 import no.digdir.catalog_admin_service.model.Field
 import no.digdir.catalog_admin_service.model.FieldToBeCreated
@@ -15,7 +14,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -25,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 
 @Controller
-@CrossOrigin
 @RequestMapping(
     value = ["/{catalogId}/concepts/fields"],
     produces = ["application/json"]

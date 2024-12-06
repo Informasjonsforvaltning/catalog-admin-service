@@ -14,7 +14,7 @@ import org.springframework.test.context.ContextConfiguration
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(
-    properties = ["springs.profiles.active=integration-test"],
+    properties = ["spring.profiles.active=integration-test"],
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @ContextConfiguration(initializers = [ApiTestContext.Initializer::class])
