@@ -16,7 +16,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.stereotype.Controller
 import org.springframework.util.MimeType
-import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -31,7 +30,6 @@ import org.springframework.web.multipart.MultipartFile
 private val logger = LoggerFactory.getLogger(DesignController::class.java)
 
 @Controller
-@CrossOrigin
 @RequestMapping(
     value = ["/{catalogId}/design"],
     produces = ["application/json"]

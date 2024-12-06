@@ -14,12 +14,14 @@ spring:
     issuer-uri: ${SSO_HOST:https://sso.staging.fellesdatakatalog.digdir.no}/auth/realms/fdk
 application:
   adminServiceUri: ${CATALOG_ADMIN_SERVICE_URI:https://catalog-admin-service.staging.fellesdatakatalog.digdir.no}
+  cors.originPatterns: "${CORS_ORIGIN_PATTERNS}"
 ---
 spring:
   config.activate.on-profile: develop
 server:
   port: 9090
   data.mongodb.uri: mongodb://admin:admin@localhost:27017/catalogAdminService?authSource=admin&authMechanism=SCRAM-SHA-1
+application.cors.originPatterns: "*"
 ---
 spring:
   config.activate.on-profile: integration-test
@@ -27,3 +29,4 @@ spring:
   security.oauth2.resourceserver.jwt:
     jwk-set-uri: http://localhost:5050/auth/realms/fdk/protocol/openid-connect/certs
     issuer-uri: http://localhost:5050/auth/realms/fdk
+application.cors.originPatterns: "*"
