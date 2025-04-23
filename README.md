@@ -1,90 +1,49 @@
-# catalog-admin-service
+# Catalog Admin Service
 
-This service is responsible for settings in registration catalogs. This includes code lists, internal fields, editable fields for concepts, and settings across different catalogs including design and responsible users. 
+This application provides an API for the management of settings in registration catalogs. This includes code lists,
+internal fields, editable fields for concepts, and settings across different catalogs including design and responsible
+users.
 
-This is a REST API. The Open-API spec can be found [here](https://raw.githubusercontent.com/Informasjonsforvaltning/catalog-admin-service/main/openapi.yaml). 
+For a broader understanding of the system’s context, refer to
+the [architecture documentation](https://github.com/Informasjonsforvaltning/architecture-documentation) wiki. For more
+specific context on this application, see the **Registration** subsystem section.
 
-## Requirements
-- maven
-- java 21
-- docker
-- docker-compose
+## Getting Started
 
-## Run tests
+These instructions will give you a copy of the project up and running on your local machine for development and testing
+purposes.
+
+### Prerequisites
+
+Ensure you have the following installed:
+
+- Java 21
+- Maven
+- Docker
+
+### Running locally
+
+Clone the repository
+
+```sh
+git clone https://github.com/Informasjonsforvaltning/catalog-admin-service.git
+cd catalog-admin-service
 ```
-mvn test
-```
 
-## Run locally
+Start MongoDB and the application (either through your IDE using the dev profile, or via CLI):
 
-### Start catalog admin service
-Start catalog admin service locally using maven. Use Spring profile **develop**.
-```
+```sh
+docker compose up -d
 mvn spring-boot:run -Dspring-boot.run.profiles=develop
 ```
 
+### API Documentation (OpenAPI)
 
-## Usage examples
-NB! Remember to use correct catalogId. 
+Once the application is running locally, the API documentation can be accessed
+at http://localhost:8080/swagger-ui/index.html
 
-### Example: create code list
+### Running tests
 
-Method: POST
-
-URL: https://catalog-admin.staging.fellesdatakatalog.digdir.no/api/code-lists/[catalogId]
-
-Payload:
-```
-{
-    "codeList": {
-        "id": "",
-        "catalogId": [catalogId],
-        "name": "Oppretter kodeliste",
-        "description": "Beskrivelse",
-        "codes": [
-            {
-                "id": "2eecd911-580b-47b9-b305-532ca68d29ca",
-                "name": {
-                    "nb": "Ny kode 1",
-                    "nn": "",
-                    "en": ""
-                },
-                "parentID": null
-            },
-            {
-                "id": "9ddcf0b1-dafb-4a34-89be-b9c50343023c",
-                "name": {
-                    "nb": "Ny kode 2",
-                    "nn": "",
-                    "en": ""
-                },
-                "parentID": null
-            }
-        ]
-    }
-}
-```
-
-### Example: Update design
-
-URL: https://catalog-admin.staging.fellesdatakatalog.digdir.no/api/design/[catalogId]/design
-
-Method: PATCH
-
-Payload:
-
-```
-[
-    {
-        "op": "replace",
-        "path": "/logoDescription",
-        "value": "qt-dawg"
-    },
-    {
-        "op": "replace",
-        "path": "/backgroundColor",
-        "value": "#8087ff"
-    }
-]
-
+```sh
+mvn verify
 ```
