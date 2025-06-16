@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.index.CompoundIndexes
 import org.springframework.data.mongodb.core.mapping.Document
 
-@Document(collection = "users")
+@Document(collection = "catalogUsers")
 @CompoundIndexes(value = [CompoundIndex(name = "catalog_id", def = "{'catalogId' : 1}")])
 data class User(
     @Id

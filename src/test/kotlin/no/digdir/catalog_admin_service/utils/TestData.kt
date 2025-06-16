@@ -19,11 +19,11 @@ import org.testcontainers.shaded.com.google.common.collect.ImmutableMap
 const val MONGO_USER = "testuser"
 const val MONGO_PASSWORD = "testpassword"
 const val MONGO_PORT = 27017
-const val MONGO_DATABASE = "catalogAdminService"
+const val MONGO_DATABASE = "catalogAdmin"
 const val MONGO_CODELIST_COLLECTION = "codeLists"
-const val MONGO_DESIGN_COLLECTION = "design"
-const val MONGO_LOGO_COLLECTION = "logo"
-const val MONGO_USER_COLLECTION = "users"
+const val MONGO_DESIGN_COLLECTION = "catalogDesigns"
+const val MONGO_LOGO_COLLECTION = "catalogLogos"
+const val MONGO_USER_COLLECTION = "catalogUsers"
 const val INTERNAL_FIELDS_COLLECTION = "internalFields"
 const val EDITABLE_COLLECTIONS_COLLECTION = "editableFields"
 

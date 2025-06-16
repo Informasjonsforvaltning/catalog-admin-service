@@ -3,7 +3,7 @@ package no.digdir.catalog_admin_service.model
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 
-@Document(collection = "design")
+@Document(collection = "catalogDesigns")
 data class DesignDBO(
     @Id
     val catalogId: String,
@@ -20,7 +20,7 @@ data class DesignDTO(
     val hasLogo: Boolean
 )
 
-@Document(collection = "logo")
+@Document(collection = "catalogLogos")
 data class Logo(
     @Id
     val catalogId: String,
