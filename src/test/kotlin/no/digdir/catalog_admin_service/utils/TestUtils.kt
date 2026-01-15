@@ -77,7 +77,7 @@ fun apiAuthorizedRequest(
     return try {
         val response = request.exchange(url, httpMethod, entity, String::class.java)
         mapOf(
-            "body" to response.body,
+            "body" to (response.body ?: ""),
             "header" to response.headers,
             "status" to response.statusCode.value()
         )
@@ -114,7 +114,7 @@ fun apiAuthorizedMultipartLogo(
     return try {
         val response = request.exchange(url, HttpMethod.POST, entity, String::class.java)
         mapOf(
-            "body" to response.body,
+            "body" to (response.body ?: ""),
             "header" to response.headers,
             "status" to response.statusCode.value()
         )
