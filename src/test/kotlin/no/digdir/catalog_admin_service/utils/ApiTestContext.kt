@@ -1,9 +1,8 @@
 package no.digdir.catalog_admin_service.utils
 
-import org.springframework.boot.test.util.TestPropertyValues
 import org.springframework.boot.test.web.server.LocalServerPort
-import org.springframework.context.ApplicationContextInitializer
-import org.springframework.context.ConfigurableApplicationContext
+import org.springframework.test.context.DynamicPropertyRegistry
+import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.wait.strategy.Wait
 import java.net.HttpURLConnection
@@ -20,25 +19,17 @@ abstract class ApiTestContext {
         resetDB()
     }
 
-    internal class Initializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
-        override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
-            TestPropertyValues.of(
-                "spring.data.mongodb.port=${mongoContainer.getMappedPort(MONGO_PORT)}"
-            ).applyTo(configurableApplicationContext.environment)
-        }
-    }
-
     companion object {
-        var mongoContainer: KGenericContainer
+        @JvmStatic
+        val mongoContainer: KGenericContainer = KGenericContainer("mongo:latest")
+            .withEnv(MONGO_ENV_VALUES)
+            .withExposedPorts(MONGO_PORT)
+            .waitingFor(Wait.forListeningPort())
 
         init {
             startMockServer()
-            mongoContainer = KGenericContainer("mongo:latest")
-                .withEnv(MONGO_ENV_VALUES)
-                .withExposedPorts(MONGO_PORT)
-                .waitingFor(Wait.forListeningPort())
-
             mongoContainer.start()
+
 
             resetDB()
 
@@ -51,6 +42,14 @@ abstract class ApiTestContext {
             } catch (e: Exception) {
                 e.printStackTrace()
                 stopMockServer()
+            }
+        }
+
+        @JvmStatic
+        @DynamicPropertySource
+        fun configureProperties(registry: DynamicPropertyRegistry) {
+            registry.add("spring.mongodb.uri") {
+                "mongodb://$MONGO_USER:$MONGO_PASSWORD@localhost:${mongoContainer.getMappedPort(MONGO_PORT)}/$MONGO_DATABASE?authSource=admin"
             }
         }
     }

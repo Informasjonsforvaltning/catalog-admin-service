@@ -17,7 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
-import org.springframework.test.context.ContextConfiguration
+import org.springframework.boot.testcontainers.context.ImportTestcontainers
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
@@ -28,7 +28,7 @@ private val mapper = jacksonObjectMapper()
     properties = ["spring.profiles.active=integration-test"],
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
-@ContextConfiguration(initializers = [ApiTestContext.Initializer::class])
+@ImportTestcontainers(ApiTestContext::class)
 @Tag("integration")
 class FieldsTest : ApiTestContext() {
 
