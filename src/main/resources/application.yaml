@@ -6,7 +6,7 @@ logging:
 server:
   port: 8080
 spring:
-  data.mongodb:
+  mongodb:
     host: ${MONGODB_HOST}
     username: ${MONGODB_USER}
     password: ${MONGODB_PASSWORD}
@@ -14,7 +14,9 @@ spring:
     replica-set-name: ${MONGODB_REPLICASET}
     port: 27017
     database: catalogAdmin
-    auto-index-creation: true
+  data:
+    mongodb:
+      auto-index-creation: true
   security.oauth2.resourceserver.jwt:
     jwk-set-uri: ${KEYCLOAK_OIDC_ISSUER:https://auth.staging.fellesdatakatalog.digdir.no/realms/fdk}/protocol/openid-connect/certs
     issuer-uri: ${KEYCLOAK_OIDC_ISSUER:https://auth.staging.fellesdatakatalog.digdir.no/realms/fdk}
@@ -24,24 +26,24 @@ application:
 ---
 spring:
   config.activate.on-profile: develop
-  data.mongodb:
+  mongodb:
     host: localhost
     username: admin
     password: admin
     authentication-database: admin
-    replica-set-name: null
+    replica-set-name:
 server:
   port: 8080
 application.cors.originPatterns: "*"
 ---
 spring:
   config.activate.on-profile: integration-test
-  data.mongodb:
+  mongodb:
     host: localhost
     username: testuser
     password: testpassword
     authentication-database: admin
-    replica-set-name: null
+    replica-set-name:
   security.oauth2.resourceserver.jwt:
     jwk-set-uri: http://localhost:5050/auth/realms/fdk/protocol/openid-connect/certs
     issuer-uri: http://localhost:5050/auth/realms/fdk

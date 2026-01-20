@@ -17,7 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.test.context.ContextConfiguration
+import org.springframework.boot.testcontainers.context.ImportTestcontainers
 import java.io.StringReader
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -27,7 +27,7 @@ import kotlin.test.assertTrue
     properties = ["spring.profiles.active=integration-test"],
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
-@ContextConfiguration(initializers = [ApiTestContext.Initializer::class])
+@ImportTestcontainers(ApiTestContext::class)
 @Tag("integration")
 class SubjectsTest : ApiTestContext() {
 
