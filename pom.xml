@@ -13,7 +13,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.1</version>
+        <version>4.0.6</version>
         <relativePath/>
     </parent>
 
@@ -26,9 +26,9 @@
         <maven.compiler.target>${java.release}</maven.compiler.target>
         <maven.exec.skip>false</maven.exec.skip>
 
-        <kotlin.version>2.2.20</kotlin.version>
-        <testcontainers.version>1.21.3</testcontainers.version>
-        <jena.version>5.5.0</jena.version>
+        <kotlin.version>2.3.21</kotlin.version>
+        <testcontainers.version>2.0.5</testcontainers.version>
+        <jena.version>6.0.0</jena.version>
     </properties>
 
     <dependencies>
@@ -47,7 +47,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>3.0.1</version>
+            <version>3.0.3</version>
         </dependency>
 
         <dependency>
@@ -109,7 +109,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>33.5.0-jre</version>
+            <version>33.6.0-jre</version>
         </dependency>
 
         <!-- Test -->
@@ -127,7 +127,7 @@
         <dependency>
             <groupId>org.mockito.kotlin</groupId>
             <artifactId>mockito-kotlin</artifactId>
-            <version>6.1.0</version>
+            <version>6.3.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -151,7 +151,7 @@
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>mongodb</artifactId>
+            <artifactId>testcontainers-mongodb</artifactId>
             <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
@@ -168,7 +168,7 @@
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
+            <artifactId>testcontainers-junit-jupiter</artifactId>
             <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
@@ -181,7 +181,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
-            <version>5.5.1</version>
+            <version>5.6.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -306,7 +306,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.4</version>
+                <version>3.5.5</version>
                 <configuration>
                     <!--suppress UnresolvedMavenProperty -->
                     <argLine>${surefire.jacoco.args}</argLine>
@@ -320,7 +320,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>3.5.4</version>
+                <version>3.5.5</version>
                 <configuration>
                     <!--suppress UnresolvedMavenProperty -->
                     <argLine>${failsafe.jacoco.args}</argLine>
