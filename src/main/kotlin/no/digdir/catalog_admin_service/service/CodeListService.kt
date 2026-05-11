@@ -23,9 +23,10 @@ import org.apache.jena.vocabulary.DCTerms
 import org.apache.jena.vocabulary.SKOS
 import org.apache.jena.vocabulary.XSD
 import org.slf4j.LoggerFactory
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.server.ResponseStatusException
+import jakarta.persistence.EntityManager
 
 private val logger = LoggerFactory.getLogger(CodeListService::class.java)
 
@@ -35,6 +36,7 @@ class CodeListService(
     private val editableFieldsRepository: EditableFieldsRepository,
     private val applicationProperties: ApplicationProperties,
     private val internalFieldsRepository: InternalFieldsRepository,
+    private val entityManager: EntityManager,
 ) {
     private fun CodeList.subjectsURI() = "${applicationProperties.adminServiceUri}/$catalogId/concepts/subjects"
     private fun createCodeURI(codeListUri: String, codeId: String) = "$codeListUri#$codeId"
@@ -48,7 +50,7 @@ class CodeListService(
 
     fun deleteCodeListById(catalogId: String, codeListId: String) {
         val codeListsInInternalFields = internalFieldsRepository.findByCatalogIdAndTypeAndCodeListId(catalogId, FieldType.CODE_LIST, codeListId)
-        val domainCodeListInEditableField = editableFieldsRepository.findByIdOrNull(catalogId)?.domainCodeListId
+        val domainCodeListInEditableField = editableFieldsRepository.findById(catalogId).orElse(null)?.domainCodeListId
 
         when {
             codeListsInInternalFields.isNotEmpty() -> {
@@ -80,10 +82,11 @@ class CodeListService(
         )
 
 
+    @Transactional
     fun createCodeList(data: CodeListToBeCreated, catalogId: String): CodeList =
         try {
             data.mapCodeListToBeCreatedToCodeList(catalogId)
-                .let { codeListRepository.insert(it) }
+                .also { entityManager.persist(it) }
         } catch (ex: Exception) {
             logger.error("Failed to create code-list for catalog $catalogId", ex)
             throw ex
@@ -108,7 +111,7 @@ class CodeListService(
     fun getAllConceptSubjectCodeLists(): List<CodeList> =
         editableFieldsRepository.findAll()
             .mapNotNull { it.domainCodeListId }
-            .mapNotNull { codeListRepository.findByIdOrNull(it) }
+            .mapNotNull { codeListRepository.findById(it).orElse(null) }
 
     fun getAllConceptSubjectCodeListsRDF(): String {
         val allConceptSubjects = ModelFactory.createDefaultModel()
@@ -119,9 +122,9 @@ class CodeListService(
     }
 
     fun getConceptSubjectsForCatalog(catalogId: String): CodeList? =
-        editableFieldsRepository.findByIdOrNull(catalogId)
+        editableFieldsRepository.findById(catalogId).orElse(null)
             ?.domainCodeListId
-            ?.let { codeListRepository.findByIdOrNull(it) }
+            ?.let { codeListRepository.findById(it).orElse(null) }
 
     fun getConceptSubjectsForCatalogRDF(catalogId: String): String? =
         getConceptSubjectsForCatalog(catalogId)

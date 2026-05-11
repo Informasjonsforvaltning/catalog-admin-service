@@ -1,12 +1,13 @@
 package no.digdir.catalog_admin_service.service
 
+import jakarta.persistence.EntityManager
 import no.digdir.catalog_admin_service.model.*
 import no.digdir.catalog_admin_service.repository.EditableFieldsRepository
 import no.digdir.catalog_admin_service.repository.InternalFieldsRepository
 import org.slf4j.LoggerFactory
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.server.ResponseStatusException
 import java.util.*
 
@@ -15,7 +16,8 @@ private val logger = LoggerFactory.getLogger(FieldsService::class.java)
 @Service
 class FieldsService(
     private val editableFieldsRepository: EditableFieldsRepository,
-    private val internalFieldsRepository: InternalFieldsRepository
+    private val internalFieldsRepository: InternalFieldsRepository,
+    private val entityManager: EntityManager,
 ) {
 
     fun getCatalogFields(catalogId: String): Fields =
@@ -25,7 +27,7 @@ class FieldsService(
         )
 
     private fun getCatalogEditableFields(catalogId: String): EditableFields =
-        editableFieldsRepository.findByIdOrNull(catalogId)
+        editableFieldsRepository.findById(catalogId).orElse(null)
             ?: EditableFields(catalogId = catalogId, domainCodeListId = null)
 
     private fun getCatalogInternalFields(catalogId: String): List<Field> =
@@ -40,6 +42,7 @@ class FieldsService(
             throw ex
         }
 
+    @Transactional
     fun createInternalField(data: FieldToBeCreated, catalogId: String): Field =
         try {
             Field(
@@ -51,7 +54,7 @@ class FieldsService(
                 location = data.location ?: FieldLocation.MAIN_COLUMN,
                 codeListId = data.codeListId,
                 enableFilter = data.enableFilter
-            ).let { internalFieldsRepository.insert(it) }
+            ).also { entityManager.persist(it) }
         } catch (ex: Exception) {
             logger.error("Failed to create internal field for catalog $catalogId", ex)
             throw ex

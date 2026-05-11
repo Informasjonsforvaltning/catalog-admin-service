@@ -3,8 +3,7 @@ package no.digdir.catalog_admin_service.utils
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
-import org.testcontainers.containers.GenericContainer
-import org.testcontainers.containers.wait.strategy.Wait
+import org.testcontainers.containers.PostgreSQLContainer
 import java.net.HttpURLConnection
 import java.net.URL
 import org.junit.jupiter.api.BeforeEach
@@ -21,15 +20,14 @@ abstract class ApiTestContext {
 
     companion object {
         @JvmStatic
-        val mongoContainer: KGenericContainer = KGenericContainer("mongo:latest")
-            .withEnv(MONGO_ENV_VALUES)
-            .withExposedPorts(MONGO_PORT)
-            .waitingFor(Wait.forListeningPort())
+        val postgresContainer: KPostgreSQLContainer = KPostgreSQLContainer("postgres:16")
+            .withDatabaseName(DB_NAME)
+            .withUsername(DB_USER)
+            .withPassword(DB_PASSWORD)
 
         init {
             startMockServer()
-            mongoContainer.start()
-
+            postgresContainer.start()
 
             resetDB()
 
@@ -48,12 +46,11 @@ abstract class ApiTestContext {
         @JvmStatic
         @DynamicPropertySource
         fun configureProperties(registry: DynamicPropertyRegistry) {
-            registry.add("spring.mongodb.uri") {
-                "mongodb://$MONGO_USER:$MONGO_PASSWORD@localhost:${mongoContainer.getMappedPort(MONGO_PORT)}/$MONGO_DATABASE?authSource=admin"
-            }
+            registry.add("spring.datasource.url") { postgresContainer.getJdbcUrl() }
+            registry.add("spring.datasource.username") { DB_USER }
+            registry.add("spring.datasource.password") { DB_PASSWORD }
         }
     }
 }
 
-// Hack needed because test containers use of generics confuses Kotlin
-class KGenericContainer(imageName: String) : GenericContainer<KGenericContainer>(imageName)
+class KPostgreSQLContainer(imageName: String) : PostgreSQLContainer<KPostgreSQLContainer>(imageName)

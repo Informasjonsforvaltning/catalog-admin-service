@@ -1,7 +1,9 @@
 package no.digdir.catalog_admin_service.service
 
+import jakarta.persistence.EntityManager
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.*
 import no.digdir.catalog_admin_service.model.JsonPatchOperation
 import no.digdir.catalog_admin_service.model.User
@@ -12,7 +14,10 @@ import no.digdir.catalog_admin_service.repository.UserRepository
 private val logger = LoggerFactory.getLogger(UserService::class.java)
 
 @Service
-class UserService(private val userRepository: UserRepository) {
+class UserService(
+    private val userRepository: UserRepository,
+    private val entityManager: EntityManager,
+) {
     fun getUsers(catalogId: String): Users =
         Users(users = userRepository.findUsersByCatalogId(catalogId).sortedBy { it.name })
 
@@ -27,6 +32,7 @@ class UserService(private val userRepository: UserRepository) {
             throw ex
         }
 
+    @Transactional
     fun createUser(data: UserToBeCreated, catalogId: String): User =
         try {
             User(
@@ -35,7 +41,7 @@ class UserService(private val userRepository: UserRepository) {
                 catalogId = catalogId,
                 email = data.email,
                 telephoneNumber = data.telephoneNumber
-            ).let { userRepository.insert(it) }
+            ).also { entityManager.persist(it) }
         } catch (ex: Exception) {
             logger.error("Failed to create user for catalog $catalogId", ex)
             throw ex

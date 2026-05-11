@@ -13,24 +13,10 @@ import no.digdir.catalog_admin_service.model.Logo
 import no.digdir.catalog_admin_service.model.MultiLanguageTexts
 import no.digdir.catalog_admin_service.model.User
 import no.digdir.catalog_admin_service.model.UserToBeCreated
-import org.bson.Document
-import org.testcontainers.shaded.com.google.common.collect.ImmutableMap
 
-const val MONGO_USER = "testuser"
-const val MONGO_PASSWORD = "testpassword"
-const val MONGO_PORT = 27017
-const val MONGO_DATABASE = "catalogAdmin"
-const val MONGO_CODELIST_COLLECTION = "codeLists"
-const val MONGO_DESIGN_COLLECTION = "catalogDesigns"
-const val MONGO_LOGO_COLLECTION = "catalogLogos"
-const val MONGO_USER_COLLECTION = "catalogUsers"
-const val INTERNAL_FIELDS_COLLECTION = "internalFields"
-const val EDITABLE_COLLECTIONS_COLLECTION = "editableFields"
-
-val MONGO_ENV_VALUES: Map<String, String> = ImmutableMap.of(
-    "MONGO_INITDB_ROOT_USERNAME", MONGO_USER,
-    "MONGO_INITDB_ROOT_PASSWORD", MONGO_PASSWORD
-)
+const val DB_USER = "testuser"
+const val DB_PASSWORD = "testpassword"
+const val DB_NAME = "catalog_admin"
 
 val NAME: MultiLanguageTexts = MultiLanguageTexts(en = "codeName", nb = null, nn = null)
 val CODE: Code = Code(id = "555", name = NAME, parentID = null)
@@ -64,7 +50,7 @@ val LOGO = Logo(
 )
 
 val FIELD_0 = Field(
-    id="field-0",
+    id = "field-0",
     catalogId = "910244132",
     label = NAME,
     description = NAME,
@@ -79,74 +65,3 @@ val LIST_OF_CODE_LISTS_TO_BE_CREATED: List<CodeListToBeCreated> = listOf(
     CodeListToBeCreated(name = "name 2", description = "description", codes = CODES),
     CodeListToBeCreated(name = "name 3", description = "description", codes = CODES)
 )
-
-fun codeListPopulation(): List<Document> =
-listOf(CODE_LIST_0, CODE_LIST_1, CODE_LIST_2, CODE_LIST_3)
-    .map { it.mapDBO() }
-
-fun internalFieldsPopulation(): List<Document> =
-    listOf(FIELD_0)
-        .map { it.mapDBO() }
-
-fun editableFieldsPopulation(): List<Document> =
-    listOf(
-        EditableFields(catalogId = CODE_LIST_0.catalogId, domainCodeListId = CODE_LIST_0.id),
-        EditableFields(catalogId = CODE_LIST_1.catalogId, domainCodeListId = CODE_LIST_1.id)
-        ).map { it.mapDBO() }
-
-private fun EditableFields.mapDBO(): Document =
-    Document()
-        .append("_id", catalogId)
-        .append("domainCodeListId", domainCodeListId)
-
-private fun CodeList.mapDBO(): Document =
-    Document()
-        .append("_id", id)
-        .append("name", name)
-        .append("catalogId", catalogId)
-        .append("description", description)
-        .append("codes", codes)
-
-private fun Field.mapDBO(): Document =
-    Document()
-        .append("_id", id)
-        .append("catalogId", catalogId)
-        .append("label", label)
-        .append("description", description)
-        .append("type", type)
-        .append("location", location)
-        .append("codeListId", codeListId)
-
-fun designPopulation(): List<Document> =
-    listOf(DESIGN_DBO)
-        .map { it.mapDBO() }
-private fun DesignDBO.mapDBO(): Document =
-    Document()
-        .append("_id", catalogId)
-        .append("backgroundColor", backgroundColor)
-        .append("fontColor", fontColor)
-        .append("logoDescription", logoDescription)
-        .append("hasLogo", hasLogo)
-
-fun logoPopulation(): List<Document> =
-    listOf(LOGO)
-        .map { it.mapDBO() }
-private fun Logo.mapDBO(): Document =
-    Document()
-        .append("_id", catalogId)
-        .append("contentType", contentType)
-        .append("base64Logo", base64Logo)
-        .append("filename", filename)
-
-fun userPopulation(): List<Document> =
-    listOf(USER)
-        .map { it.mapDBO() }
-
-private fun User.mapDBO(): Document =
-    Document()
-        .append("_id", id)
-        .append("name", name)
-        .append("catalogId", catalogId)
-        .append("email", email)
-        .append("telephoneNumber", telephoneNumber)
-
