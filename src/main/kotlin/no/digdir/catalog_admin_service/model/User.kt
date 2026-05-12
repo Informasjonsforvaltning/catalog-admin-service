@@ -17,7 +17,7 @@ data class User(
     val name: String = "",
 
     @Column(name = "email")
-    val email: String? = null,
+    val email: String?,
 
     @Column(name = "telephone_number")
     val telephoneNumber: String? = null,
