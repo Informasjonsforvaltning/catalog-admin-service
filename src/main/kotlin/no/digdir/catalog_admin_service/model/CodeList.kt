@@ -10,7 +10,7 @@ import org.hibernate.type.SqlTypes
 data class CodeList(
     @Id
     @Column(name = "id")
-    val id: String = "",
+    val id: String,
 
     @Column(name = "name", nullable = false)
     val name: String = "",
