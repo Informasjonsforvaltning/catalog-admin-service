@@ -11,7 +11,7 @@ data class User(
     val id: String,
 
     @Column(name = "catalog_id", nullable = false)
-    val catalogId: String = "",
+    val catalogId: String,
 
     @Column(name = "name", nullable = false)
     val name: String = "",
