@@ -19,7 +19,7 @@ data class CodeList(
     val catalogId: String,
 
     @Column(name = "description", nullable = false)
-    val description: String = "",
+    val description: String,
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "codes", columnDefinition = "jsonb", nullable = false)
