@@ -7,7 +7,7 @@ import jakarta.persistence.*
 data class DesignDBO(
     @Id
     @Column(name = "catalog_id")
-    val catalogId: String = "",
+    val catalogId: String,
 
     @Column(name = "background_color")
     val backgroundColor: String? = null,
