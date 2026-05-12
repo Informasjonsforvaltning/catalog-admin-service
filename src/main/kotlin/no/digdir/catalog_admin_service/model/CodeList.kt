@@ -13,7 +13,7 @@ data class CodeList(
     val id: String,
 
     @Column(name = "name", nullable = false)
-    val name: String = "",
+    val name: String,
 
     @Column(name = "catalog_id", nullable = false)
     val catalogId: String,
