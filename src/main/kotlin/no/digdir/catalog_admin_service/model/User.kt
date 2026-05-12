@@ -14,7 +14,7 @@ data class User(
     val catalogId: String,
 
     @Column(name = "name", nullable = false)
-    val name: String = "",
+    val name: String,
 
     @Column(name = "email")
     val email: String?,
