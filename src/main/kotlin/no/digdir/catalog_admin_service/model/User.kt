@@ -8,7 +8,7 @@ import jakarta.persistence.*
 data class User(
     @Id
     @Column(name = "id")
-    val id: String = "",
+    val id: String,
 
     @Column(name = "catalog_id", nullable = false)
     val catalogId: String = "",
