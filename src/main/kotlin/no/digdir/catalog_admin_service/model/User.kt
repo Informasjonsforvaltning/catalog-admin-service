@@ -20,7 +20,7 @@ data class User(
     val email: String?,
 
     @Column(name = "telephone_number")
-    val telephoneNumber: String? = null,
+    val telephoneNumber: String?,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
