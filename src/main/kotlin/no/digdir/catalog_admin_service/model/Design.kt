@@ -10,16 +10,16 @@ data class DesignDBO(
     val catalogId: String,
 
     @Column(name = "background_color")
-    val backgroundColor: String? = null,
+    val backgroundColor: String?,
 
     @Column(name = "font_color")
-    val fontColor: String? = null,
+    val fontColor: String?,
 
     @Column(name = "logo_description")
-    val logoDescription: String? = null,
+    val logoDescription: String?,
 
     @Column(name = "has_logo", nullable = false)
-    val hasLogo: Boolean = false,
+    val hasLogo: Boolean,
 )
 
 data class DesignDTO(
@@ -34,14 +34,14 @@ data class DesignDTO(
 data class Logo(
     @Id
     @Column(name = "catalog_id")
-    val catalogId: String = "",
+    val catalogId: String,
 
     @Column(name = "content_type", nullable = false)
-    val contentType: String = "",
+    val contentType: String,
 
     @Column(name = "base64_logo", columnDefinition = "text", nullable = false)
-    val base64Logo: String = "",
+    val base64Logo: String,
 
     @Column(name = "filename", nullable = false)
-    val filename: String = "",
+    val filename: String,
 )

@@ -27,7 +27,7 @@ open class DesignService(private val designRepository: DesignRepository, private
 
     private fun getDesignDBO(catalogId: String): DesignDBO =
         designRepository.findById(catalogId).orElse(null)
-            ?: DesignDBO(catalogId, null, null, null)
+            ?: DesignDBO(catalogId, null, null, null, false)
 
     private fun DesignDBO.mapToDTO(): DesignDTO =
         DesignDTO(

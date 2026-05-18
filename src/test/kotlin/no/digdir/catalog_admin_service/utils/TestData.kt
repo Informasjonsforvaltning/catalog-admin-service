@@ -36,7 +36,7 @@ val CODE_LIST_TO_BE_CREATED_0 = CodeListToBeCreated(name = "name", description =
 
 val DESIGN_DTO = DesignDTO(backgroundColor = "#FFFFFF", fontColor = "#CCCFFF", logoDescription = "FDK Logo", hasLogo = false)
 val DESIGN_DBO =
-    DesignDBO(backgroundColor = "#FFFFFF", fontColor = "#CCCFFF", logoDescription = "FDK Logo", catalogId = "910244132")
+    DesignDBO(backgroundColor = "#FFFFFF", fontColor = "#CCCFFF", logoDescription = "FDK Logo", catalogId = "910244132", hasLogo = false)
 
 val USER =
     User(name = "Test User", id = "123", catalogId = "910244132", email = "test@mail.com", telephoneNumber = "12345678")

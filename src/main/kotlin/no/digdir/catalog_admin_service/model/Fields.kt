@@ -16,32 +16,32 @@ data class Fields(
 data class Field(
     @Id
     @Column(name = "id")
-    val id: String = "",
+    val id: String,
 
     @Column(name = "catalog_id", nullable = false)
-    val catalogId: String = "",
+    val catalogId: String,
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "label", columnDefinition = "jsonb", nullable = false)
-    val label: MultiLanguageTexts = MultiLanguageTexts(null, null, null),
+    val label: MultiLanguageTexts,
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "description", columnDefinition = "jsonb", nullable = false)
-    val description: MultiLanguageTexts = MultiLanguageTexts(null, null, null),
+    val description: MultiLanguageTexts,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
-    val type: FieldType = FieldType.TEXT_SHORT,
+    val type: FieldType,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "location", nullable = false)
-    val location: FieldLocation = FieldLocation.MAIN_COLUMN,
+    val location: FieldLocation,
 
     @Column(name = "code_list_id")
-    val codeListId: String? = null,
+    val codeListId: String?,
 
     @Column(name = "enable_filter")
-    val enableFilter: Boolean? = null,
+    val enableFilter: Boolean?,
 )
 
 @Entity
@@ -49,10 +49,10 @@ data class Field(
 data class EditableFields(
     @Id
     @Column(name = "catalog_id")
-    val catalogId: String = "",
+    val catalogId: String,
 
     @Column(name = "domain_code_list_id")
-    val domainCodeListId: String? = null,
+    val domainCodeListId: String?,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

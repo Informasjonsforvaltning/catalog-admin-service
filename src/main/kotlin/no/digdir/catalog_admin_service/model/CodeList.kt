@@ -23,7 +23,7 @@ data class CodeList(
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "codes", columnDefinition = "jsonb", nullable = false)
-    val codes: List<Code> = emptyList(),
+    val codes: List<Code>,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
