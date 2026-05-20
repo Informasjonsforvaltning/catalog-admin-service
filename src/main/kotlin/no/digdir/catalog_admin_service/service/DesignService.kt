@@ -9,7 +9,6 @@ import no.digdir.catalog_admin_service.repository.DesignRepository
 import no.digdir.catalog_admin_service.repository.LogoRepository
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.InputStreamResource
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
@@ -27,8 +26,8 @@ private val logger = LoggerFactory.getLogger(DesignService::class.java)
 open class DesignService(private val designRepository: DesignRepository, private val logoRepository: LogoRepository) {
 
     private fun getDesignDBO(catalogId: String): DesignDBO =
-        designRepository.findByIdOrNull(catalogId)
-            ?: DesignDBO(catalogId, null, null, null)
+        designRepository.findById(catalogId).orElse(null)
+            ?: DesignDBO(catalogId, null, null, null, false)
 
     private fun DesignDBO.mapToDTO(): DesignDTO =
         DesignDTO(
@@ -52,7 +51,7 @@ open class DesignService(private val designRepository: DesignRepository, private
         }
 
     fun getLogo(catalogId: String): Logo? =
-        logoRepository.findByIdOrNull(catalogId)
+        logoRepository.findById(catalogId).orElse(null)
 
     fun deleteLogo(catalogId: String): DesignDBO =
         try {

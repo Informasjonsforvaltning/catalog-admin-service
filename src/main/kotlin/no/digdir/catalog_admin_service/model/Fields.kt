@@ -2,38 +2,57 @@ package no.digdir.catalog_admin_service.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonValue
-import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.core.index.CompoundIndex
-import org.springframework.data.mongodb.core.index.CompoundIndexes
-import org.springframework.data.mongodb.core.mapping.Document
+import jakarta.persistence.*
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 
 data class Fields(
     val editable: EditableFields,
     val internal: List<Field>
 )
 
-@Document(collection = "internalFields")
-@CompoundIndexes(value = [
-    CompoundIndex(name = "catalog_id", def = "{'catalogId' : 1}"),
-    CompoundIndex(name = "catalog_id_type_code_list_id", def = "{'catalogId' : 1, 'type' : 1, 'codeListId' : 1}")
-])
+@Entity
+@Table(name = "internal_fields")
 data class Field(
     @Id
+    @Column(name = "id")
     val id: String,
+
+    @Column(name = "catalog_id", nullable = false)
     val catalogId: String,
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "label", columnDefinition = "jsonb", nullable = false)
     val label: MultiLanguageTexts,
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "description", columnDefinition = "jsonb", nullable = false)
     val description: MultiLanguageTexts,
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
     val type: FieldType,
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "location", nullable = false)
     val location: FieldLocation,
+
+    @Column(name = "code_list_id")
     val codeListId: String?,
-    val enableFilter: Boolean?
+
+    @Column(name = "enable_filter")
+    val enableFilter: Boolean?,
 )
 
-@Document(collection = "editableFields")
+@Entity
+@Table(name = "editable_fields")
 data class EditableFields(
     @Id
+    @Column(name = "catalog_id")
     val catalogId: String,
-    val domainCodeListId: String?
+
+    @Column(name = "domain_code_list_id")
+    val domainCodeListId: String?,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

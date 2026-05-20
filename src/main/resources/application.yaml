@@ -6,17 +6,17 @@ logging:
 server:
   port: 8080
 spring:
-  mongodb:
-    host: ${MONGODB_HOST}
-    username: ${MONGODB_USER}
-    password: ${MONGODB_PASSWORD}
-    authentication-database: ${MONGODB_AUTH}
-    replica-set-name: ${MONGODB_REPLICASET}
-    port: 27017
-    database: catalogAdmin
-  data:
-    mongodb:
-      auto-index-creation: true
+  datasource:
+    url: jdbc:postgresql://${POSTGRESQL_HOST}:${POSTGRESQL_PORT:5432}/${POSTGRESQL_DB:catalog_admin}
+    username: ${POSTGRESQL_USER}
+    password: ${POSTGRESQL_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
   security.oauth2.resourceserver.jwt:
     jwk-set-uri: ${KEYCLOAK_OIDC_ISSUER:https://auth.staging.fellesdatakatalog.digdir.no/realms/fdk}/protocol/openid-connect/certs
     issuer-uri: ${KEYCLOAK_OIDC_ISSUER:https://auth.staging.fellesdatakatalog.digdir.no/realms/fdk}
@@ -26,24 +26,16 @@ application:
 ---
 spring:
   config.activate.on-profile: develop
-  mongodb:
-    host: localhost
+  datasource:
+    url: jdbc:postgresql://localhost:5432/catalog_admin
     username: admin
     password: admin
-    authentication-database: admin
-    replica-set-name:
 server:
   port: 8080
 application.cors.originPatterns: "*"
 ---
 spring:
   config.activate.on-profile: integration-test
-  mongodb:
-    host: localhost
-    username: testuser
-    password: testpassword
-    authentication-database: admin
-    replica-set-name:
   security.oauth2.resourceserver.jwt:
     jwk-set-uri: http://localhost:5050/auth/realms/fdk/protocol/openid-connect/certs
     issuer-uri: http://localhost:5050/auth/realms/fdk

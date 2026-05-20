@@ -1,20 +1,26 @@
 package no.digdir.catalog_admin_service.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.core.index.CompoundIndex
-import org.springframework.data.mongodb.core.index.CompoundIndexes
-import org.springframework.data.mongodb.core.mapping.Document
+import jakarta.persistence.*
 
-@Document(collection = "catalogUsers")
-@CompoundIndexes(value = [CompoundIndex(name = "catalog_id", def = "{'catalogId' : 1}")])
+@Entity
+@Table(name = "catalog_users")
 data class User(
     @Id
+    @Column(name = "id")
     val id: String,
+
+    @Column(name = "catalog_id", nullable = false)
     val catalogId: String,
+
+    @Column(name = "name", nullable = false)
     val name: String,
+
+    @Column(name = "email")
     val email: String?,
-    val telephoneNumber: String?
+
+    @Column(name = "telephone_number")
+    val telephoneNumber: String?,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
