@@ -282,9 +282,6 @@
                 </dependencies>
             </plugin>
 
-            <!-- ktlint derives its source roots from the project's compile source roots.
-                 Those are set to src/main/kotlin and src/test/kotlin by <sourceDirectory>
-                 and <testSourceDirectory> above, so ktlint sees all Kotlin sources. -->
             <plugin>
                 <groupId>com.github.gantsign.maven</groupId>
                 <artifactId>ktlint-maven-plugin</artifactId>
