@@ -1,6 +1,5 @@
 package no.digdir.catalog_admin_service.integration
 
-
 import no.digdir.catalog_admin_service.utils.ApiTestContext
 import no.digdir.catalog_admin_service.utils.apiGet
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -9,18 +8,17 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
-import org.springframework.http.HttpStatus
 import org.springframework.boot.testcontainers.context.ImportTestcontainers
+import org.springframework.http.HttpStatus
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(
     properties = ["spring.profiles.active=integration-test"],
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 )
 @ImportTestcontainers(ApiTestContext::class)
 @Tag("integration")
-class StatusTest: ApiTestContext() {
-
+class StatusTest : ApiTestContext() {
     @Test
     fun ping() {
         val response = apiGet(port, "/ping", null)

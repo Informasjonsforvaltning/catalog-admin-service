@@ -1,18 +1,17 @@
 package no.digdir.catalog_admin_service.service
 
+import jakarta.persistence.EntityManager
 import no.digdir.catalog_admin_service.configuration.ApplicationProperties
 import no.digdir.catalog_admin_service.model.Code
-import java.util.*
 import no.digdir.catalog_admin_service.model.CodeList
 import no.digdir.catalog_admin_service.model.CodeListToBeCreated
 import no.digdir.catalog_admin_service.model.CodeLists
 import no.digdir.catalog_admin_service.model.FieldType
-import no.digdir.catalog_admin_service.repository.CodeListRepository
-import org.springframework.stereotype.Service
 import no.digdir.catalog_admin_service.model.JsonPatchOperation
 import no.digdir.catalog_admin_service.model.MultiLanguageTexts
 import no.digdir.catalog_admin_service.rdf.UNESKOS
 import no.digdir.catalog_admin_service.rdf.turtleResponse
+import no.digdir.catalog_admin_service.repository.CodeListRepository
 import no.digdir.catalog_admin_service.repository.EditableFieldsRepository
 import no.digdir.catalog_admin_service.repository.InternalFieldsRepository
 import org.apache.jena.datatypes.xsd.impl.XSDDateType
@@ -24,9 +23,10 @@ import org.apache.jena.vocabulary.SKOS
 import org.apache.jena.vocabulary.XSD
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
+import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.server.ResponseStatusException
-import jakarta.persistence.EntityManager
+import java.util.UUID
 
 private val logger = LoggerFactory.getLogger(CodeListService::class.java)
 
@@ -39,17 +39,32 @@ class CodeListService(
     private val entityManager: EntityManager,
 ) {
     private fun CodeList.subjectsURI() = "${applicationProperties.adminServiceUri}/$catalogId/concepts/subjects"
-    private fun createCodeURI(codeListUri: String, codeId: String) = "$codeListUri#$codeId"
+
+    private fun createCodeURI(
+        codeListUri: String,
+        codeId: String,
+    ) = "$codeListUri#$codeId"
+
     private fun publisherURI(publisherId: String) = "https://data.brreg.no/enhetsregisteret/api/enheter/$publisherId"
 
     fun getCodeLists(catalogId: String): CodeLists =
         CodeLists(codeLists = codeListRepository.findCodeListsByCatalogId(catalogId).sortedBy { it.name })
 
-    fun getCodeListById(catalogId: String, codeListId: String): CodeList? =
-        codeListRepository.findCodeListByIdAndCatalogId(codeListId, catalogId)
+    fun getCodeListById(
+        catalogId: String,
+        codeListId: String,
+    ): CodeList? = codeListRepository.findCodeListByIdAndCatalogId(codeListId, catalogId)
 
-    fun deleteCodeListById(catalogId: String, codeListId: String) {
-        val codeListsInInternalFields = internalFieldsRepository.findByCatalogIdAndTypeAndCodeListId(catalogId, FieldType.CODE_LIST, codeListId)
+    fun deleteCodeListById(
+        catalogId: String,
+        codeListId: String,
+    ) {
+        val codeListsInInternalFields =
+            internalFieldsRepository.findByCatalogIdAndTypeAndCodeListId(
+                catalogId,
+                FieldType.CODE_LIST,
+                codeListId,
+            )
         val domainCodeListInEditableField = editableFieldsRepository.findById(catalogId).orElse(null)?.domainCodeListId
 
         when {
@@ -57,10 +72,12 @@ class CodeListService(
                 logger.error("Cannot delete a code list that is in use in internal fields.")
                 throw ResponseStatusException(HttpStatus.BAD_REQUEST)
             }
+
             domainCodeListInEditableField == codeListId -> {
                 logger.error("Cannot delete a code list that is in use in editable fields.")
                 throw ResponseStatusException(HttpStatus.BAD_REQUEST)
             }
+
             else -> {
                 try {
                     codeListRepository.deleteById(codeListId)
@@ -78,29 +95,40 @@ class CodeListService(
             name = name,
             catalogId = catalogId,
             description = description,
-            codes = codes
+            codes = codes,
         )
 
-
     @Transactional
-    fun createCodeList(data: CodeListToBeCreated, catalogId: String): CodeList =
+    fun createCodeList(
+        data: CodeListToBeCreated,
+        catalogId: String,
+    ): CodeList =
         try {
-            data.mapCodeListToBeCreatedToCodeList(catalogId)
+            data
+                .mapCodeListToBeCreatedToCodeList(catalogId)
                 .also { entityManager.persist(it) }
         } catch (ex: Exception) {
             logger.error("Failed to create code-list for catalog $catalogId", ex)
             throw ex
         }
 
-    fun createListOfCodeLists(codeListsToBeCreated: List<CodeListToBeCreated>, catalogId: String) {
+    fun createListOfCodeLists(
+        codeListsToBeCreated: List<CodeListToBeCreated>,
+        catalogId: String,
+    ) {
         codeListsToBeCreated
             .map { it.mapCodeListToBeCreatedToCodeList(catalogId) }
             .run { codeListRepository.saveAll(this) }
     }
 
-    fun updateCodeList(codeListId: String, catalogId: String, operations: List<JsonPatchOperation>): CodeList? =
+    fun updateCodeList(
+        codeListId: String,
+        catalogId: String,
+        operations: List<JsonPatchOperation>,
+    ): CodeList? =
         try {
-            codeListRepository.findCodeListByIdAndCatalogId(codeListId, catalogId)
+            codeListRepository
+                .findCodeListByIdAndCatalogId(codeListId, catalogId)
                 ?.let { dbCodeList -> patchOriginal(dbCodeList, operations) }
                 ?.let { codeListRepository.save(it) }
         } catch (ex: Exception) {
@@ -109,7 +137,8 @@ class CodeListService(
         }
 
     fun getAllConceptSubjectCodeLists(): List<CodeList> =
-        editableFieldsRepository.findAll()
+        editableFieldsRepository
+            .findAll()
             .mapNotNull { it.domainCodeListId }
             .mapNotNull { codeListRepository.findById(it).orElse(null) }
 
@@ -122,7 +151,9 @@ class CodeListService(
     }
 
     fun getConceptSubjectsForCatalog(catalogId: String): CodeList? =
-        editableFieldsRepository.findById(catalogId).orElse(null)
+        editableFieldsRepository
+            .findById(catalogId)
+            .orElse(null)
             ?.domainCodeListId
             ?.let { codeListRepository.findById(it).orElse(null) }
 
@@ -135,7 +166,7 @@ class CodeListService(
     private fun Model.addDefaultCodeListPrefixes(): Model {
         setNsPrefix("dct", DCTerms.NS)
         setNsPrefix("skos", SKOS.uri)
-        setNsPrefix("uneskos", UNESKOS.uri)
+        setNsPrefix("uneskos", UNESKOS.URI)
         setNsPrefix("xsd", XSD.NS)
         return this
     }
@@ -143,7 +174,8 @@ class CodeListService(
     private fun CodeList.createModel(): Model {
         val uri = subjectsURI()
         val codeListModel = ModelFactory.createDefaultModel()
-        codeListModel.createResource(uri, SKOS.ConceptScheme)
+        codeListModel
+            .createResource(uri, SKOS.ConceptScheme)
             .addProperty(DCTerms.identifier, codeListModel.createTypedLiteral(uri, XSDDateType.XSDanyURI))
             .addProperty(DCTerms.title, name)
             .addProperty(DCTerms.description, description)
@@ -154,15 +186,20 @@ class CodeListService(
     }
 
     private fun Resource.addCodes(codes: List<Code>): Resource {
-        codes.map { code -> createCodeResource(code, codes.filter { it.parentID == code.id }.map { it.id }) }
+        codes
+            .map { code -> createCodeResource(code, codes.filter { it.parentID == code.id }.map { it.id }) }
             .forEach { addProperty(UNESKOS.contains, it) }
 
         return this
     }
 
-    private fun Resource.createCodeResource(code: Code, childrenIds: List<String>): Resource {
+    private fun Resource.createCodeResource(
+        code: Code,
+        childrenIds: List<String>,
+    ): Resource {
         val codeURI = createCodeURI(uri, code.id)
-        return model.createResource(codeURI, SKOS.Concept)
+        return model
+            .createResource(codeURI, SKOS.Concept)
             .addProperty(DCTerms.identifier, model.createTypedLiteral(codeURI, XSDDateType.XSDanyURI))
             .addProperty(SKOS.inScheme, this)
             .addBroader(uri, code.parentID)
@@ -177,12 +214,18 @@ class CodeListService(
         return this
     }
 
-    private fun Resource.addBroader(codeListUri: String, parentId: String?): Resource {
+    private fun Resource.addBroader(
+        codeListUri: String,
+        parentId: String?,
+    ): Resource {
         if (parentId != null) addProperty(SKOS.broader, model.getResource(createCodeURI(codeListUri, parentId)))
         return this
     }
 
-    private fun Resource.addNarrower(codeListUri: String, childrenIds: List<String>): Resource {
+    private fun Resource.addNarrower(
+        codeListUri: String,
+        childrenIds: List<String>,
+    ): Resource {
         childrenIds.forEach { addProperty(SKOS.narrower, model.getResource(createCodeURI(codeListUri, it))) }
         return this
     }

@@ -2,7 +2,15 @@ package no.digdir.catalog_admin_service.integration
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.digdir.catalog_admin_service.model.*
+import no.digdir.catalog_admin_service.model.EditableFields
+import no.digdir.catalog_admin_service.model.Field
+import no.digdir.catalog_admin_service.model.FieldLocation
+import no.digdir.catalog_admin_service.model.FieldToBeCreated
+import no.digdir.catalog_admin_service.model.FieldType
+import no.digdir.catalog_admin_service.model.Fields
+import no.digdir.catalog_admin_service.model.JsonPatchOperation
+import no.digdir.catalog_admin_service.model.MultiLanguageTexts
+import no.digdir.catalog_admin_service.model.OpEnum
 import no.digdir.catalog_admin_service.utils.ApiTestContext
 import no.digdir.catalog_admin_service.utils.CODE_LIST_0
 import no.digdir.catalog_admin_service.utils.FIELD_0
@@ -14,10 +22,10 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.testcontainers.context.ImportTestcontainers
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
-import org.springframework.boot.testcontainers.context.ImportTestcontainers
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
@@ -26,12 +34,11 @@ private val mapper = jacksonObjectMapper()
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(
     properties = ["spring.profiles.active=integration-test"],
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 )
 @ImportTestcontainers(ApiTestContext::class)
 @Tag("integration")
 class FieldsTest : ApiTestContext() {
-
     @Nested
     internal inner class GetFields {
         private val path = "/910244132/concepts/fields"
@@ -67,7 +74,6 @@ class FieldsTest : ApiTestContext() {
             val response = apiAuthorizedRequest(path, port, null, null, HttpMethod.GET)
             assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
         }
-
     }
 
     @Nested
@@ -77,7 +83,14 @@ class FieldsTest : ApiTestContext() {
         @Test
         fun ableToUpdateEditableFields() {
             val operations = listOf(JsonPatchOperation(op = OpEnum.REMOVE, "/domainCodeListId"))
-            val response = apiAuthorizedRequest(path, port, mapper.writeValueAsString(operations), JwtToken(Access.ORG_ADMIN).toString(), HttpMethod.PATCH)
+            val response =
+                apiAuthorizedRequest(
+                    path,
+                    port,
+                    mapper.writeValueAsString(operations),
+                    JwtToken(Access.ORG_ADMIN).toString(),
+                    HttpMethod.PATCH,
+                )
 
             assertEquals(HttpStatus.OK.value(), response["status"])
 
@@ -89,7 +102,14 @@ class FieldsTest : ApiTestContext() {
         @Test
         fun badRequestWhenUpdatingCatalogId() {
             val operations = listOf(JsonPatchOperation(op = OpEnum.ADD, "/catalogId", "12345678"))
-            val response = apiAuthorizedRequest(path, port, mapper.writeValueAsString(operations), JwtToken(Access.ORG_ADMIN).toString(), HttpMethod.PATCH)
+            val response =
+                apiAuthorizedRequest(
+                    path,
+                    port,
+                    mapper.writeValueAsString(operations),
+                    JwtToken(Access.ORG_ADMIN).toString(),
+                    HttpMethod.PATCH,
+                )
 
             assertEquals(HttpStatus.BAD_REQUEST.value(), response["status"])
         }
@@ -97,9 +117,18 @@ class FieldsTest : ApiTestContext() {
         @Test
         fun forbiddenForWrongOrgAndNonAdminRoles() {
             val body = listOf(JsonPatchOperation(op = OpEnum.ADD, "/domainCodeListId", "123"))
-            val readRole = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.ORG_READ).toString(), HttpMethod.PATCH)
-            val writeRole = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.ORG_WRITE).toString(), HttpMethod.PATCH)
-            val wrongOrg = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.WRONG_ORG_ADMIN).toString(), HttpMethod.PATCH)
+            val readRole =
+                apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.ORG_READ).toString(), HttpMethod.PATCH)
+            val writeRole =
+                apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.ORG_WRITE).toString(), HttpMethod.PATCH)
+            val wrongOrg =
+                apiAuthorizedRequest(
+                    path,
+                    port,
+                    mapper.writeValueAsString(body),
+                    JwtToken(Access.WRONG_ORG_ADMIN).toString(),
+                    HttpMethod.PATCH,
+                )
 
             assertEquals(HttpStatus.FORBIDDEN.value(), readRole["status"])
             assertEquals(HttpStatus.FORBIDDEN.value(), writeRole["status"])
@@ -112,7 +141,6 @@ class FieldsTest : ApiTestContext() {
             val response = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), null, HttpMethod.PATCH)
             assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
         }
-
     }
 
     @Nested
@@ -121,15 +149,17 @@ class FieldsTest : ApiTestContext() {
 
         @Test
         fun ableToCreateInternalField() {
-            val body = FieldToBeCreated(
-                MultiLanguageTexts(nb = "label", nn = "label", en = "label"),
-                MultiLanguageTexts(nb = "description", nn = "description", en = "description"),
-                FieldType.BOOLEAN,
-                null,
-                null,
-                false
-            )
-            val response = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.ORG_ADMIN).toString(), HttpMethod.POST)
+            val body =
+                FieldToBeCreated(
+                    MultiLanguageTexts(nb = "label", nn = "label", en = "label"),
+                    MultiLanguageTexts(nb = "description", nn = "description", en = "description"),
+                    FieldType.BOOLEAN,
+                    null,
+                    null,
+                    false,
+                )
+            val response =
+                apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.ORG_ADMIN).toString(), HttpMethod.POST)
 
             assertEquals(HttpStatus.CREATED.value(), response["status"])
 
@@ -140,25 +170,35 @@ class FieldsTest : ApiTestContext() {
             val getResponse = apiAuthorizedRequest(location.toString(), port, null, JwtToken(Access.ORG_READ).toString(), HttpMethod.GET)
             assertEquals(HttpStatus.OK.value(), getResponse["status"])
             val result: Field = mapper.readValue(getResponse["body"] as String)
-            val expected = Field(
-                id = result.id,
-                catalogId = "910244132",
-                label = MultiLanguageTexts(nb = "label", nn = "label", en = "label"),
-                description = MultiLanguageTexts(nb = "description", nn = "description", en = "description"),
-                type = FieldType.BOOLEAN,
-                location = FieldLocation.MAIN_COLUMN,
-                codeListId = null,
-                enableFilter = false
-            )
+            val expected =
+                Field(
+                    id = result.id,
+                    catalogId = "910244132",
+                    label = MultiLanguageTexts(nb = "label", nn = "label", en = "label"),
+                    description = MultiLanguageTexts(nb = "description", nn = "description", en = "description"),
+                    type = FieldType.BOOLEAN,
+                    location = FieldLocation.MAIN_COLUMN,
+                    codeListId = null,
+                    enableFilter = false,
+                )
             assertEquals(expected, result)
         }
 
         @Test
         fun forbiddenForWrongOrgAndNonAdminRoles() {
             val body = FieldToBeCreated(MultiLanguageTexts(nb = "Test", nn = "Test", en = "Test"), null, null, null, null, null)
-            val readRole = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.ORG_READ).toString(), HttpMethod.POST)
-            val writeRole = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.ORG_WRITE).toString(), HttpMethod.POST)
-            val wrongOrg = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.WRONG_ORG_ADMIN).toString(), HttpMethod.POST)
+            val readRole =
+                apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.ORG_READ).toString(), HttpMethod.POST)
+            val writeRole =
+                apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), JwtToken(Access.ORG_WRITE).toString(), HttpMethod.POST)
+            val wrongOrg =
+                apiAuthorizedRequest(
+                    path,
+                    port,
+                    mapper.writeValueAsString(body),
+                    JwtToken(Access.WRONG_ORG_ADMIN).toString(),
+                    HttpMethod.POST,
+                )
 
             assertEquals(HttpStatus.FORBIDDEN.value(), readRole["status"])
             assertEquals(HttpStatus.FORBIDDEN.value(), writeRole["status"])
@@ -171,7 +211,6 @@ class FieldsTest : ApiTestContext() {
             val response = apiAuthorizedRequest(path, port, mapper.writeValueAsString(body), null, HttpMethod.POST)
             assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
         }
-
     }
 
     @Nested
@@ -211,7 +250,14 @@ class FieldsTest : ApiTestContext() {
 
         @Test
         fun notFoundForWrongId() {
-            val response = apiAuthorizedRequest("/910244132/concepts/fields/internal/invalid", port, null, JwtToken(Access.ORG_ADMIN).toString(), HttpMethod.GET)
+            val response =
+                apiAuthorizedRequest(
+                    "/910244132/concepts/fields/internal/invalid",
+                    port,
+                    null,
+                    JwtToken(Access.ORG_ADMIN).toString(),
+                    HttpMethod.GET,
+                )
             assertEquals(HttpStatus.NOT_FOUND.value(), response["status"])
         }
     }
@@ -248,7 +294,14 @@ class FieldsTest : ApiTestContext() {
 
         @Test
         fun notFoundForWrongId() {
-            val response = apiAuthorizedRequest("/910244132/concepts/fields/internal/invalid", port, null, JwtToken(Access.ORG_ADMIN).toString(), HttpMethod.DELETE)
+            val response =
+                apiAuthorizedRequest(
+                    "/910244132/concepts/fields/internal/invalid",
+                    port,
+                    null,
+                    JwtToken(Access.ORG_ADMIN).toString(),
+                    HttpMethod.DELETE,
+                )
             assertEquals(HttpStatus.NOT_FOUND.value(), response["status"])
         }
     }
@@ -260,7 +313,14 @@ class FieldsTest : ApiTestContext() {
         @Test
         fun adminIsAbleToUpdateField() {
             val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, "/description/nn", "New description"))
-            val response = apiAuthorizedRequest(path, port, mapper.writeValueAsString(operations), JwtToken(Access.ORG_ADMIN).toString(), HttpMethod.PATCH)
+            val response =
+                apiAuthorizedRequest(
+                    path,
+                    port,
+                    mapper.writeValueAsString(operations),
+                    JwtToken(Access.ORG_ADMIN).toString(),
+                    HttpMethod.PATCH,
+                )
             assertEquals(HttpStatus.OK.value(), response["status"])
 
             val result: Field = mapper.readValue(response["body"] as String)
@@ -270,9 +330,30 @@ class FieldsTest : ApiTestContext() {
         @Test
         fun forbiddenForWrongOrgAndNonAdminRoles() {
             val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, "/description/nn", "New description"))
-            val wrongOrg = apiAuthorizedRequest(path, port, mapper.writeValueAsString(operations), JwtToken(Access.WRONG_ORG_ADMIN).toString(), HttpMethod.PATCH)
-            val readRole = apiAuthorizedRequest(path, port, mapper.writeValueAsString(operations), JwtToken(Access.ORG_READ).toString(), HttpMethod.PATCH)
-            val writeRole = apiAuthorizedRequest(path, port, mapper.writeValueAsString(operations), JwtToken(Access.ORG_WRITE).toString(), HttpMethod.PATCH)
+            val wrongOrg =
+                apiAuthorizedRequest(
+                    path,
+                    port,
+                    mapper.writeValueAsString(operations),
+                    JwtToken(Access.WRONG_ORG_ADMIN).toString(),
+                    HttpMethod.PATCH,
+                )
+            val readRole =
+                apiAuthorizedRequest(
+                    path,
+                    port,
+                    mapper.writeValueAsString(operations),
+                    JwtToken(Access.ORG_READ).toString(),
+                    HttpMethod.PATCH,
+                )
+            val writeRole =
+                apiAuthorizedRequest(
+                    path,
+                    port,
+                    mapper.writeValueAsString(operations),
+                    JwtToken(Access.ORG_WRITE).toString(),
+                    HttpMethod.PATCH,
+                )
 
             assertEquals(HttpStatus.FORBIDDEN.value(), wrongOrg["status"])
             assertEquals(HttpStatus.FORBIDDEN.value(), readRole["status"])
@@ -289,7 +370,14 @@ class FieldsTest : ApiTestContext() {
         @Test
         fun notFoundForWrongId() {
             val operations = listOf(JsonPatchOperation(op = OpEnum.REPLACE, "/description/nn", "New description"))
-            val response = apiAuthorizedRequest("/910244132/concepts/fields/internal/invalid", port, mapper.writeValueAsString(operations), JwtToken(Access.ORG_ADMIN).toString(), HttpMethod.DELETE)
+            val response =
+                apiAuthorizedRequest(
+                    "/910244132/concepts/fields/internal/invalid",
+                    port,
+                    mapper.writeValueAsString(operations),
+                    JwtToken(Access.ORG_ADMIN).toString(),
+                    HttpMethod.DELETE,
+                )
             assertEquals(HttpStatus.NOT_FOUND.value(), response["status"])
         }
     }

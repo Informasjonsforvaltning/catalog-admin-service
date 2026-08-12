@@ -5,7 +5,7 @@ import org.apache.jena.riot.Lang
 import java.io.StringWriter
 
 fun Model.turtleResponse(): String =
-    StringWriter().use{ out ->
+    StringWriter().use { out ->
         write(out, Lang.TURTLE.name)
         out.toString()
     }

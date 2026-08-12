@@ -19,12 +19,13 @@ import java.io.InputStream
 import java.util.Base64
 import javax.imageio.ImageIO
 
-
 private val logger = LoggerFactory.getLogger(DesignService::class.java)
 
 @Service
-open class DesignService(private val designRepository: DesignRepository, private val logoRepository: LogoRepository) {
-
+open class DesignService(
+    private val designRepository: DesignRepository,
+    private val logoRepository: LogoRepository,
+) {
     private fun getDesignDBO(catalogId: String): DesignDBO =
         designRepository.findById(catalogId).orElse(null)
             ?: DesignDBO(catalogId, null, null, null, false)
@@ -34,13 +35,15 @@ open class DesignService(private val designRepository: DesignRepository, private
             backgroundColor = backgroundColor,
             fontColor = fontColor,
             logoDescription = logoDescription,
-            hasLogo = hasLogo
+            hasLogo = hasLogo,
         )
 
-    fun getDesign(catalogId: String): DesignDTO =
-        getDesignDBO(catalogId).mapToDTO()
+    fun getDesign(catalogId: String): DesignDTO = getDesignDBO(catalogId).mapToDTO()
 
-    fun updateDesign(catalogId: String, operations: List<JsonPatchOperation>): DesignDTO =
+    fun updateDesign(
+        catalogId: String,
+        operations: List<JsonPatchOperation>,
+    ): DesignDTO =
         try {
             patchOriginal(getDesignDBO(catalogId), operations)
                 .let { designRepository.save(it) }
@@ -50,8 +53,7 @@ open class DesignService(private val designRepository: DesignRepository, private
             throw ex
         }
 
-    fun getLogo(catalogId: String): Logo? =
-        logoRepository.findById(catalogId).orElse(null)
+    fun getLogo(catalogId: String): Logo? = logoRepository.findById(catalogId).orElse(null)
 
     fun deleteLogo(catalogId: String): DesignDBO =
         try {
@@ -64,14 +66,23 @@ open class DesignService(private val designRepository: DesignRepository, private
             throw ex
         }
 
-    open fun saveLogo(catalogId: String, logoFile: MultipartFile) {
+    open fun saveLogo(
+        catalogId: String,
+        logoFile: MultipartFile,
+    ) {
         logger.info("uploading logo for $catalogId")
         val contentType = logoFile.contentType
         val bytes: ByteArray = logoFile.inputStream.readAllBytes()
 
         when (contentType) {
-            MediaType.IMAGE_PNG_VALUE -> validatePNG(logoFile.inputStream)
-            "image/svg+xml" -> validateSVG(bytes)
+            MediaType.IMAGE_PNG_VALUE -> {
+                validatePNG(logoFile.inputStream)
+            }
+
+            "image/svg+xml" -> {
+                validateSVG(bytes)
+            }
+
             else -> {
                 logger.error("Logo content-type '${logoFile.contentType}' is not supported")
                 throw ResponseStatusException(HttpStatus.BAD_REQUEST)
@@ -83,8 +94,8 @@ open class DesignService(private val designRepository: DesignRepository, private
                 base64Logo = Base64.getEncoder().encodeToString(bytes),
                 contentType = contentType,
                 catalogId = catalogId,
-                filename = logoFile.originalFilename ?: "logo.${fileEndingFromContentType(contentType)}"
-            )
+                filename = logoFile.originalFilename ?: "logo.${fileEndingFromContentType(contentType)}",
+            ),
         )
 
         getDesignDBO(catalogId)
@@ -124,12 +135,11 @@ open class DesignService(private val designRepository: DesignRepository, private
             throw ResponseStatusException(HttpStatus.BAD_REQUEST)
         }
     }
-
 }
 
 fun Logo.inputStreamResource(): InputStreamResource =
     InputStreamResource(
         ByteArrayInputStream(
-            Base64.getDecoder().decode(base64Logo)
-        )
+            Base64.getDecoder().decode(base64Logo),
+        ),
     )

@@ -1,15 +1,14 @@
 package no.digdir.catalog_admin_service.utils
 
+import org.junit.jupiter.api.BeforeEach
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.PostgreSQLContainer
 import java.net.HttpURLConnection
 import java.net.URL
-import org.junit.jupiter.api.BeforeEach
 
 abstract class ApiTestContext {
-
     @LocalServerPort
     var port = 0
 
@@ -20,10 +19,11 @@ abstract class ApiTestContext {
 
     companion object {
         @JvmStatic
-        val postgresContainer: KPostgreSQLContainer = KPostgreSQLContainer("postgres:16")
-            .withDatabaseName(DB_NAME)
-            .withUsername(DB_USER)
-            .withPassword(DB_PASSWORD)
+        val postgresContainer: KPostgreSQLContainer =
+            KPostgreSQLContainer("postgres:16")
+                .withDatabaseName(DB_NAME)
+                .withUsername(DB_USER)
+                .withPassword(DB_PASSWORD)
 
         init {
             startMockServer()
@@ -53,4 +53,6 @@ abstract class ApiTestContext {
     }
 }
 
-class KPostgreSQLContainer(imageName: String) : PostgreSQLContainer<KPostgreSQLContainer>(imageName)
+class KPostgreSQLContainer(
+    imageName: String,
+) : PostgreSQLContainer<KPostgreSQLContainer>(imageName)

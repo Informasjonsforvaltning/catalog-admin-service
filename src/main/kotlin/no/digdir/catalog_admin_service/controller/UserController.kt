@@ -12,34 +12,44 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.jwt.Jwt
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping(
     value = ["/{catalogId}/general/users"],
-    produces = ["application/json"]
+    produces = ["application/json"],
 )
 open class UserController(
     private val userService: UserService,
-    private val endpointPermissions: EndpointPermissions
+    private val endpointPermissions: EndpointPermissions,
 ) {
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getUsers(@AuthenticationPrincipal jwt: Jwt, @PathVariable catalogId: String): ResponseEntity<Users> =
+    fun getUsers(
+        @AuthenticationPrincipal jwt: Jwt,
+        @PathVariable catalogId: String,
+    ): ResponseEntity<Users> =
         if (endpointPermissions.hasOrgReadPermission(jwt, catalogId)) {
             ResponseEntity(userService.getUsers(catalogId), HttpStatus.OK)
         } else {
             ResponseEntity(HttpStatus.FORBIDDEN)
         }
 
-
     @GetMapping(value = ["/{userId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun getUserById(
         @AuthenticationPrincipal jwt: Jwt,
         @PathVariable catalogId: String,
-        @PathVariable userId: String
+        @PathVariable userId: String,
     ): ResponseEntity<User> =
         if (endpointPermissions.hasOrgReadPermission(jwt, catalogId)) {
-            userService.getUserById(userId, catalogId)
+            userService
+                .getUserById(userId, catalogId)
                 ?.let { ResponseEntity(it, HttpStatus.OK) }
                 ?: ResponseEntity(HttpStatus.NOT_FOUND)
         } else {
@@ -51,10 +61,11 @@ open class UserController(
         @AuthenticationPrincipal jwt: Jwt,
         @PathVariable catalogId: String,
         @PathVariable userId: String,
-        @RequestBody patchOperations: List<JsonPatchOperation>
+        @RequestBody patchOperations: List<JsonPatchOperation>,
     ): ResponseEntity<User> =
         if (endpointPermissions.hasOrgAdminPermission(jwt, catalogId)) {
-            userService.updateUser(userId, catalogId, patchOperations)
+            userService
+                .updateUser(userId, catalogId, patchOperations)
                 ?.let { ResponseEntity(it, HttpStatus.OK) }
                 ?: ResponseEntity(HttpStatus.NOT_FOUND)
         } else {
@@ -65,11 +76,17 @@ open class UserController(
     fun deleteUser(
         @AuthenticationPrincipal jwt: Jwt,
         @PathVariable catalogId: String,
-        @PathVariable userId: String
+        @PathVariable userId: String,
     ): ResponseEntity<Unit> =
         when {
-            !endpointPermissions.hasOrgAdminPermission(jwt, catalogId) -> ResponseEntity(HttpStatus.FORBIDDEN)
-            userService.getUserById(userId, catalogId) == null -> ResponseEntity(HttpStatus.NOT_FOUND)
+            !endpointPermissions.hasOrgAdminPermission(jwt, catalogId) -> {
+                ResponseEntity(HttpStatus.FORBIDDEN)
+            }
+
+            userService.getUserById(userId, catalogId) == null -> {
+                ResponseEntity(HttpStatus.NOT_FOUND)
+            }
+
             else -> {
                 userService.deleteUserById(userId)
                 ResponseEntity(HttpStatus.NO_CONTENT)
@@ -80,19 +97,23 @@ open class UserController(
     fun createUser(
         @AuthenticationPrincipal jwt: Jwt,
         @PathVariable catalogId: String,
-        @RequestBody newUser: UserToBeCreated
+        @RequestBody newUser: UserToBeCreated,
     ): ResponseEntity<Unit> =
         if (endpointPermissions.hasOrgAdminPermission(jwt, catalogId)) {
             val created = userService.createUser(newUser, catalogId)
             ResponseEntity(
                 locationHeaderForCreated(newId = created.id, catalogId),
-                HttpStatus.CREATED
+                HttpStatus.CREATED,
             )
-
-        } else ResponseEntity<Unit>(HttpStatus.FORBIDDEN)
+        } else {
+            ResponseEntity<Unit>(HttpStatus.FORBIDDEN)
+        }
 }
 
-private fun locationHeaderForCreated(newId: String, catalogId: String): HttpHeaders =
+private fun locationHeaderForCreated(
+    newId: String,
+    catalogId: String,
+): HttpHeaders =
     HttpHeaders().apply {
         add(HttpHeaders.LOCATION, "/$catalogId/general/users/$newId")
         add(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.LOCATION)

@@ -18,9 +18,9 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.testcontainers.context.ImportTestcontainers
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
-import org.springframework.boot.testcontainers.context.ImportTestcontainers
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
@@ -29,25 +29,25 @@ private val mapper = jacksonObjectMapper()
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(
     properties = ["spring.profiles.active=integration-test"],
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 )
 @ImportTestcontainers(ApiTestContext::class)
 @Tag("integration")
-class DesignTest : ApiTestContext(
-) {
+class DesignTest : ApiTestContext() {
     @Nested
     internal inner class Design {
         private val path = "/910244132/design"
 
         @Test
         fun findDesign() {
-            val response = apiAuthorizedRequest(
-                path,
-                port,
-                null,
-                JwtToken(Access.ORG_WRITE).toString(),
-                HttpMethod.GET
-            )
+            val response =
+                apiAuthorizedRequest(
+                    path,
+                    port,
+                    null,
+                    JwtToken(Access.ORG_WRITE).toString(),
+                    HttpMethod.GET,
+                )
             assertEquals(HttpStatus.OK.value(), response["status"])
             val result: DesignDTO = mapper.readValue(response["body"] as String)
             assertEquals(DESIGN_DTO, result)
@@ -56,21 +56,23 @@ class DesignTest : ApiTestContext(
         @Test
         fun updateDesign() {
             val operations = listOf(JsonPatchOperation(op = OpEnum.ADD, "/logoDescription", "New FDK Logo"))
-            val response = apiAuthorizedRequest(
-                path,
-                port,
-                mapper.writeValueAsString(operations),
-                JwtToken(Access.ORG_ADMIN).toString(),
-                HttpMethod.PATCH
-            )
+            val response =
+                apiAuthorizedRequest(
+                    path,
+                    port,
+                    mapper.writeValueAsString(operations),
+                    JwtToken(Access.ORG_ADMIN).toString(),
+                    HttpMethod.PATCH,
+                )
 
             assertEquals(HttpStatus.OK.value(), response["status"])
 
             val result: DesignDTO = mapper.readValue(response["body"] as String)
             assertEquals(
                 DESIGN_DTO.copy(
-                    logoDescription = "New FDK Logo"
-                ), result
+                    logoDescription = "New FDK Logo",
+                ),
+                result,
             )
         }
 
@@ -82,13 +84,14 @@ class DesignTest : ApiTestContext(
 
         @Test
         fun designNotFoundInDB() {
-            val response = apiAuthorizedRequest(
-                "/123456789/design",
-                port,
-                null,
-                JwtToken(Access.ROOT).toString(),
-                HttpMethod.GET
-            )
+            val response =
+                apiAuthorizedRequest(
+                    "/123456789/design",
+                    port,
+                    null,
+                    JwtToken(Access.ROOT).toString(),
+                    HttpMethod.GET,
+                )
             assertEquals(HttpStatus.OK.value(), response["status"])
             val result: DesignDTO = mapper.readValue(response["body"] as String)
             assertEquals(result, DesignDTO(null, null, null, false))
@@ -97,30 +100,33 @@ class DesignTest : ApiTestContext(
         @Test
         fun updateDesignForbiddenForOrgRead() {
             val operations = listOf(JsonPatchOperation(op = OpEnum.ADD, "/logoDescription", "New FDK Logo"))
-            val response = apiAuthorizedRequest(
-                path,
-                port,
-                mapper.writeValueAsString(operations),
-                JwtToken(Access.ORG_READ).toString(),
-                HttpMethod.PATCH
-            )
+            val response =
+                apiAuthorizedRequest(
+                    path,
+                    port,
+                    mapper.writeValueAsString(operations),
+                    JwtToken(Access.ORG_READ).toString(),
+                    HttpMethod.PATCH,
+                )
             assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
         }
 
         @Test
         fun badRequestWhenUpdatingHasLogo() {
             val operations = listOf(JsonPatchOperation(op = OpEnum.ADD, "/hasLogo", true))
-            val response = apiAuthorizedRequest(
-                path,
-                port,
-                mapper.writeValueAsString(operations),
-                JwtToken(Access.ORG_ADMIN).toString(),
-                HttpMethod.PATCH
-            )
+            val response =
+                apiAuthorizedRequest(
+                    path,
+                    port,
+                    mapper.writeValueAsString(operations),
+                    JwtToken(Access.ORG_ADMIN).toString(),
+                    HttpMethod.PATCH,
+                )
 
             assertEquals(HttpStatus.BAD_REQUEST.value(), response["status"])
         }
     }
+
     @Nested
     internal inner class Logo {
         private val path = "/910244132/design/logo"
@@ -215,6 +221,5 @@ class DesignTest : ApiTestContext(
             val response = apiAuthorizedRequest(path, port, null, JwtToken(Access.ORG_READ).toString(), HttpMethod.DELETE)
             assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
         }
-
     }
 }

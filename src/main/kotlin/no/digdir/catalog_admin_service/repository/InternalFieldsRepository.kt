@@ -8,6 +8,15 @@ import org.springframework.stereotype.Repository
 @Repository
 interface InternalFieldsRepository : JpaRepository<Field, String> {
     fun findByCatalogId(catalogId: String): List<Field>
-    fun findByIdAndCatalogId(id: String, catalogId: String): Field?
-    fun findByCatalogIdAndTypeAndCodeListId(catalogId: String, type: FieldType, codeListId: String): List<Field>
+
+    fun findByIdAndCatalogId(
+        id: String,
+        catalogId: String,
+    ): Field?
+
+    fun findByCatalogIdAndTypeAndCodeListId(
+        catalogId: String,
+        type: FieldType,
+        codeListId: String,
+    ): List<Field>
 }

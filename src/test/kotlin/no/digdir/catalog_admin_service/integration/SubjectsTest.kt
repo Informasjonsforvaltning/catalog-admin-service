@@ -14,10 +14,10 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.testcontainers.context.ImportTestcontainers
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.boot.testcontainers.context.ImportTestcontainers
 import java.io.StringReader
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -25,28 +25,27 @@ import kotlin.test.assertTrue
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(
     properties = ["spring.profiles.active=integration-test"],
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 )
 @ImportTestcontainers(ApiTestContext::class)
 @Tag("integration")
 class SubjectsTest : ApiTestContext() {
-
     val testResponseReader = TestResponseReader()
     private val mapper = jacksonObjectMapper()
 
     @Nested
     internal inner class RDF {
-
         @Test
         fun getAllConceptSubjects() {
-            val response = apiAuthorizedRequest(
-                "/concept-subjects",
-                port,
-                null,
-                null,
-                HttpMethod.GET,
-                accept = MediaType.parseMediaType("text/turtle")
-            )
+            val response =
+                apiAuthorizedRequest(
+                    "/concept-subjects",
+                    port,
+                    null,
+                    null,
+                    HttpMethod.GET,
+                    accept = MediaType.parseMediaType("text/turtle"),
+                )
             assertEquals(HttpStatus.OK.value(), response["status"])
             val model = ModelFactory.createDefaultModel().read(StringReader(response["body"] as String), "", "TURTLE")
             val expected = testResponseReader.parseTurtleFile("all-concept-subjects.ttl")
@@ -55,14 +54,15 @@ class SubjectsTest : ApiTestContext() {
 
         @Test
         fun getCatalogSubjects() {
-            val response = apiAuthorizedRequest(
-                "/123456789/concepts/code-list/subjects",
-                port,
-                null,
-                null,
-                HttpMethod.GET,
-                accept = MediaType.parseMediaType("text/turtle")
-            )
+            val response =
+                apiAuthorizedRequest(
+                    "/123456789/concepts/code-list/subjects",
+                    port,
+                    null,
+                    null,
+                    HttpMethod.GET,
+                    accept = MediaType.parseMediaType("text/turtle"),
+                )
             assertEquals(HttpStatus.OK.value(), response["status"])
             val model = ModelFactory.createDefaultModel().read(StringReader(response["body"] as String), "", "TURTLE")
             val expected = testResponseReader.parseTurtleFile("concept-subjects-for-single-catalog.ttl")
@@ -71,31 +71,32 @@ class SubjectsTest : ApiTestContext() {
 
         @Test
         fun getCatalogSubjectsNotFoundWhenMissingInDB() {
-            val response = apiAuthorizedRequest(
-                "/111222333/concepts/code-list/subjects",
-                port,
-                null,
-                null,
-                HttpMethod.GET,
-                accept = MediaType.parseMediaType("text/turtle")
-            )
+            val response =
+                apiAuthorizedRequest(
+                    "/111222333/concepts/code-list/subjects",
+                    port,
+                    null,
+                    null,
+                    HttpMethod.GET,
+                    accept = MediaType.parseMediaType("text/turtle"),
+                )
             assertEquals(HttpStatus.NOT_FOUND.value(), response["status"])
         }
     }
 
     @Nested
     internal inner class JSON {
-
         @Test
         fun getAllConceptSubjects() {
-            val response = apiAuthorizedRequest(
-                "/concept-subjects",
-                port,
-                null,
-                null,
-                HttpMethod.GET,
-                accept = MediaType.parseMediaType("application/json")
-            )
+            val response =
+                apiAuthorizedRequest(
+                    "/concept-subjects",
+                    port,
+                    null,
+                    null,
+                    HttpMethod.GET,
+                    accept = MediaType.parseMediaType("application/json"),
+                )
             assertEquals(HttpStatus.OK.value(), response["status"])
             val result: List<CodeList> = mapper.readValue(response["body"] as String)
             val expected = listOf(CODE_LIST_0, CODE_LIST_1)
@@ -104,14 +105,15 @@ class SubjectsTest : ApiTestContext() {
 
         @Test
         fun getCatalogSubjects() {
-            val response = apiAuthorizedRequest(
-                "/123456789/concepts/code-list/subjects",
-                port,
-                null,
-                null,
-                HttpMethod.GET,
-                accept = MediaType.parseMediaType("application/json")
-            )
+            val response =
+                apiAuthorizedRequest(
+                    "/123456789/concepts/code-list/subjects",
+                    port,
+                    null,
+                    null,
+                    HttpMethod.GET,
+                    accept = MediaType.parseMediaType("application/json"),
+                )
             assertEquals(HttpStatus.OK.value(), response["status"])
             val result: CodeList = mapper.readValue(response["body"] as String)
             assertEquals(CODE_LIST_1, result)
@@ -119,16 +121,16 @@ class SubjectsTest : ApiTestContext() {
 
         @Test
         fun getCatalogSubjectsNotFoundWhenMissingInDB() {
-            val response = apiAuthorizedRequest(
-                "/111222333/concepts/code-list/subjects",
-                port,
-                null,
-                null,
-                HttpMethod.GET,
-                accept = MediaType.parseMediaType("application/json")
-            )
+            val response =
+                apiAuthorizedRequest(
+                    "/111222333/concepts/code-list/subjects",
+                    port,
+                    null,
+                    null,
+                    HttpMethod.GET,
+                    accept = MediaType.parseMediaType("application/json"),
+                )
             assertEquals(HttpStatus.NOT_FOUND.value(), response["status"])
         }
     }
-
 }

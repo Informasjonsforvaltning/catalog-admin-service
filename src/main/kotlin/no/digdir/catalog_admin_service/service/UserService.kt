@@ -1,15 +1,15 @@
 package no.digdir.catalog_admin_service.service
 
 import jakarta.persistence.EntityManager
-import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
-import java.util.*
 import no.digdir.catalog_admin_service.model.JsonPatchOperation
 import no.digdir.catalog_admin_service.model.User
 import no.digdir.catalog_admin_service.model.UserToBeCreated
 import no.digdir.catalog_admin_service.model.Users
 import no.digdir.catalog_admin_service.repository.UserRepository
+import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.util.UUID
 
 private val logger = LoggerFactory.getLogger(UserService::class.java)
 
@@ -18,11 +18,12 @@ class UserService(
     private val userRepository: UserRepository,
     private val entityManager: EntityManager,
 ) {
-    fun getUsers(catalogId: String): Users =
-        Users(users = userRepository.findUsersByCatalogId(catalogId).sortedBy { it.name })
+    fun getUsers(catalogId: String): Users = Users(users = userRepository.findUsersByCatalogId(catalogId).sortedBy { it.name })
 
-    fun getUserById(userId: String, catalogId: String): User? =
-        userRepository.findUserByIdAndCatalogId(userId, catalogId)
+    fun getUserById(
+        userId: String,
+        catalogId: String,
+    ): User? = userRepository.findUserByIdAndCatalogId(userId, catalogId)
 
     fun deleteUserById(userId: String) =
         try {
@@ -33,23 +34,31 @@ class UserService(
         }
 
     @Transactional
-    fun createUser(data: UserToBeCreated, catalogId: String): User =
+    fun createUser(
+        data: UserToBeCreated,
+        catalogId: String,
+    ): User =
         try {
             User(
                 id = UUID.randomUUID().toString(),
                 name = data.name,
                 catalogId = catalogId,
                 email = data.email,
-                telephoneNumber = data.telephoneNumber
+                telephoneNumber = data.telephoneNumber,
             ).also { entityManager.persist(it) }
         } catch (ex: Exception) {
             logger.error("Failed to create user for catalog $catalogId", ex)
             throw ex
         }
 
-    fun updateUser(userId: String, catalogId: String, operations: List<JsonPatchOperation>): User? =
+    fun updateUser(
+        userId: String,
+        catalogId: String,
+        operations: List<JsonPatchOperation>,
+    ): User? =
         try {
-            userRepository.findUserByIdAndCatalogId(userId, catalogId)
+            userRepository
+                .findUserByIdAndCatalogId(userId, catalogId)
                 ?.let { dbUser -> patchOriginal(dbUser, operations) }
                 ?.let { userRepository.save(it) }
         } catch (ex: Exception) {
