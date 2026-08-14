@@ -26,8 +26,4 @@ data class CodeList(
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class CodeListToBeCreated(
-    val name: String,
-    val description: String,
-    val codes: List<Code>,
-)
+data class CodeListToBeCreated(val name: String, val description: String, val codes: List<Code>)

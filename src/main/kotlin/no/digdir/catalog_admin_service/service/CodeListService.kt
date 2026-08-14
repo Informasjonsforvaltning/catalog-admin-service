@@ -40,25 +40,17 @@ class CodeListService(
 ) {
     private fun CodeList.subjectsURI() = "${applicationProperties.adminServiceUri}/$catalogId/concepts/subjects"
 
-    private fun createCodeURI(
-        codeListUri: String,
-        codeId: String,
-    ) = "$codeListUri#$codeId"
+    private fun createCodeURI(codeListUri: String, codeId: String) = "$codeListUri#$codeId"
 
     private fun publisherURI(publisherId: String) = "https://data.brreg.no/enhetsregisteret/api/enheter/$publisherId"
 
     fun getCodeLists(catalogId: String): CodeLists =
         CodeLists(codeLists = codeListRepository.findCodeListsByCatalogId(catalogId).sortedBy { it.name })
 
-    fun getCodeListById(
-        catalogId: String,
-        codeListId: String,
-    ): CodeList? = codeListRepository.findCodeListByIdAndCatalogId(codeListId, catalogId)
+    fun getCodeListById(catalogId: String, codeListId: String): CodeList? =
+        codeListRepository.findCodeListByIdAndCatalogId(codeListId, catalogId)
 
-    fun deleteCodeListById(
-        catalogId: String,
-        codeListId: String,
-    ) {
+    fun deleteCodeListById(catalogId: String, codeListId: String) {
         val codeListsInInternalFields =
             internalFieldsRepository.findByCatalogIdAndTypeAndCodeListId(
                 catalogId,
@@ -89,58 +81,44 @@ class CodeListService(
         }
     }
 
-    private fun CodeListToBeCreated.mapCodeListToBeCreatedToCodeList(catalogId: String): CodeList =
-        CodeList(
-            id = UUID.randomUUID().toString(),
-            name = name,
-            catalogId = catalogId,
-            description = description,
-            codes = codes,
-        )
+    private fun CodeListToBeCreated.mapCodeListToBeCreatedToCodeList(catalogId: String): CodeList = CodeList(
+        id = UUID.randomUUID().toString(),
+        name = name,
+        catalogId = catalogId,
+        description = description,
+        codes = codes,
+    )
 
     @Transactional
-    fun createCodeList(
-        data: CodeListToBeCreated,
-        catalogId: String,
-    ): CodeList =
-        try {
-            data
-                .mapCodeListToBeCreatedToCodeList(catalogId)
-                .also { entityManager.persist(it) }
-        } catch (ex: Exception) {
-            logger.error("Failed to create code-list for catalog $catalogId", ex)
-            throw ex
-        }
+    fun createCodeList(data: CodeListToBeCreated, catalogId: String): CodeList = try {
+        data
+            .mapCodeListToBeCreatedToCodeList(catalogId)
+            .also { entityManager.persist(it) }
+    } catch (ex: Exception) {
+        logger.error("Failed to create code-list for catalog $catalogId", ex)
+        throw ex
+    }
 
-    fun createListOfCodeLists(
-        codeListsToBeCreated: List<CodeListToBeCreated>,
-        catalogId: String,
-    ) {
+    fun createListOfCodeLists(codeListsToBeCreated: List<CodeListToBeCreated>, catalogId: String) {
         codeListsToBeCreated
             .map { it.mapCodeListToBeCreatedToCodeList(catalogId) }
             .run { codeListRepository.saveAll(this) }
     }
 
-    fun updateCodeList(
-        codeListId: String,
-        catalogId: String,
-        operations: List<JsonPatchOperation>,
-    ): CodeList? =
-        try {
-            codeListRepository
-                .findCodeListByIdAndCatalogId(codeListId, catalogId)
-                ?.let { dbCodeList -> patchOriginal(dbCodeList, operations) }
-                ?.let { codeListRepository.save(it) }
-        } catch (ex: Exception) {
-            logger.error("Failed to update code-list with id $codeListId in catalog $catalogId", ex)
-            throw ex
-        }
+    fun updateCodeList(codeListId: String, catalogId: String, operations: List<JsonPatchOperation>): CodeList? = try {
+        codeListRepository
+            .findCodeListByIdAndCatalogId(codeListId, catalogId)
+            ?.let { dbCodeList -> patchOriginal(dbCodeList, operations) }
+            ?.let { codeListRepository.save(it) }
+    } catch (ex: Exception) {
+        logger.error("Failed to update code-list with id $codeListId in catalog $catalogId", ex)
+        throw ex
+    }
 
-    fun getAllConceptSubjectCodeLists(): List<CodeList> =
-        editableFieldsRepository
-            .findAll()
-            .mapNotNull { it.domainCodeListId }
-            .mapNotNull { codeListRepository.findById(it).orElse(null) }
+    fun getAllConceptSubjectCodeLists(): List<CodeList> = editableFieldsRepository
+        .findAll()
+        .mapNotNull { it.domainCodeListId }
+        .mapNotNull { codeListRepository.findById(it).orElse(null) }
 
     fun getAllConceptSubjectCodeListsRDF(): String {
         val allConceptSubjects = ModelFactory.createDefaultModel()
@@ -150,18 +128,16 @@ class CodeListService(
         return allConceptSubjects.addDefaultCodeListPrefixes().turtleResponse()
     }
 
-    fun getConceptSubjectsForCatalog(catalogId: String): CodeList? =
-        editableFieldsRepository
-            .findById(catalogId)
-            .orElse(null)
-            ?.domainCodeListId
-            ?.let { codeListRepository.findById(it).orElse(null) }
+    fun getConceptSubjectsForCatalog(catalogId: String): CodeList? = editableFieldsRepository
+        .findById(catalogId)
+        .orElse(null)
+        ?.domainCodeListId
+        ?.let { codeListRepository.findById(it).orElse(null) }
 
-    fun getConceptSubjectsForCatalogRDF(catalogId: String): String? =
-        getConceptSubjectsForCatalog(catalogId)
-            ?.createModel()
-            ?.addDefaultCodeListPrefixes()
-            ?.turtleResponse()
+    fun getConceptSubjectsForCatalogRDF(catalogId: String): String? = getConceptSubjectsForCatalog(catalogId)
+        ?.createModel()
+        ?.addDefaultCodeListPrefixes()
+        ?.turtleResponse()
 
     private fun Model.addDefaultCodeListPrefixes(): Model {
         setNsPrefix("dct", DCTerms.NS)
@@ -193,10 +169,7 @@ class CodeListService(
         return this
     }
 
-    private fun Resource.createCodeResource(
-        code: Code,
-        childrenIds: List<String>,
-    ): Resource {
+    private fun Resource.createCodeResource(code: Code, childrenIds: List<String>): Resource {
         val codeURI = createCodeURI(uri, code.id)
         return model
             .createResource(codeURI, SKOS.Concept)
@@ -214,18 +187,12 @@ class CodeListService(
         return this
     }
 
-    private fun Resource.addBroader(
-        codeListUri: String,
-        parentId: String?,
-    ): Resource {
+    private fun Resource.addBroader(codeListUri: String, parentId: String?): Resource {
         if (parentId != null) addProperty(SKOS.broader, model.getResource(createCodeURI(codeListUri, parentId)))
         return this
     }
 
-    private fun Resource.addNarrower(
-        codeListUri: String,
-        childrenIds: List<String>,
-    ): Resource {
+    private fun Resource.addNarrower(codeListUri: String, childrenIds: List<String>): Resource {
         childrenIds.forEach { addProperty(SKOS.narrower, model.getResource(createCodeURI(codeListUri, it))) }
         return this
     }

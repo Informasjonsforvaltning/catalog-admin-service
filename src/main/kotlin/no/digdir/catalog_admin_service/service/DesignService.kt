@@ -22,54 +22,41 @@ import javax.imageio.ImageIO
 private val logger = LoggerFactory.getLogger(DesignService::class.java)
 
 @Service
-open class DesignService(
-    private val designRepository: DesignRepository,
-    private val logoRepository: LogoRepository,
-) {
-    private fun getDesignDBO(catalogId: String): DesignDBO =
-        designRepository.findById(catalogId).orElse(null)
-            ?: DesignDBO(catalogId, null, null, null, false)
+open class DesignService(private val designRepository: DesignRepository, private val logoRepository: LogoRepository) {
+    private fun getDesignDBO(catalogId: String): DesignDBO = designRepository.findById(catalogId).orElse(null)
+        ?: DesignDBO(catalogId, null, null, null, false)
 
-    private fun DesignDBO.mapToDTO(): DesignDTO =
-        DesignDTO(
-            backgroundColor = backgroundColor,
-            fontColor = fontColor,
-            logoDescription = logoDescription,
-            hasLogo = hasLogo,
-        )
+    private fun DesignDBO.mapToDTO(): DesignDTO = DesignDTO(
+        backgroundColor = backgroundColor,
+        fontColor = fontColor,
+        logoDescription = logoDescription,
+        hasLogo = hasLogo,
+    )
 
     fun getDesign(catalogId: String): DesignDTO = getDesignDBO(catalogId).mapToDTO()
 
-    fun updateDesign(
-        catalogId: String,
-        operations: List<JsonPatchOperation>,
-    ): DesignDTO =
-        try {
-            patchOriginal(getDesignDBO(catalogId), operations)
-                .let { designRepository.save(it) }
-                .mapToDTO()
-        } catch (ex: Exception) {
-            logger.error("Failed to update design for catalog $catalogId", ex)
-            throw ex
-        }
+    fun updateDesign(catalogId: String, operations: List<JsonPatchOperation>): DesignDTO = try {
+        patchOriginal(getDesignDBO(catalogId), operations)
+            .let { designRepository.save(it) }
+            .mapToDTO()
+    } catch (ex: Exception) {
+        logger.error("Failed to update design for catalog $catalogId", ex)
+        throw ex
+    }
 
     fun getLogo(catalogId: String): Logo? = logoRepository.findById(catalogId).orElse(null)
 
-    fun deleteLogo(catalogId: String): DesignDBO =
-        try {
-            logoRepository.deleteById(catalogId)
-            getDesignDBO(catalogId)
-                .copy(hasLogo = false)
-                .run { designRepository.save(this) }
-        } catch (ex: Exception) {
-            logger.error("Failed to delete logo for catalog $catalogId", ex)
-            throw ex
-        }
+    fun deleteLogo(catalogId: String): DesignDBO = try {
+        logoRepository.deleteById(catalogId)
+        getDesignDBO(catalogId)
+            .copy(hasLogo = false)
+            .run { designRepository.save(this) }
+    } catch (ex: Exception) {
+        logger.error("Failed to delete logo for catalog $catalogId", ex)
+        throw ex
+    }
 
-    open fun saveLogo(
-        catalogId: String,
-        logoFile: MultipartFile,
-    ) {
+    open fun saveLogo(catalogId: String, logoFile: MultipartFile) {
         logger.info("uploading logo for $catalogId")
         val contentType = logoFile.contentType
         val bytes: ByteArray = logoFile.inputStream.readAllBytes()
@@ -103,12 +90,11 @@ open class DesignService(
             .run { designRepository.save(this) }
     }
 
-    private fun fileEndingFromContentType(contentType: String): String =
-        when {
-            contentType.contains("svg") -> "svg"
-            contentType.contains("png") -> "png"
-            else -> throw ResponseStatusException(HttpStatus.BAD_REQUEST)
-        }
+    private fun fileEndingFromContentType(contentType: String): String = when {
+        contentType.contains("svg") -> "svg"
+        contentType.contains("png") -> "png"
+        else -> throw ResponseStatusException(HttpStatus.BAD_REQUEST)
+    }
 
     private fun validatePNG(inputStream: InputStream) {
         try {
@@ -137,9 +123,8 @@ open class DesignService(
     }
 }
 
-fun Logo.inputStreamResource(): InputStreamResource =
-    InputStreamResource(
-        ByteArrayInputStream(
-            Base64.getDecoder().decode(base64Logo),
-        ),
-    )
+fun Logo.inputStreamResource(): InputStreamResource = InputStreamResource(
+    ByteArrayInputStream(
+        Base64.getDecoder().decode(base64Logo),
+    ),
+)

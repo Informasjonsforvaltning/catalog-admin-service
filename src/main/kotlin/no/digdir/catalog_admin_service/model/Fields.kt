@@ -11,10 +11,7 @@ import jakarta.persistence.Table
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 
-data class Fields(
-    val editable: EditableFields,
-    val internal: List<Field>,
-)
+data class Fields(val editable: EditableFields, val internal: List<Field>)
 
 @Entity
 @Table(name = "internal_fields")
@@ -62,9 +59,7 @@ data class FieldToBeCreated(
     val enableFilter: Boolean?,
 )
 
-enum class FieldType(
-    private val value: String,
-) {
+enum class FieldType(private val value: String) {
     BOOLEAN("boolean"),
     TEXT_SHORT("text_short"),
     TEXT_LONG("text_long"),
@@ -76,9 +71,7 @@ enum class FieldType(
     fun jsonValue(): String = value
 }
 
-enum class FieldLocation(
-    private val value: String,
-) {
+enum class FieldLocation(private val value: String) {
     MAIN_COLUMN("main_column"),
     RIGHT_COLUMN("right_column"),
     ;

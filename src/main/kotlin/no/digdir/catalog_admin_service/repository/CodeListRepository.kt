@@ -8,8 +8,5 @@ import org.springframework.stereotype.Repository
 interface CodeListRepository : JpaRepository<CodeList, String> {
     fun findCodeListsByCatalogId(catalogId: String): List<CodeList>
 
-    fun findCodeListByIdAndCatalogId(
-        id: String,
-        catalogId: String,
-    ): CodeList?
+    fun findCodeListByIdAndCatalogId(id: String, catalogId: String): CodeList?
 }

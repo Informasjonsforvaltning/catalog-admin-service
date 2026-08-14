@@ -13,10 +13,7 @@ private fun roleOrgRead(orgnr: String) = "organization:$orgnr:read"
 
 @Service
 class EndpointPermissions {
-    fun hasOrgReadPermission(
-        jwt: Jwt,
-        orgnr: String,
-    ): Boolean {
+    fun hasOrgReadPermission(jwt: Jwt, orgnr: String): Boolean {
         val authorities: String? = jwt.claims["authorities"] as? String
 
         return when {
@@ -29,10 +26,7 @@ class EndpointPermissions {
         }
     }
 
-    fun hasOrgAdminPermission(
-        jwt: Jwt,
-        orgnr: String,
-    ): Boolean {
+    fun hasOrgAdminPermission(jwt: Jwt, orgnr: String): Boolean {
         val authorities: String? = jwt.claims["authorities"] as? String
 
         return when {

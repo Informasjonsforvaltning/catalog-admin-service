@@ -29,15 +29,9 @@ private val logger = LoggerFactory.getLogger(CodeListController::class.java)
     value = ["/{catalogId}/concepts/code-lists"],
     produces = ["application/json"],
 )
-open class CodeListController(
-    private val codeListService: CodeListService,
-    private val endpointPermissions: EndpointPermissions,
-) {
+open class CodeListController(private val codeListService: CodeListService, private val endpointPermissions: EndpointPermissions) {
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getCodeLists(
-        @AuthenticationPrincipal jwt: Jwt,
-        @PathVariable catalogId: String,
-    ): ResponseEntity<CodeLists> =
+    fun getCodeLists(@AuthenticationPrincipal jwt: Jwt, @PathVariable catalogId: String): ResponseEntity<CodeLists> =
         if (endpointPermissions.hasOrgReadPermission(jwt, catalogId)) {
             ResponseEntity(codeListService.getCodeLists(catalogId), HttpStatus.OK)
         } else {
@@ -49,15 +43,14 @@ open class CodeListController(
         @AuthenticationPrincipal jwt: Jwt,
         @PathVariable catalogId: String,
         @PathVariable codeListId: String,
-    ): ResponseEntity<CodeList> =
-        if (endpointPermissions.hasOrgReadPermission(jwt, catalogId)) {
-            codeListService
-                .getCodeListById(catalogId, codeListId)
-                ?.let { ResponseEntity(it, HttpStatus.OK) }
-                ?: ResponseEntity(HttpStatus.NOT_FOUND)
-        } else {
-            ResponseEntity(HttpStatus.FORBIDDEN)
-        }
+    ): ResponseEntity<CodeList> = if (endpointPermissions.hasOrgReadPermission(jwt, catalogId)) {
+        codeListService
+            .getCodeListById(catalogId, codeListId)
+            ?.let { ResponseEntity(it, HttpStatus.OK) }
+            ?: ResponseEntity(HttpStatus.NOT_FOUND)
+    } else {
+        ResponseEntity(HttpStatus.FORBIDDEN)
+    }
 
     @PatchMapping(value = ["/{codeListId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun patchCodeList(
@@ -65,53 +58,50 @@ open class CodeListController(
         @PathVariable catalogId: String,
         @PathVariable codeListId: String,
         @RequestBody patchOperations: List<JsonPatchOperation>,
-    ): ResponseEntity<CodeList> =
-        if (endpointPermissions.hasOrgAdminPermission(jwt, catalogId)) {
-            codeListService
-                .updateCodeList(codeListId, catalogId, patchOperations)
-                ?.let { ResponseEntity(it, HttpStatus.OK) }
-                ?: ResponseEntity(HttpStatus.NOT_FOUND)
-        } else {
-            ResponseEntity(HttpStatus.FORBIDDEN)
-        }
+    ): ResponseEntity<CodeList> = if (endpointPermissions.hasOrgAdminPermission(jwt, catalogId)) {
+        codeListService
+            .updateCodeList(codeListId, catalogId, patchOperations)
+            ?.let { ResponseEntity(it, HttpStatus.OK) }
+            ?: ResponseEntity(HttpStatus.NOT_FOUND)
+    } else {
+        ResponseEntity(HttpStatus.FORBIDDEN)
+    }
 
     @DeleteMapping(value = ["/{codeListId}"])
     fun deleteCodeList(
         @AuthenticationPrincipal jwt: Jwt,
         @PathVariable catalogId: String,
         @PathVariable codeListId: String,
-    ): ResponseEntity<Unit> =
-        when {
-            !endpointPermissions.hasOrgAdminPermission(jwt, catalogId) -> {
-                ResponseEntity(HttpStatus.FORBIDDEN)
-            }
-
-            codeListService.getCodeListById(catalogId, codeListId) == null -> {
-                ResponseEntity(HttpStatus.NOT_FOUND)
-            }
-
-            else -> {
-                codeListService.deleteCodeListById(catalogId, codeListId)
-                ResponseEntity(HttpStatus.NO_CONTENT)
-            }
+    ): ResponseEntity<Unit> = when {
+        !endpointPermissions.hasOrgAdminPermission(jwt, catalogId) -> {
+            ResponseEntity(HttpStatus.FORBIDDEN)
         }
+
+        codeListService.getCodeListById(catalogId, codeListId) == null -> {
+            ResponseEntity(HttpStatus.NOT_FOUND)
+        }
+
+        else -> {
+            codeListService.deleteCodeListById(catalogId, codeListId)
+            ResponseEntity(HttpStatus.NO_CONTENT)
+        }
+    }
 
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun createCodeList(
         @AuthenticationPrincipal jwt: Jwt,
         @PathVariable catalogId: String,
         @RequestBody newCodeList: CodeListToBeCreated,
-    ): ResponseEntity<Unit> =
-        if (endpointPermissions.hasOrgAdminPermission(jwt, catalogId)) {
-            logger.info("creating codelist for $catalogId")
-            val created = codeListService.createCodeList(newCodeList, catalogId)
-            ResponseEntity(
-                locationHeaderForCreated(newId = created.id, catalogId),
-                HttpStatus.CREATED,
-            )
-        } else {
-            ResponseEntity<Unit>(HttpStatus.FORBIDDEN)
-        }
+    ): ResponseEntity<Unit> = if (endpointPermissions.hasOrgAdminPermission(jwt, catalogId)) {
+        logger.info("creating codelist for $catalogId")
+        val created = codeListService.createCodeList(newCodeList, catalogId)
+        ResponseEntity(
+            locationHeaderForCreated(newId = created.id, catalogId),
+            HttpStatus.CREATED,
+        )
+    } else {
+        ResponseEntity<Unit>(HttpStatus.FORBIDDEN)
+    }
 
     @PostMapping(
         value = ["/import"],
@@ -133,11 +123,7 @@ open class CodeListController(
     }
 }
 
-private fun locationHeaderForCreated(
-    newId: String,
-    catalogId: String,
-): HttpHeaders =
-    HttpHeaders().apply {
-        add(HttpHeaders.LOCATION, "/$catalogId/concepts/code-lists/$newId")
-        add(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.LOCATION)
-    }
+private fun locationHeaderForCreated(newId: String, catalogId: String): HttpHeaders = HttpHeaders().apply {
+    add(HttpHeaders.LOCATION, "/$catalogId/concepts/code-lists/$newId")
+    add(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.LOCATION)
+}

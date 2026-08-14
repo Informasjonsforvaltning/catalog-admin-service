@@ -350,9 +350,9 @@ class CodeListTest : ApiTestContext() {
             assertEquals(
                 CODE_LIST_0.copy(
                     codes =
-                        listOf(
-                            CODE.copy(name = NAME.copy(en = "Updated name")),
-                        ),
+                    listOf(
+                        CODE.copy(name = NAME.copy(en = "Updated name")),
+                    ),
                 ),
                 result,
             )
@@ -375,9 +375,9 @@ class CodeListTest : ApiTestContext() {
             assertEquals(
                 CODE_LIST_0.copy(
                     codes =
-                        listOf(
-                            CODE.copy(name = NAME.copy(nn = "New name")),
-                        ),
+                    listOf(
+                        CODE.copy(name = NAME.copy(nn = "New name")),
+                    ),
                 ),
                 result,
             )
@@ -437,9 +437,9 @@ class CodeListTest : ApiTestContext() {
             assertEquals(
                 CODE_LIST_0.copy(
                     codes =
-                        listOf(
-                            CODE.copy(name = NAME.copy(en = null)),
-                        ),
+                    listOf(
+                        CODE.copy(name = NAME.copy(en = null)),
+                    ),
                 ),
                 result,
             )
@@ -478,9 +478,9 @@ class CodeListTest : ApiTestContext() {
                 CODE_LIST_0.copy(
                     name = CODE_LIST_0.codes[0].name.en!!,
                     codes =
-                        listOf(
-                            CODE.copy(name = NAME.copy(en = null)),
-                        ),
+                    listOf(
+                        CODE.copy(name = NAME.copy(en = null)),
+                    ),
                 ),
                 result,
             )

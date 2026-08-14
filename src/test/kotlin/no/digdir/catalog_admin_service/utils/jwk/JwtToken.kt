@@ -4,9 +4,7 @@ import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import java.util.Date
 
-class JwtToken(
-    private val access: Access,
-) {
+class JwtToken(private val access: Access) {
     private val exp = Date().time + 120 * 1000
     private val aud = listOf("catalog-admin-service")
 
@@ -33,9 +31,7 @@ class JwtToken(
     override fun toString(): String = buildToken()
 }
 
-enum class Access(
-    val authorities: String,
-) {
+enum class Access(val authorities: String) {
     ORG_READ("organization:910244132:read"),
     ORG_WRITE("organization:910244132:write"),
     ORG_ADMIN("organization:910244132:admin"),

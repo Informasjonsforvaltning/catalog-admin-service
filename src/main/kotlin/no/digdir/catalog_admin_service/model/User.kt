@@ -23,8 +23,4 @@ data class User(
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class UserToBeCreated(
-    val name: String,
-    val email: String?,
-    val telephoneNumber: String?,
-)
+data class UserToBeCreated(val name: String, val email: String?, val telephoneNumber: String?)

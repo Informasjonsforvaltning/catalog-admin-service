@@ -53,6 +53,4 @@ abstract class ApiTestContext {
     }
 }
 
-class KPostgreSQLContainer(
-    imageName: String,
-) : PostgreSQLContainer<KPostgreSQLContainer>(imageName)
+class KPostgreSQLContainer(imageName: String) : PostgreSQLContainer<KPostgreSQLContainer>(imageName)

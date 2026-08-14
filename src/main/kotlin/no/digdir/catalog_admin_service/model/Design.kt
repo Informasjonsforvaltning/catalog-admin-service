@@ -21,12 +21,7 @@ data class DesignDBO(
     val hasLogo: Boolean,
 )
 
-data class DesignDTO(
-    val backgroundColor: String?,
-    val fontColor: String?,
-    val logoDescription: String?,
-    val hasLogo: Boolean,
-)
+data class DesignDTO(val backgroundColor: String?, val fontColor: String?, val logoDescription: String?, val hasLogo: Boolean)
 
 @Entity
 @Table(name = "catalog_logos")

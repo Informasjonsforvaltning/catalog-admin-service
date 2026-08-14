@@ -10,10 +10,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import java.io.StringReader
 
-inline fun <reified T> patchOriginal(
-    original: T,
-    operations: List<JsonPatchOperation>,
-): T {
+inline fun <reified T> patchOriginal(original: T, operations: List<JsonPatchOperation>): T {
     validateOperations(operations)
     try {
         return applyPatch(original, operations)
@@ -27,10 +24,7 @@ inline fun <reified T> patchOriginal(
     }
 }
 
-inline fun <reified T> applyPatch(
-    originalObject: T,
-    operations: List<JsonPatchOperation>,
-): T {
+inline fun <reified T> applyPatch(originalObject: T, operations: List<JsonPatchOperation>): T {
     if (operations.isNotEmpty()) {
         with(jacksonObjectMapper()) {
             val changes = Json.createReader(StringReader(writeValueAsString(operations))).readArray()
