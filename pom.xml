@@ -13,7 +13,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.1.0</version>
+        <version>4.1.1</version>
         <relativePath/>
     </parent>
 
@@ -26,13 +26,17 @@
         <maven.compiler.target>${java.release}</maven.compiler.target>
         <maven.exec.skip>false</maven.exec.skip>
 
-        <kotlin.version>2.3.21</kotlin.version>
+        <kotlin.version>2.4.20</kotlin.version>
         <testcontainers.version>2.0.5</testcontainers.version>
         <jena.version>6.2.0</jena.version>
         <ktlint.version>3.7.1</ktlint.version>
         <httpcore5.version>5.4.3</httpcore5.version>
-        <!-- Overrides Spring Boot 4.1.0 (42.7.11), which is still affected by CVE-2026-54291 -->
-        <postgresql.version>42.7.13</postgresql.version>
+
+        <!-- Overrides Spring Boot 4.1.1 (11.0.24): CVE-2026-65182, CVE-2026-65905, CVE-2026-68525 -->
+        <tomcat.version>11.0.25</tomcat.version>
+        <!-- Overrides Spring Boot 4.1.1 (2.21.5 / 3.1.5): CVE-2026-68497 -->
+        <jackson-2-bom.version>2.21.6</jackson-2-bom.version>
+        <jackson-bom.version>3.1.6</jackson-bom.version>
     </properties>
 
     <dependencies>
@@ -64,7 +68,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>3.0.3</version>
+            <version>3.1.1</version>
         </dependency>
 
         <dependency>
@@ -126,7 +130,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>33.6.0-jre</version>
+            <version>33.7.1-jre</version>
         </dependency>
 
         <!-- Test -->
@@ -144,7 +148,7 @@
         <dependency>
             <groupId>org.mockito.kotlin</groupId>
             <artifactId>mockito-kotlin</artifactId>
-            <version>6.3.0</version>
+            <version>6.4.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -177,12 +181,6 @@
             <artifactId>spring-boot-testcontainers</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- Fix CVE-2024-25710/CVE-2024-26308 -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-compress</artifactId>
-            <version>1.28.0</version>
-        </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers-junit-jupiter</artifactId>
@@ -192,13 +190,13 @@
         <dependency>
             <groupId>org.wiremock</groupId>
             <artifactId>wiremock-standalone</artifactId>
-            <version>3.13.1</version>
+            <version>3.13.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
-            <version>5.6.3</version>
+            <version>5.6.4</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -358,7 +356,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.5</version>
+                <version>3.5.6</version>
                 <configuration>
                     <!--suppress UnresolvedMavenProperty -->
                     <argLine>${surefire.jacoco.args}</argLine>
@@ -372,7 +370,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>3.5.5</version>
+                <version>3.5.6</version>
                 <configuration>
                     <!--suppress UnresolvedMavenProperty -->
                     <argLine>${failsafe.jacoco.args}</argLine>
