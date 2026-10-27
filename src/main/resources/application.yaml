@@ -5,6 +5,10 @@ logging:
   level.org.springframework.web: WARN
 server:
   port: 8080
+  compression:
+    enabled: true
+    min-response-size: 1024
+    additional-mime-types: text/turtle,image/svg+xml
 spring:
   datasource:
     url: jdbc:postgresql://${POSTGRESQL_HOST}:${POSTGRESQL_PORT:5432}/${POSTGRESQL_DB:catalog_admin}
