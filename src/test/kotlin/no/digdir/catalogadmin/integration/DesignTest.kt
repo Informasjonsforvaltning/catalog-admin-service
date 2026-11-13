@@ -19,6 +19,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.testcontainers.context.ImportTestcontainers
+import org.springframework.core.io.ByteArrayResource
+import org.springframework.core.io.ClassPathResource
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import kotlin.test.assertEquals
@@ -190,6 +193,27 @@ class DesignTest : ApiTestContext() {
         }
 
         @Test
+        fun payloadTooLargeWhenUploadingOversizedLogo() {
+            val oversized = namedResource(ByteArray(5 * 1024 * 1024 + 512 * 1024), "big.png")
+            val response = apiAuthorizedMultipartLogo(path, port, oversized, JwtToken(Access.ORG_ADMIN).toString())
+            assertEquals(HttpStatus.PAYLOAD_TOO_LARGE.value(), response["status"])
+        }
+
+        @Test
+        fun filenameIsEscapedInContentDisposition() {
+            val filename = "my \"logo\"; x=y æøå.png"
+            val png = namedResource(ClassPathResource("safe.png").contentAsByteArray, filename)
+            val upload = apiAuthorizedMultipartLogo(path, port, png, JwtToken(Access.ORG_ADMIN).toString())
+            assertEquals(HttpStatus.OK.value(), upload["status"])
+
+            val response = apiAuthorizedRequest(path, port, null, JwtToken(Access.ORG_READ).toString(), HttpMethod.GET)
+            assertEquals(HttpStatus.OK.value(), response["status"])
+            val contentDisposition = (response["header"] as HttpHeaders).contentDisposition
+            assertTrue(contentDisposition.isInline)
+            assertEquals(filename, contentDisposition.filename)
+        }
+
+        @Test
         fun getLogo() {
             val response = apiAuthorizedRequest(path, port, null, JwtToken(Access.ORG_READ).toString(), HttpMethod.GET)
             assertEquals(HttpStatus.OK.value(), response["status"])
@@ -222,4 +246,8 @@ class DesignTest : ApiTestContext() {
             assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
         }
     }
+}
+
+private fun namedResource(bytes: ByteArray, name: String) = object : ByteArrayResource(bytes) {
+    override fun getFilename(): String = name
 }
