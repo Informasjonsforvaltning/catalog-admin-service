@@ -8,6 +8,7 @@ import no.digdir.catalogadmin.service.DesignService
 import no.digdir.catalogadmin.service.inputStreamResource
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.InputStreamResource
+import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
+import java.nio.charset.StandardCharsets
 
 private val logger = LoggerFactory.getLogger(DesignController::class.java)
 
@@ -105,5 +107,5 @@ open class DesignController(private val designService: DesignService, private va
 }
 
 private fun Logo.fileNameHeader(): HttpHeaders = HttpHeaders().apply {
-    add(HttpHeaders.CONTENT_DISPOSITION, """filename="$filename"""")
+    contentDisposition = ContentDisposition.inline().filename(filename, StandardCharsets.UTF_8).build()
 }

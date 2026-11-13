@@ -10,7 +10,13 @@ server:
     min-response-size: 1024
     # Extends Spring Boot’s default list with Turtle and SVG, which the service serves.
     additional-mime-types: text/turtle,image/svg+xml
+  tomcat:
+    max-swallow-size: 10MB
 spring:
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
   datasource:
     url: jdbc:postgresql://${POSTGRESQL_HOST}:${POSTGRESQL_PORT:5432}/${POSTGRESQL_DB:catalog_admin}
     username: ${POSTGRESQL_USER}

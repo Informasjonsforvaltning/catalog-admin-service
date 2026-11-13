@@ -7,6 +7,7 @@ import org.apache.jena.rdf.model.ModelFactory
 import org.flywaydb.core.Flyway
 import org.postgresql.util.PGobject
 import org.springframework.core.io.ClassPathResource
+import org.springframework.core.io.Resource
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -91,8 +92,10 @@ fun apiAuthorizedRequest(
     }
 }
 
-fun apiAuthorizedMultipartLogo(path: String, port: Int, filePath: String, token: String?): Map<String, Any> {
-    val file = ClassPathResource(filePath)
+fun apiAuthorizedMultipartLogo(path: String, port: Int, filePath: String, token: String?): Map<String, Any> =
+    apiAuthorizedMultipartLogo(path, port, ClassPathResource(filePath), token)
+
+fun apiAuthorizedMultipartLogo(path: String, port: Int, file: Resource, token: String?): Map<String, Any> {
     val parts: MultiValueMap<String, Any> = LinkedMultiValueMap()
     parts.add("logo", file)
     val request = RestTemplate()
